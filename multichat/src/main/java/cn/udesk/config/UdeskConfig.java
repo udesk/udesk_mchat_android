@@ -68,8 +68,4 @@ public class UdeskConfig {
     //是否使用拍照的功能  true表示使用 false表示不使用
     public static boolean isUsecamera = true;
 
-    public static class UdeskPushFlag {
-        public static final String ON = "on";
-        public static final String OFF = "off";
-    }
 }

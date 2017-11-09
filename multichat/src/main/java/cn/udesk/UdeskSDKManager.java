@@ -37,8 +37,6 @@ public class UdeskSDKManager {
 
     private static UdeskSDKManager instance = new UdeskSDKManager();
 
-//    private ExecutorService messageExecutor;
-
     private InitMode initMode;
 
     private Context context;

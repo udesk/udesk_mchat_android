@@ -10,6 +10,6 @@ import cn.udesk.muchat.bean.ReceiveMessage;
  */
 
 public interface IMessageArrived {
-
+//    收到消息的回调接口
     void onNewMessage(ReceiveMessage receiveMessage);
 }
