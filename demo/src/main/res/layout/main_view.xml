@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/udesk_bottom_send1"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="50dp"
+        android:layout_marginLeft="25dp"
+        android:layout_marginRight="25dp"
+        android:layout_marginTop="50dp"
+        android:background="@drawable/login_linearlayout_bg"
+        android:orientation="horizontal">
+
+
+        <EditText
+            android:id="@+id/udesk_customer_uuid"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:background="@null"
+            android:gravity="center_vertical"
+            android:hint="输入客户id"
+            android:paddingLeft="12dp"
+            android:singleLine="true"
+
+            android:textColorHint="@color/android:dim_foreground_dark"
+            android:textSize="16sp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="50dp"
+        android:layout_marginLeft="25dp"
+        android:layout_marginRight="25dp"
+        android:layout_marginTop="15dp"
+        android:background="@drawable/login_linearlayout_bg"
+        android:orientation="horizontal">
+
+
+        <EditText
+            android:id="@+id/custom_name"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:background="@null"
+            android:gravity="center_vertical"
+            android:hint="输入客户的名字"
+            android:paddingLeft="12dp"
+            android:singleLine="true"
+            android:textColorHint="@color/android:dim_foreground_dark"
+            android:textSize="16sp" />
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/udesk_start"
+        android:layout_width="fill_parent"
+        android:layout_height="50dp"
+        android:layout_marginLeft="25dp"
+        android:layout_marginRight="25dp"
+        android:layout_marginTop="25dp"
+        android:background="@drawable/udesk_btn_bg"
+        android:gravity="center"
+        android:text="设置好客户信息在   点开启"
+        android:textColor="@color/android:white"
+        android:textSize="17sp" />
+
+
+</LinearLayout>

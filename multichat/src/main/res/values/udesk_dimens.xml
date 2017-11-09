@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- 整体界面中，顶部Title条的高度 -->
+    <dimen name="udesk_titlebar_height">48dp</dimen>
+
+    <!-- 整体界面中，TitleBar两侧的内边距 -->
+    <dimen name="udesk_titlebar_right_margin">10dp</dimen> 
+    <dimen name="udesk_titlebar_left_margin">10dp</dimen> 
+
+   
+    
+    
+    
+    <dimen name="udesk_chat_head_margin_left_or_right">8dip</dimen>
+    <dimen name="udesk_1">1dip</dimen>
+    <dimen name="udesk_2">2dip</dimen>
+    <dimen name="udesk_3">3dip</dimen>
+    <dimen name="udesk_4">4dip</dimen>
+    <dimen name="udesk_5">5dip</dimen>
+    <dimen name="udesk_6">6dip</dimen>
+    <dimen name="udesk_8">8dip</dimen>
+    <dimen name="udesk_10">10dip</dimen>
+    <dimen name="udesk_11">11dip</dimen>
+    <dimen name="udesk_12">12dip</dimen>
+    <dimen name="udesk_13">13dip</dimen>
+    <dimen name="udesk_15">15dip</dimen>
+    <dimen name="udesk_16">16dip</dimen>
+    <dimen name="udesk_20">20dip</dimen>
+    <dimen name="udesk_22">22dip</dimen>
+    <dimen name="udesk_23">23dip</dimen>
+    <dimen name="udesk_25">25dip</dimen>
+    <dimen name="udesk_30">30dip</dimen>
+    <dimen name="udesk_32">32dip</dimen>
+    <dimen name="udesk_34">34dip</dimen>
+    <dimen name="udesk_35">35dip</dimen>
+    <dimen name="udesk_40">40dip</dimen>
+    <dimen name="udesk_45">45dip</dimen>
+    <dimen name="udesk_50">50dip</dimen>
+    <dimen name="udesk_55">55dip</dimen>
+    <dimen name="udesk_60">60dip</dimen>
+    <dimen name="udesk_64">64dip</dimen>
+    <dimen name="udesk_66">66dip</dimen>
+    <dimen name="udesk_70">70dip</dimen>
+    <dimen name="udesk_72">72dip</dimen>
+    <dimen name="udesk_80">80dip</dimen>
+    <dimen name="udesk_95">95dip</dimen>
+    <dimen name="udesk_100">100dip</dimen>
+    <dimen name="udesk_105">105dip</dimen>
+    <dimen name="udesk_120">120dip</dimen>
+    <dimen name="udesk_140">140dip</dimen>
+    <dimen name="udesk_160">160dip</dimen>
+    <dimen name="udesk_190">190dip</dimen>
+    <dimen name="udesk_200">200dip</dimen>
+    <dimen name="udesk_220">220dip</dimen>
+    <dimen name="udesk_240">240dip</dimen>
+    <dimen name="udesk_278">278dip</dimen>
+    <dimen name="udesk_300">300dip</dimen>
+
+    <dimen name="udesk_sp12">12sp</dimen>
+    <dimen name="udesk_sp14">14sp</dimen>
+    <dimen name="udesk_sp15">15sp</dimen>
+    <dimen name="udesk_sp16">16sp</dimen>
+    <dimen name="udesk_sp18">18sp</dimen>
+    <dimen name="udesk_sp20">20sp</dimen>
+    <dimen name="udesk_chat_head">45dip</dimen>
+    <dimen name="udesk_chat_head_margin">3dip</dimen>
+    <dimen name="udesk_chat_msg_send_fail_pic">22dip</dimen>
+    <dimen name="udesk_chat_context_margin_other_derction">62dip</dimen>
+
+
+    <!-- 整体界面中，TitleBar中文字的大小 -->
+    <dimen name="udesk_navi_text_size">18sp</dimen>
+
+   
+
+
+
+
+
+
+
+
+
+
+
+    <!-- IM界面，商品咨询中 缩略图的宽度和高度 -->
+    <dimen name="udesk_im_commondity_width_height">65dp</dimen>
+
+    <dimen name="defalut_largr_small_size">14sp</dimen>
+
+    <dimen name="px72tosp">36sp</dimen>
+    <dimen name="px50tosp">26.5sp</dimen>
+    <dimen name="px36tosp">19.5sp</dimen>
+    <dimen name="px34tosp">18.5sp</dimen>
+    <dimen name="px32tosp">17.5sp</dimen>
+    <dimen name="px30tosp">16.5sp</dimen>
+    <dimen name="px28tosp">15.5sp</dimen>
+    <dimen name="px26tosp">14.5sp</dimen>
+    <dimen name="px24tosp">13.5sp</dimen>
+    <dimen name="px22tosp">12.5sp</dimen>
+    <dimen name="px20tosp">11.5sp</dimen>
+
+    <dimen name="defalut_line_height">0.5dip</dimen>
+
+
+
+</resources>

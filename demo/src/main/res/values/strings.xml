@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">multchat</string>
+    <string name="udesk_help_tips">帮助中心</string>
+    <string name="udesk_conversion_tips">咨询会话</string>
+    <string name="udesk_form_tips">留言表单</string>
+    <string name="udesk_utils_tips">开发者功能</string>
+    <string name="udesk_reset_init">重置域名和App Key</string>
+</resources>
