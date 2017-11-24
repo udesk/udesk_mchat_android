@@ -51,9 +51,60 @@
 }
 ```
 
+### 3.获取历史对话商户列表
+
+```java
+
+ //提供了历史对话商户列表，提供ConversationFragment，可根据你们app加入，参见demo。
+```
+
+### 4.获取指定的商户的未读消息
+
+```java
+
+  UdeskSDKManager.getInstance().getMerchantUnReadMsg(merchant_euid,merchantUnreadMsgCnt)
+```
+
+### 5.查询所有商户未读消息
+
+```java
+
+    UdeskSDKManager.getInstance().setItotalCount(new ItotalUnreadMsgCnt() {
+                @Override
+                public void totalcount(final int count) {
+        
+                }
+            });
+    UdeskSDKManager.getInstance().getUnReadMessages();
+```
 
 
-### 3.离线推送
+### 6.设置在线状态下收到消息的监听事件
+
+```java
+
+       UdeskSDKManager.getInstance().setMessageArrived(new IMessageArrived() {
+                @Override
+                public void onNewMessage(final ReceiveMessage receiveMessage) {
+
+                }
+            });
+```
+
+### 7.设置咨询对象的回调
+
+```java
+
+        UdeskSDKManager.getInstance().setCommodityCallBack(new ICommodityCallBack() {
+                @Override
+                public void callBackProduct(Products products) {
+
+                
+                }
+            });
+```
+
+### 8.离线推送
 ```java
 
 //App 进入后台时，开启Udesk推送
@@ -64,7 +115,7 @@
 
 ```
 
-### 4.混淆配置
+### 9.混淆配置
 
 ``` java
 //udesk
