@@ -1,4 +1,4 @@
-package cn.udesk.xmppmanager;
+package cn.udesk.xmpp;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;

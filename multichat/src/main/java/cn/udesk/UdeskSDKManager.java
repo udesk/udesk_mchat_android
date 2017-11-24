@@ -17,14 +17,21 @@ import com.facebook.imagepipeline.cache.MemoryCacheParams;
 import com.facebook.imagepipeline.core.ImagePipelineConfig;
 import com.tencent.bugly.crashreport.CrashReport;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.File;
 import java.util.concurrent.ExecutorService;
 
 import cn.udesk.activity.UdeskChatActivity;
+import cn.udesk.callback.ICommodityCallBack;
+import cn.udesk.callback.IMerchantUnreadMsgCnt;
+import cn.udesk.callback.IMessageArrived;
+import cn.udesk.callback.ItotalUnreadMsgCnt;
 import cn.udesk.config.UdeskConfig;
 import cn.udesk.db.UdeskDBManager;
-import cn.udesk.xmppmanager.Concurrents;
-import cn.udesk.xmppmanager.XmppConnectManager;
+import cn.udesk.xmpp.Concurrents;
+import cn.udesk.xmpp.ConnectManager;
 import cn.udesk.model.InitMode;
 import cn.udesk.muchat.HttpCallBack;
 import cn.udesk.muchat.HttpFacade;
@@ -37,13 +44,16 @@ public class UdeskSDKManager {
 
     private static UdeskSDKManager instance = new UdeskSDKManager();
 
+    private ExecutorService messageExecutor;
+
     private InitMode initMode;
 
     private Context context;
 
     private IMessageArrived messageArrived;
 
-    private ItotalCount itotalCount;
+    private ItotalUnreadMsgCnt itotalCount;
+    private ICommodityCallBack commodityCallBack;
 
     /**
      * 设置的咨询对象
@@ -66,26 +76,38 @@ public class UdeskSDKManager {
         return messageArrived;
     }
 
+    //设置消息到达的回调
     public void setMessageArrived(IMessageArrived messageArrived) {
         this.messageArrived = messageArrived;
     }
 
-    public void setItotalCount(ItotalCount itotalCount) {
+    public ICommodityCallBack getCommodityCallBack() {
+        return commodityCallBack;
+    }
+
+    //设置咨询对象的回调
+    public void setCommodityCallBack(ICommodityCallBack commodityCallBack) {
+        this.commodityCallBack = commodityCallBack;
+    }
+
+    //设置总未读消息的回调
+    public void setItotalCount(ItotalUnreadMsgCnt itotalCount) {
         this.itotalCount = itotalCount;
     }
 
-//    private void ensureMessageExecutor() {
-//        if (messageExecutor == null) {
-//            messageExecutor = Concurrents
-//                    .newSingleThreadExecutor("managerExecutor");
-//        }
-//    }
+    public ItotalUnreadMsgCnt getItotalCount() {
+        return itotalCount;
+    }
+
+    private void ensureMessageExecutor() {
+        if (messageExecutor == null) {
+            messageExecutor = Concurrents
+                    .newSingleThreadExecutor("managerExecutor");
+        }
+    }
 
     public InitMode getInitMode() {
         if (initMode == null) {
-            initMode = UdeskDBManager.getInstance().getInitMode(customerEuid);
-        }
-        if (initMode == null){
             initMode(customerEuid, customerName);
         }
         return initMode;
@@ -162,27 +184,38 @@ public class UdeskSDKManager {
     }
 
     private void initMode(final String customer_euid, final String customer_name) {
-
-        HttpFacade.getInstance().init(customer_euid, customer_name, new HttpCallBack() {
+        ensureMessageExecutor();
+        messageExecutor.submit(new Runnable() {
             @Override
-            public void onSuccess(String message) {
-                initMode = JsonUtils.parserInitMessage(message);
-                if (initMode != null) {
-                    UdeskDBManager.getInstance().addInitInfo(initMode);
+            public void run() {
+                initMode = UdeskDBManager.getInstance().getInitMode(customer_euid);
+                if (initMode == null) {
+                    HttpFacade.getInstance().init(customer_euid, customer_name, new HttpCallBack() {
+                        @Override
+                        public void onSuccess(String message) {
+                            initMode = JsonUtils.parserInitMessage(message);
+                            if (initMode != null) {
+                                UdeskDBManager.getInstance().addInitInfo(initMode);
+                                connectXmpp(initMode);
+                                getUnReadMessages();
+
+                            }
+                        }
+
+                        @Override
+                        public void onFail(Throwable message) {
+
+                        }
+
+                        @Override
+                        public void onSuccessFail(String message) {
+
+                        }
+                    });
+                } else {
                     connectXmpp(initMode);
                     getUnReadMessages();
-
                 }
-            }
-
-            @Override
-            public void onFail(Throwable message) {
-                Throwable throwable = message;
-            }
-
-            @Override
-            public void onSuccessFail(String message) {
-                String erroe = message;
             }
         });
     }
@@ -213,7 +246,7 @@ public class UdeskSDKManager {
 
     public void connectXmpp(InitMode initMode) {
 
-        XmppConnectManager.getInstance().connection(UdeskUtil.objectToString(initMode.getIm_username()),
+        ConnectManager.getInstance().connection(UdeskUtil.objectToString(initMode.getIm_username()),
                 UdeskUtil.objectToString(initMode.getIm_password()),
                 UdeskUtil.objectToString(initMode.getTcp_server()),
                 UdeskUtil.objectToInt(initMode.getTcp_port())
@@ -332,6 +365,46 @@ public class UdeskSDKManager {
     }
 
     /**
+     * @param merchant_euid 指定商户euid
+     */
+    public void getMerchantUnReadMsg(String merchant_euid, final IMerchantUnreadMsgCnt merchantUnreadMsgCnt) {
+
+        if (initMode != null) {
+            if (initMode != null) {
+                HttpFacade.getInstance().unreadCount(UdeskUtil.getAuthToken(UdeskUtil.objectToString(initMode.getIm_username()),
+                        UdeskUtil.objectToString(initMode.getIm_password())), merchant_euid, new HttpCallBack() {
+                    @Override
+                    public void onSuccess(String message) {
+                        try {
+                            JSONObject jsonObject = new JSONObject(message);
+                            if (merchantUnreadMsgCnt != null) {
+                                merchantUnreadMsgCnt.totalCount(UdeskUtil.objectToInt(jsonObject.opt("count")));
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+
+                    }
+
+                    @Override
+                    public void onFail(Throwable message) {
+                    }
+
+                    @Override
+                    public void onSuccessFail(String message) {
+                        if (UdeskLibConst.isDebug) {
+                            Log.i("udesk", "getMerchantUnReadMsg result =" + message);
+                        }
+
+                    }
+                });
+            }
+        }
+
+    }
+
+
+    /**
      * 获取未读消息总数量
      */
     public void getUnReadMessages() {
@@ -341,10 +414,14 @@ public class UdeskSDKManager {
                 @Override
                 public void onSuccess(String message) {
 
-                    if (itotalCount != null) {
-                        itotalCount.totalcount(UdeskUtil.objectToInt(message));
+                    try {
+                        JSONObject jsonObject = new JSONObject(message);
+                        if (itotalCount != null) {
+                            itotalCount.totalcount(UdeskUtil.objectToInt(jsonObject.opt("count")));
+                        }
+                    } catch (JSONException e) {
+                        e.printStackTrace();
                     }
-
                 }
 
                 @Override
@@ -363,7 +440,14 @@ public class UdeskSDKManager {
 
     }
 
-    public ItotalCount getItotalCount() {
-        return itotalCount;
+
+    /**
+     * 获取历史会话商户的列表
+     */
+    public void getgetMerchants(HttpCallBack httpCallBack) {
+        if (initMode != null) {
+            HttpFacade.getInstance().getMerchants(UdeskUtil.getAuthToken(UdeskUtil.objectToString(initMode.getIm_username()),
+                    UdeskUtil.objectToString(initMode.getIm_password())), httpCallBack);
+        }
     }
 }

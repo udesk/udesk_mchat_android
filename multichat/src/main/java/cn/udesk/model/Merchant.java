@@ -17,6 +17,9 @@ public class Merchant {
      * on_duty : true
      * off_duty_tips : 不在工作时间, 请留言
      */
+//
+    private Object code;
+    private Object message;
 
     private Object euid;
     private Object name;
@@ -89,5 +92,21 @@ public class Merchant {
 
     public void setOff_duty_tips(Object off_duty_tips) {
         this.off_duty_tips = off_duty_tips;
+    }
+
+    public Object getCode() {
+        return code;
+    }
+
+    public void setCode(Object code) {
+        this.code = code;
+    }
+
+    public Object getMessage() {
+        return message;
+    }
+
+    public void setMessage(Object message) {
+        this.message = message;
     }
 }

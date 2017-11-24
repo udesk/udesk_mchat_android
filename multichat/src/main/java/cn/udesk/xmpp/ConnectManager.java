@@ -1,22 +1,22 @@
-package cn.udesk.xmppmanager;
+package cn.udesk.xmpp;
 
 import java.util.concurrent.ExecutorService;
 
 import cn.udesk.UdeskSDKManager;
 
 
-public class XmppConnectManager {
+public class ConnectManager {
 
     private UdeskXmppManager mUdeskXmppManager;
     private ExecutorService messageExecutor;
-    private static XmppConnectManager instance = new XmppConnectManager();
+    private static ConnectManager instance = new ConnectManager();
 
 
-    public static XmppConnectManager getInstance() {
+    public static ConnectManager getInstance() {
         return instance;
     }
 
-    private XmppConnectManager() {
+    private ConnectManager() {
         mUdeskXmppManager = new UdeskXmppManager();
     }
 

@@ -6,33 +6,47 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import cn.jpush.android.api.JPushInterface;
+import cn.udesk.callback.ICommodityCallBack;
+import cn.udesk.callback.IMessageArrived;
+import cn.udesk.callback.ItotalUnreadMsgCnt;
 import cn.udesk.UdeskSDKManager;
+import cn.udesk.callback.IMerchantUnreadMsgCnt;
+import cn.udesk.UdeskUtil;
+import cn.udesk.muchat.bean.Products;
+import cn.udesk.muchat.bean.ReceiveMessage;
 
-public class UdeskUseGuideActivity extends Activity {
+public class UdeskUseGuideActivity extends Activity implements View.OnClickListener {
 
-    public static String merchant_euid = "sdk2";
+    private TextView merchant_unread_count, all_unread_count, receive_msg;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.udesk_use_guide_view);
+        findViewById(R.id.conversation).setOnClickListener(this);
+        findViewById(R.id.history_conversation).setOnClickListener(this);
+        findViewById(R.id.merchant_unread_msg).setOnClickListener(this);
+        findViewById(R.id.msg_callback).setOnClickListener(this);
+        findViewById(R.id.commity_callback).setOnClickListener(this);
+        findViewById(R.id.all_unread_msg).setOnClickListener(this);
+        merchant_unread_count = (TextView) findViewById(R.id.merchant_unread_count);
+        all_unread_count = (TextView) findViewById(R.id.all_unread_count);
+        receive_msg = (TextView) findViewById(R.id.receive_msg);
 
 
     }
 
+    @Override
     public void onClick(View v) {
 
         String rid = JPushInterface.getRegistrationID(getApplicationContext());
         UdeskSDKManager.getInstance().setRegisterId(UdeskUseGuideActivity.this, rid);
-        if (v.getId() == R.id.udesk_group_help) {
-            Intent intent = new Intent(this, TestFragmentActivity.class);
-            startActivity(intent);
-        } else if (v.getId() == R.id.udesk_group_conversation) {
-            //咨询会话
-
+        if (v.getId() == R.id.conversation) {
+            //输入特定的商户id，咨询会话
             final UdeskCustomDialog dialog = new UdeskCustomDialog(UdeskUseGuideActivity.this);
             dialog.setDialogTitle("输入商户UID进入会话");
             final EditText editText = (EditText) dialog.getEditText();
@@ -56,6 +70,96 @@ public class UdeskUseGuideActivity extends Activity {
                 }
             });
             dialog.show();
+        } else if (v.getId() == R.id.history_conversation) {
+            //获取对话过的商户列表
+            Intent intent = new Intent(this, TestFragmentActivity.class);
+            startActivity(intent);
+        } else if (v.getId() == R.id.merchant_unread_msg) {
+            //获取指定的商户的未读消息
+            final UdeskCustomDialog dialog = new UdeskCustomDialog(UdeskUseGuideActivity.this);
+            dialog.setDialogTitle("输入商户UID查未读消息数");
+            final EditText editText = (EditText) dialog.getEditText();
+            editText.setHint("商户的euid");
+            dialog.setOkTextViewOnclick(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    dialog.dismiss();
+                    if (TextUtils.isEmpty(editText.getText().toString().trim())) {
+                        Toast.makeText(getApplicationContext(), "商户的euid", Toast.LENGTH_LONG).show();
+                        return;
+                    }
+                    UdeskSDKManager.getInstance().getMerchantUnReadMsg(editText.getText().toString().trim(), new IMerchantUnreadMsgCnt() {
+                        @Override
+                        public void totalCount(final int count) {
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    merchant_unread_count.setVisibility(View.VISIBLE);
+                                    merchant_unread_count.setText(editText.getText().toString().trim() + "未读消息数 = " + count);
+                                }
+                            });
+                        }
+                    });
+
+                }
+            });
+            dialog.setCancleTextViewOnclick(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    dialog.dismiss();
+                }
+            });
+            dialog.show();
+
+        } else if (v.getId() == R.id.all_unread_msg) {
+            //查询所有商户未读消息
+            UdeskSDKManager.getInstance().setItotalCount(new ItotalUnreadMsgCnt() {
+                @Override
+                public void totalcount(final int count) {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            all_unread_count.setVisibility(View.VISIBLE);
+                            all_unread_count.setText("所有商户未读消息数：" + count);
+                        }
+                    });
+
+                }
+            });
+            UdeskSDKManager.getInstance().getUnReadMessages();
+        } else if (v.getId() == R.id.msg_callback) {
+
+            //设置在线状态下收到消息的监听事件
+            UdeskSDKManager.getInstance().setMessageArrived(new IMessageArrived() {
+                @Override
+                public void onNewMessage(final ReceiveMessage receiveMessage) {
+
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            receive_msg.setVisibility(View.VISIBLE);
+                            receive_msg.setText("收到消息---" + UdeskUtil.objectToString(receiveMessage.getContent()));
+                        }
+                    });
+
+                }
+            });
+            Toast.makeText(UdeskUseGuideActivity.this, "设置成功", Toast.LENGTH_SHORT).show();
+        } else if (v.getId() == R.id.commity_callback) {
+            //设置咨询对象的回调
+            UdeskSDKManager.getInstance().setCommodityCallBack(new ICommodityCallBack() {
+                @Override
+                public void callBackProduct(Products products) {
+
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(UdeskUseGuideActivity.this, "你点击了咨询对象", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                }
+            });
+            Toast.makeText(UdeskUseGuideActivity.this, "设置成功", Toast.LENGTH_SHORT).show();
         }
     }
 

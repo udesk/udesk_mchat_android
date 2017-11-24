@@ -4,13 +4,17 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:background="@color/udesk_color_bg_white"
-    android:orientation="vertical" >
+    android:orientation="vertical">
 
     <cn.udesk.widget.UdeskTitleBar
         android:id="@+id/udesktitlebar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 
+    <include
+        layout="@layout/udesk_im_commodity_item"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
 
     <cn.udesk.widget.UDPullGetMoreListView
         android:id="@+id/udesk_conversation"

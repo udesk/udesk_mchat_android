@@ -65,6 +65,7 @@
 
 
     <RelativeLayout
+        android:background="@color/udesk_color_bg_white"
         android:id="@+id/conversation_ll"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent">
@@ -80,18 +81,27 @@
             android:scrollingCache="false" />
 
         <LinearLayout
+            android:background="@color/udesk_color_bg_white"
             android:id="@+id/no_data_tips"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
             android:layout_centerInParent="true"
             android:orientation="vertical"
             android:visibility="gone">
 
-            <ImageView
-                android:layout_width="@dimen/udesk_120"
-                android:layout_height="@dimen/udesk_120"
-                android:layout_gravity="center_vertical|center_horizontal"
-                android:src="@drawable/no_converstion_tips" />
+            <!--<ImageView-->
+                <!--android:layout_width="@dimen/udesk_120"-->
+                <!--android:layout_height="@dimen/udesk_120"-->
+                <!--android:layout_gravity="center_vertical|center_horizontal"-->
+                <!--android:src="@drawable/no_converstion_tips" />-->
+
+            <TextView
+                android:textColor="@color/color_999999"
+                android:textSize="@dimen/px36tosp"
+                android:gravity="center"
+                android:text="@string/udesk_label_search_fail"
+                android:layout_width="fill_parent"
+                android:layout_height="@dimen/udesk_240" />
 
         </LinearLayout>
     </RelativeLayout>

@@ -22,6 +22,7 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.facebook.drawee.view.SimpleDraweeView;
@@ -32,6 +33,7 @@ import java.util.List;
 
 import cn.udesk.R;
 import cn.udesk.UdeskConst;
+import cn.udesk.UdeskSDKManager;
 import cn.udesk.UdeskUtil;
 import cn.udesk.adapter.UDEmojiAdapter;
 import cn.udesk.config.UdekConfigUtil;
@@ -331,8 +333,10 @@ public class MessageAdatper extends BaseAdapter {
                     }
                     case COMMODITY: {
                         CommodityViewHolder holder = new CommodityViewHolder();
-                        holder.rootView = convertView.findViewById(R.id.udesk_commit_root);
+                        holder.ivHeader = (SimpleDraweeView) convertView.findViewById(R.id.udesk_iv_head);
                         holder.tvTime = (TextView) convertView.findViewById(R.id.udesk_tv_time);
+                        holder.rootView = convertView.findViewById(R.id.udesk_commit_root);
+                        holder.udesk_name_ll = convertView.findViewById(R.id.udesk_name_ll);
                         holder.thumbnail = (SimpleDraweeView) convertView
                                 .findViewById(R.id.udesk_im_commondity_thumbnail);
                         holder.title = (TextView) convertView
@@ -399,12 +403,12 @@ public class MessageAdatper extends BaseAdapter {
                     case MSG_AUDIO_R:
                     case MSG_IMG_R:
                     case LEAVEMSG_TXT_R:
+                    case COMMODITY:
                         this.isLeft = false;
                         if (!TextUtils.isEmpty(UdeskConfig.customerUrl)) {
                             UdeskUtil.loadHeadView(mContext, ivHeader, Uri.parse(UdeskConfig.customerUrl));
                         }
                         break;
-
                     case MSG_TXT_L:
                     case MSG_AUDIO_L:
                     case RICH_TEXT:
@@ -895,21 +899,42 @@ public class MessageAdatper extends BaseAdapter {
         public TextView subTitle;
         public TextView link;
 
+        public View udesk_name_ll;
+
         @Override
         void bind(Context context) {
             try {
                 final Products item = (Products) message;
+                if (item.isActitve()) {
+                    link.setVisibility(View.GONE);
+                    ivHeader.setVisibility(View.VISIBLE);
+                    udesk_name_ll.setVisibility(View.VISIBLE);
+                    RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) rootView.getLayoutParams();
+                    params.leftMargin = 124;
+                    rootView.setOnClickListener(new OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            if (UdeskSDKManager.getInstance().getCommodityCallBack() != null) {
+                                UdeskSDKManager.getInstance().getCommodityCallBack().callBackProduct(item);
+                            }
+                        }
+                    });
+                } else {
+                    link.setVisibility(View.VISIBLE);
+                    ivHeader.setVisibility(View.GONE);
+                    udesk_name_ll.setVisibility(View.GONE);
+                }
+
                 title.setText(item.getProduct().getTitle());
                 List<Products.ProductBean.ExtrasBean> extrasBeens = item.getProduct().getExtras();
                 if (extrasBeens != null && extrasBeens.size() > 0) {
                     subTitle.setText(extrasBeens.get(0).getTitle() + ": " + extrasBeens.get(0).getContent());
                 }
-
                 UdeskUtil.loadNoChangeView(thumbnail, Uri.parse(item.getProduct().getImage()));
                 link.setOnClickListener(new OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        ((UdeskChatActivity) mContext).sentLink(item.getProduct().getUrl());
+                        ((UdeskChatActivity) mContext).sentProduct(item);
                     }
                 });
             } catch (Exception e) {
@@ -943,9 +968,13 @@ public class MessageAdatper extends BaseAdapter {
         try {
             holder.tvTime.setVisibility(View.VISIBLE);
             if (info instanceof Products) {
-                holder.tvTime.setVisibility(View.GONE);
-                holder.tvTime.setText(UdeskUtil.formatLongTypeTimeToString(mContext, System.currentTimeMillis()));
-
+                Products products = (Products) info;
+                if (products.getSendTime() > 0) {
+                    holder.tvTime.setVisibility(View.VISIBLE);
+                    holder.tvTime.setText(UdeskUtil.formatLongTypeTimeToString(mContext, products.getSendTime()));
+                } else {
+                    holder.tvTime.setVisibility(View.GONE);
+                }
                 return;
             }
             if (info.getCreated_at() != null) {

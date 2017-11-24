@@ -1,4 +1,4 @@
-package cn.udesk.xmppmanager;
+package cn.udesk.xmpp;
 
 import android.os.Handler;
 import android.text.TextUtils;
@@ -25,7 +25,8 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.UUID;
 
-import cn.udesk.IDialogMessageArrived;
+import cn.udesk.callback.IConversionMsgArrived;
+import cn.udesk.callback.IDialogMessageArrived;
 import cn.udesk.JsonUtils;
 import cn.udesk.UdeskSDKManager;
 import cn.udesk.muchat.UdeskLibConst;
@@ -42,6 +43,7 @@ public class UdeskXmppManager implements ConnectionListener, StanzaListener {
     private Handler handler = new Handler();
 
     private IDialogMessageArrived dialogMessageArrived;
+    private IConversionMsgArrived conversionMsgArrived;
     volatile boolean isConnecting = false;
 
 
@@ -58,6 +60,10 @@ public class UdeskXmppManager implements ConnectionListener, StanzaListener {
 
     public void setDialogMessageArrived(IDialogMessageArrived dialogMessageArrived) {
         this.dialogMessageArrived = dialogMessageArrived;
+    }
+
+    public void setConversionMsgArrived(IConversionMsgArrived conversionMsgArrived) {
+        this.conversionMsgArrived = conversionMsgArrived;
     }
 
     /**
@@ -193,6 +199,9 @@ public class UdeskXmppManager implements ConnectionListener, StanzaListener {
                                 if (dialogMessageArrived != null) {
                                     dialogMessageArrived.onNewMessage(receiveMessage);
                                 }
+                                if (conversionMsgArrived != null) {
+                                    conversionMsgArrived.onNewMessage(receiveMessage);
+                                }
                                 if (UdeskSDKManager.getInstance().getMessageArrived() != null) {
                                     UdeskSDKManager.getInstance().getMessageArrived().onNewMessage(receiveMessage);
                                 }
@@ -269,7 +278,7 @@ public class UdeskXmppManager implements ConnectionListener, StanzaListener {
 
     @Override
     public void connectionClosed() {
-        reConnected();
+
     }
 
     @Override

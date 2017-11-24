@@ -1,5 +1,6 @@
 package cn.udesk.fragment;
 
+import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
@@ -26,7 +27,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import cn.udesk.IMessageArrived;
+import cn.udesk.activity.UdeskChatActivity;
+import cn.udesk.callback.IConversionMsgArrived;
 import cn.udesk.JsonUtils;
 import cn.udesk.R;
 import cn.udesk.UdeskConst;
@@ -46,14 +48,13 @@ import cn.udesk.widget.swipelistview.PullToRefreshSwipeMenuListView;
 import cn.udesk.widget.swipelistview.SwipeMenu;
 import cn.udesk.widget.swipelistview.SwipeMenuCreator;
 import cn.udesk.widget.swipelistview.SwipeMenuItem;
+import cn.udesk.xmpp.ConnectManager;
 import udesk.core.utils.BaseUtils;
 
 /**
  * Created by Administrator on 2017/10/18.
  */
-public class ConversationFragment extends BaseFragment implements PullToRefreshSwipeMenuListView.IXListViewListener, AdapterView.OnItemClickListener, IMessageArrived {
-
-    private static final String TAG = ConversationFragment.class.getSimpleName();
+public class ConversationFragment extends BaseFragment implements PullToRefreshSwipeMenuListView.IXListViewListener, AdapterView.OnItemClickListener, IConversionMsgArrived {
 
     private EditText mSearchEt;
     private ImageView mClearIv;
@@ -65,6 +66,7 @@ public class ConversationFragment extends BaseFragment implements PullToRefreshS
     // 正常显示List
     private List<Merchant> mNormalResult = new ArrayList<>();
     private MyHandler mHandler;
+    private final int REQUEST_CODE = 1;
     public static final int ReceviveMessageWhat = 1;
 
     private static class MyHandler extends Handler {
@@ -109,7 +111,7 @@ public class ConversationFragment extends BaseFragment implements PullToRefreshS
         UdeskSDKManager.getInstance().setCustomerOffline(true);
         mHandler = new MyHandler(ConversationFragment.this);
         UdeskSDKManager.getInstance().setCustomerOffline(true);
-        UdeskSDKManager.getInstance().setMessageArrived(this);
+        ConnectManager.getInstance().getmUdeskXmppManager().setConversionMsgArrived(this);
         mClearIv = (ImageView) rootView.findViewById(R.id.iv_clear);
         mSearchEt = (EditText) rootView.findViewById(R.id.et_search_msg);
         mSearchEt.addTextChangedListener(new TextWatcher() {
@@ -131,6 +133,11 @@ public class ConversationFragment extends BaseFragment implements PullToRefreshS
             @Override
             public void afterTextChanged(Editable editable) {
 
+                if (TextUtils.isEmpty(mSearchEt.getText().toString())) {
+                    mClearIv.setVisibility(View.GONE);
+                } else {
+                    mClearIv.setVisibility(View.VISIBLE);
+                }
             }
 
 
@@ -181,7 +188,6 @@ public class ConversationFragment extends BaseFragment implements PullToRefreshS
                 ReceiveMessage message = item.getLast_message();
                 if (message != null) {
                     timeTv.setText(UdeskUtil.formatLongTypeTimeToString(ConversationFragment.this.getContext(), BaseUtils.objectToString(message.getCreated_at())));
-                    //timeTv.setText(TimeUtil.formatFilterTime(BaseUtils.objectToString(message.getCreated_at())));
                     String contentType = BaseUtils.objectToString(message.getContent_type());
                     if (UdeskConst.ChatMsgTypeString.TYPE_TEXT.equals(contentType)) {
                         if (UDEmojiAdapter.replaceEmoji(mContext, BaseUtils.objectToString(message.getContent()),
@@ -249,6 +255,7 @@ public class ConversationFragment extends BaseFragment implements PullToRefreshS
                 mSearchEt.setText("");
             }
         });
+        refreshData();
     }
 
     @Override
@@ -257,57 +264,46 @@ public class ConversationFragment extends BaseFragment implements PullToRefreshS
     }
 
     @Override
-    public void onStart() {
-        super.onStart();
-        refreshData();
-    }
-
-    @Override
     protected void initData() {
 
     }
 
     private void refreshData() {
-        InitMode initMode = UdeskSDKManager.getInstance().getInitMode();
-        if (initMode != null) {
-            HttpFacade.getInstance().getMerchants(UdeskUtil.getAuthToken(UdeskUtil.objectToString(initMode.getIm_username()),
-                    UdeskUtil.objectToString(initMode.getIm_password())), new HttpCallBack() {
-                @Override
-                public void onSuccess(String message) {
-                    if (mListView != null && mListView.getVisibility() == View.VISIBLE) {
-                        mListView.stopRefresh(true);
-                    }
-                    List<Merchant> merchants = JsonUtils.parseRecentMerchants(message);
-                    Collections.reverse(merchants);
-                    mAdapter.clearData(true);
-                    mAdapter.addData(merchants, false);
-                    mNormalResult = merchants;
-                    mNoDataTipLl.setVisibility(merchants.isEmpty() ? View.VISIBLE : View.GONE);
-                    getTotalCount();
+        UdeskSDKManager.getInstance().getgetMerchants(new HttpCallBack() {
+            @Override
+            public void onSuccess(String message) {
+                if (mListView != null && mListView.getVisibility() == View.VISIBLE) {
+                    mListView.stopRefresh(true);
                 }
+                List<Merchant> merchants = JsonUtils.parseRecentMerchants(message);
+                Collections.reverse(merchants);
+                mAdapter.clearData(true);
+                mAdapter.addData(merchants, false);
+                mNormalResult = merchants;
+                mNoDataTipLl.setVisibility(merchants.isEmpty() ? View.VISIBLE : View.GONE);
+                getTotalCount();
+            }
 
-                @Override
-                public void onFail(Throwable message) {
-                    if (UdeskLibConst.isDebug) {
-                        Log.i("udesk", "getMerchants result =" + message);
-                    }
-                    if (mListView != null && mListView.getVisibility() == View.VISIBLE) {
-                        mListView.stopRefresh(true);
-                    }
+            @Override
+            public void onFail(Throwable message) {
+                if (UdeskLibConst.isDebug) {
+                    Log.i("udesk", "getMerchants result =" + message);
                 }
-
-                @Override
-                public void onSuccessFail(String message) {
-                    if (UdeskLibConst.isDebug) {
-                        Log.i("udesk", "getMerchants result =" + message);
-                    }
-                    if (mListView != null && mListView.getVisibility() == View.VISIBLE) {
-                        mListView.stopRefresh(true);
-                    }
+                if (mListView != null && mListView.getVisibility() == View.VISIBLE) {
+                    mListView.stopRefresh(true);
                 }
-            });
-        }
+            }
 
+            @Override
+            public void onSuccessFail(String message) {
+                if (UdeskLibConst.isDebug) {
+                    Log.i("udesk", "getMerchants result =" + message);
+                }
+                if (mListView != null && mListView.getVisibility() == View.VISIBLE) {
+                    mListView.stopRefresh(true);
+                }
+            }
+        });
     }
 
     private void setMsgListClickListener() {
@@ -391,8 +387,15 @@ public class ConversationFragment extends BaseFragment implements PullToRefreshS
     @Override
     public void onItemClick(AdapterView<?> adapterView, View view, int i, long id) {
         Merchant merchant = mAdapter.getItem((int) id);
+        Intent intent = new Intent(ConversationFragment.this.getContext(), UdeskChatActivity.class);
+        intent.putExtra(UdeskConst.Euid, UdeskUtil.objectToString(merchant.getEuid()));
+        startActivityForResult(intent, REQUEST_CODE);
+    }
 
-        UdeskSDKManager.getInstance().entryChat(ConversationFragment.this.getActivity(), UdeskUtil.objectToString(merchant.getEuid()));
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        refreshData();
     }
 
     @Override

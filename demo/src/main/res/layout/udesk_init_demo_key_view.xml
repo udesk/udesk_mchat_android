@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@mipmap/udesk_init_key_bg"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="50dp"
+        android:layout_marginLeft="25dp"
+        android:layout_marginRight="25dp"
+        android:layout_marginTop="200dp"
+        android:background="@drawable/login_linearlayout_bg"
+        android:orientation="horizontal">
+
+        <EditText
+            android:id="@+id/udesk_uuid"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:background="@null"
+            android:gravity="center_vertical"
+            android:hint="输入租户的UUID"
+            android:paddingLeft="12dp"
+            android:singleLine="true"
+            android:textColorHint="@color/android:dim_foreground_light_inverse_disabled"
+            android:textSize="16sp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="50dp"
+        android:layout_marginLeft="25dp"
+        android:layout_marginRight="25dp"
+        android:layout_marginTop="15dp"
+        android:background="@drawable/login_linearlayout_bg"
+        android:orientation="horizontal">
+
+        <EditText
+            android:id="@+id/udesk_sign"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:background="@null"
+            android:gravity="center_vertical"
+            android:hint="请点击获取租户的签名"
+            android:paddingLeft="12dp"
+            android:singleLine="true"
+            android:textColorHint="@color/android:dim_foreground_dark"
+            android:textSize="16sp" />
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/udesk_start"
+        android:layout_width="fill_parent"
+        android:layout_height="50dp"
+        android:layout_marginLeft="25dp"
+        android:layout_marginRight="25dp"
+        android:layout_marginTop="25dp"
+        android:background="@drawable/udesk_btn_bg"
+        android:gravity="center"
+        android:text="获取租户的签名"
+        android:textColor="@color/android:white"
+        android:textSize="17sp" />
+
+    <Button
+        android:id="@+id/udesk_next"
+        android:layout_width="fill_parent"
+        android:layout_height="50dp"
+        android:layout_marginLeft="25dp"
+        android:layout_marginRight="25dp"
+        android:layout_marginTop="25dp"
+        android:background="@drawable/udesk_btn_bg"
+        android:gravity="center"
+        android:text="下一步"
+        android:textColor="@color/android:white"
+        android:textSize="17sp" />
+</LinearLayout>
+

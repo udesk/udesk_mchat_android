@@ -5,16 +5,19 @@ import android.text.Selection;
 import android.text.Spannable;
 import android.text.TextUtils;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.alibaba.sdk.android.oss.ClientConfiguration;
 
 import org.apache.http.conn.ConnectTimeoutException;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import cn.udesk.IDialogMessageArrived;
+import cn.udesk.callback.IDialogMessageArrived;
 import cn.udesk.JsonUtils;
 import cn.udesk.R;
 import cn.udesk.UdeskConst;
@@ -35,12 +38,12 @@ import cn.udesk.muchat.bean.SendMessage;
 import cn.udesk.voice.AudioRecordState;
 import cn.udesk.voice.AudioRecordingAacThread;
 import cn.udesk.voice.VoiceRecord;
-import cn.udesk.xmppmanager.XmppConnectManager;
+import cn.udesk.xmpp.ConnectManager;
 import udesk.core.utils.BaseUtils;
 import udesk.core.utils.UdeskIdBuild;
 import udesk.core.utils.UdeskUtils;
 
-public class ChatActivityPresenter implements IDialogMessageArrived{
+public class ChatActivityPresenter implements IDialogMessageArrived {
 
     private IChatActivityView mChatView;
     private VoiceRecord mVoiceRecord = null;
@@ -53,14 +56,14 @@ public class ChatActivityPresenter implements IDialogMessageArrived{
     }
 
 
-    public  void setDialogMessageArrived(){
-        XmppConnectManager.getInstance().getmUdeskXmppManager().setDialogMessageArrived(this);
+    public void setDialogMessageArrived() {
+        ConnectManager.getInstance().getmUdeskXmppManager().setDialogMessageArrived(this);
     }
 
 
     public void unBind() {
         mChatView = null;
-
+        ConnectManager.getInstance().getmUdeskXmppManager().setDialogMessageArrived(null);
     }
 
 
@@ -70,7 +73,7 @@ public class ChatActivityPresenter implements IDialogMessageArrived{
     public void onNewMessage(ReceiveMessage msgInfo) {
 
         try {
-            if (mChatView.getHandler() != null) {
+            if (mChatView != null && mChatView.getHandler() != null) {
                 Message messge = mChatView.getHandler().obtainMessage(
                         MessageWhat.onNewMessage);
                 messge.obj = msgInfo;
@@ -90,8 +93,8 @@ public class ChatActivityPresenter implements IDialogMessageArrived{
                     UdeskUtil.objectToString(initMode.getIm_password())), mChatView.getEuid(), products, new HttpCallBack() {
                 @Override
                 public void onSuccess(String message) {
-                    if (UdeskLibConst.isDebug ){
-                        Log.i("udesk","sendCommodity result =" + message);
+                    if (UdeskLibConst.isDebug) {
+                        Log.i("udesk", "sendCommodity result =" + message);
                     }
                 }
 
@@ -101,17 +104,17 @@ public class ChatActivityPresenter implements IDialogMessageArrived{
                     if (failureCount < 3) {
                         sendCommodity(products);
                     }
-                    if (message instanceof ConnectTimeoutException){
-                        if (UdeskLibConst.isDebug ){
-                            Log.i("udesk","sendCommodity result =" + mChatView.getContext().getString(R.string.time_out));
+                    if (message instanceof ConnectTimeoutException) {
+                        if (UdeskLibConst.isDebug) {
+                            Log.i("udesk", "sendCommodity result =" + mChatView.getContext().getString(R.string.time_out));
                         }
                     }
                 }
 
                 @Override
                 public void onSuccessFail(String message) {
-                    if (UdeskLibConst.isDebug ){
-                        Log.i("udesk","sendCommodity result =" + message);
+                    if (UdeskLibConst.isDebug) {
+                        Log.i("udesk", "sendCommodity result =" + message);
                     }
                 }
             });
@@ -138,7 +141,7 @@ public class ChatActivityPresenter implements IDialogMessageArrived{
             ReceiveMessage receiveMessage = buildSendMessage(UdeskConst.ChatMsgTypeString.TYPE_TEXT, msgString);
             mChatView.clearInputContent();
             onNewMessage(receiveMessage);
-            createMessage(UdeskUtil.objectToString(receiveMessage.getId()), msgString, UdeskConst.ChatMsgTypeString.TYPE_TEXT,receiveMessage.getExtras());
+            createMessage(UdeskUtil.objectToString(receiveMessage.getId()), msgString, UdeskConst.ChatMsgTypeString.TYPE_TEXT, receiveMessage.getExtras());
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -376,15 +379,15 @@ public class ChatActivityPresenter implements IDialogMessageArrived{
                             @Override
                             public void onSuccess(String message) {
                                 message = "https://" + message;
-                                createMessage(UdeskUtil.objectToString(receiveMessage.getId()), message, UdeskUtil.objectToString(receiveMessage.getContent_type()),receiveMessage.getExtras());
+                                createMessage(UdeskUtil.objectToString(receiveMessage.getId()), message, UdeskUtil.objectToString(receiveMessage.getContent_type()), receiveMessage.getExtras());
                             }
 
                             @Override
                             public void onFail(Throwable message) {
                                 sendMessageResult(UdeskUtil.objectToString(receiveMessage.getId()), UdeskConst.SendFlag.RESULT_FAIL, new SendMsgResult());
-                                if (message instanceof ConnectTimeoutException){
-                                    if (UdeskLibConst.isDebug ){
-                                        Log.i("udesk","upLoadFile result =" + mChatView.getContext().getString(R.string.time_out));
+                                if (message instanceof ConnectTimeoutException) {
+                                    if (UdeskLibConst.isDebug) {
+                                        Log.i("udesk", "upLoadFile result =" + mChatView.getContext().getString(R.string.time_out));
                                     }
                                 }
                             }
@@ -392,8 +395,8 @@ public class ChatActivityPresenter implements IDialogMessageArrived{
                             @Override
                             public void onSuccessFail(String message) {
                                 sendMessageResult(UdeskUtil.objectToString(receiveMessage.getId()), UdeskConst.SendFlag.RESULT_FAIL, new SendMsgResult());
-                                if (UdeskLibConst.isDebug ){
-                                    Log.i("udesk","upLoadFile result =" + message);
+                                if (UdeskLibConst.isDebug) {
+                                    Log.i("udesk", "upLoadFile result =" + message);
                                 }
                             }
                         });
@@ -412,7 +415,7 @@ public class ChatActivityPresenter implements IDialogMessageArrived{
     //点击失败按钮 重试发送消息
     public void startRetryMsg(ReceiveMessage message) {
         try {
-            createMessage(UdeskUtil.objectToString(message.getId()), UdeskUtil.objectToString(message.getContent()), UdeskUtil.objectToString(message.getContent_type()),message.getExtras());
+            createMessage(UdeskUtil.objectToString(message.getId()), UdeskUtil.objectToString(message.getContent()), UdeskUtil.objectToString(message.getContent_type()), message.getExtras());
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -434,18 +437,29 @@ public class ChatActivityPresenter implements IDialogMessageArrived{
 
                 @Override
                 public void onFail(Throwable message) {
-                    if (message instanceof ConnectTimeoutException){
-                        if (UdeskLibConst.isDebug ){
-                            Log.i("udesk","getMerchantInfo result =" + mChatView.getContext().getString(R.string.time_out));
+                    if (message instanceof ConnectTimeoutException) {
+                        if (UdeskLibConst.isDebug) {
+                            Log.i("udesk", "getMerchantInfo result =" + mChatView.getContext().getString(R.string.time_out));
                         }
                     }
                 }
 
                 @Override
                 public void onSuccessFail(String message) {
-                    if (UdeskLibConst.isDebug ){
-                        Log.i("udesk","getMerchantInfo result =" + message);
+//                    {"code":"record_not_found","message":"没有找到商户"}
+                    if (UdeskLibConst.isDebug) {
+                        Log.i("udesk", "getMerchantInfo result =" + message);
                     }
+
+                    try {
+                        JSONObject object = new JSONObject(message);
+                        String error = object.optString("message");
+                        Toast.makeText(mChatView.getContext(), error, Toast.LENGTH_SHORT).show();
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+
+
                 }
             });
         }
@@ -453,13 +467,13 @@ public class ChatActivityPresenter implements IDialogMessageArrived{
 
 
     //创建消息
-    public void createMessage(final String id, final String messa, String type,ExtrasInfo info) {
+    public void createMessage(final String id, final String messa, String type, ExtrasInfo info) {
         InitMode initMode = UdeskSDKManager.getInstance().getInitMode();
         if (initMode != null) {
             final SendMessage sendMessage = new SendMessage();
             sendMessage.setContent(messa);
             sendMessage.setContent_type(type);
-            if (info != null){
+            if (info != null) {
                 sendMessage.setExtras(info);
             }
             HttpFacade.getInstance().createMessage(UdeskUtil.getAuthToken(UdeskUtil.objectToString(initMode.getIm_username()),
@@ -472,9 +486,9 @@ public class ChatActivityPresenter implements IDialogMessageArrived{
                 @Override
                 public void onFail(Throwable message) {
                     sendMessageResult(id, UdeskConst.SendFlag.RESULT_FAIL, new SendMsgResult());
-                    if (message instanceof ConnectTimeoutException){
-                        if (UdeskLibConst.isDebug ){
-                            Log.i("udesk","createMessage result =" + mChatView.getContext().getString(R.string.time_out));
+                    if (message instanceof ConnectTimeoutException) {
+                        if (UdeskLibConst.isDebug) {
+                            Log.i("udesk", "createMessage result =" + mChatView.getContext().getString(R.string.time_out));
                         }
                     }
                 }
@@ -482,8 +496,8 @@ public class ChatActivityPresenter implements IDialogMessageArrived{
                 @Override
                 public void onSuccessFail(String message) {
                     sendMessageResult(id, UdeskConst.SendFlag.RESULT_FAIL, new SendMsgResult());
-                    if (UdeskLibConst.isDebug ){
-                        Log.i("udesk","createMessage result =" + message);
+                    if (UdeskLibConst.isDebug) {
+                        Log.i("udesk", "createMessage result =" + message);
                     }
                 }
             });
@@ -502,28 +516,28 @@ public class ChatActivityPresenter implements IDialogMessageArrived{
                 public void onSuccess(String message) {
                     List<ReceiveMessage> messagess = JsonUtils.parserMessages(message);
                     Collections.reverse(messagess);
-                    mChatView.addMessage(messagess,fromUUID);
+                    mChatView.addMessage(messagess, fromUUID);
 
                 }
 
                 @Override
                 public void onFail(Throwable message) {
                     List<ReceiveMessage> messagess = new ArrayList<ReceiveMessage>();
-                    mChatView.addMessage(messagess,fromUUID);
-                    if (message instanceof ConnectTimeoutException){
-                        if (UdeskLibConst.isDebug ){
-                            Log.i("udesk","getMessages result =" + mChatView.getContext().getString(R.string.time_out));
+                    mChatView.addMessage(messagess, fromUUID);
+                    if (message instanceof ConnectTimeoutException) {
+                        if (UdeskLibConst.isDebug) {
+                            Log.i("udesk", "getMessages result =" + mChatView.getContext().getString(R.string.time_out));
                         }
                     }
                 }
 
                 @Override
                 public void onSuccessFail(String message) {
-                    if (UdeskLibConst.isDebug ){
-                        Log.i("udesk","getMessages result =" + message);
+                    if (UdeskLibConst.isDebug) {
+                        Log.i("udesk", "getMessages result =" + message);
                     }
                     List<ReceiveMessage> messagess = new ArrayList<ReceiveMessage>();
-                    mChatView.addMessage(messagess,fromUUID);
+                    mChatView.addMessage(messagess, fromUUID);
                 }
             });
         }
@@ -564,7 +578,7 @@ public class ChatActivityPresenter implements IDialogMessageArrived{
         try {
             sendMsgResult.setId(msgId);
             sendMsgResult.setFlag(status);
-            if (mChatView.getHandler() != null) {
+            if (mChatView != null && mChatView.getHandler() != null) {
                 Message message = mChatView.getHandler().obtainMessage(
                         MessageWhat.changeImState);
                 message.obj = sendMsgResult;

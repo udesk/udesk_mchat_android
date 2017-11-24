@@ -36,6 +36,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.facebook.drawee.backends.pipeline.Fresco;
+import com.facebook.drawee.view.SimpleDraweeView;
 
 import java.io.File;
 import java.lang.ref.WeakReference;
@@ -52,6 +53,7 @@ import cn.udesk.config.UdekConfigUtil;
 import cn.udesk.config.UdeskConfig;
 import cn.udesk.model.Merchant;
 import cn.udesk.model.SendMsgResult;
+import cn.udesk.muchat.bean.Products;
 import cn.udesk.muchat.bean.ReceiveMessage;
 import cn.udesk.permission.RequestCode;
 import cn.udesk.permission.XPermissionUtils;
@@ -107,6 +109,15 @@ public class UdeskChatActivity extends Activity implements IChatActivityView,
     private ChatActivityPresenter mPresenter;
     private BroadcastReceiver mConnectivityChangedReceiver = null;
     private boolean hasAddCommodity = false;
+
+    //咨询对象
+    public View commodity_rl;
+    public SimpleDraweeView commityThumbnail;
+    public TextView commityTitle;
+    public TextView commitySubTitle;
+    public TextView commityLink;
+
+    private boolean isDestroyed = false;
 
     public static class MessageWhat {
 
@@ -170,7 +181,8 @@ public class UdeskChatActivity extends Activity implements IChatActivityView,
                             int arg1 = msg.arg1;
                             if (UdeskSDKManager.getInstance().getProducts() != null && !activity.hasAddCommodity) {
                                 activity.hasAddCommodity = true;
-                                messages.add(UdeskSDKManager.getInstance().getProducts());
+//                                messages.add(UdeskSDKManager.getInstance().getProducts());
+                                activity.showCommityThunbnail(UdeskSDKManager.getInstance().getProducts());
                                 activity.mPresenter.sendCommodity(UdeskSDKManager.getInstance().getProducts());
                             }
                             if (messages != null) {
@@ -290,8 +302,41 @@ public class UdeskChatActivity extends Activity implements IChatActivityView,
         }
     }
 
+    private void showCommityThunbnail(final Products products) {
+
+        commodity_rl.setVisibility(View.VISIBLE);
+        commodity_rl.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (UdeskSDKManager.getInstance().getCommodityCallBack() != null) {
+                    UdeskSDKManager.getInstance().getCommodityCallBack().callBackProduct(products);
+                }
+            }
+        });
+        commityTitle.setText(products.getProduct().getTitle());
+        List<Products.ProductBean.ExtrasBean> extrasBeens = products.getProduct().getExtras();
+        if (extrasBeens != null && extrasBeens.size() > 0) {
+            commitySubTitle.setText(extrasBeens.get(0).getTitle() + ": " + extrasBeens.get(0).getContent());
+        }
+        UdeskUtil.loadNoChangeView(commityThumbnail, Uri.parse(products.getProduct().getImage()));
+        commityLink.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                sentProduct(products);
+            }
+        });
+    }
+
     private void initView() {
         try {
+            commodity_rl = findViewById(R.id.commodity_rl);
+            commityThumbnail = (SimpleDraweeView) findViewById(R.id.udesk_im_commondity_thumbnail);
+            commityTitle = (TextView) findViewById(R.id.udesk_im_commondity_title);
+            commitySubTitle = (TextView) findViewById(R.id.udesk_im_commondity_subtitle);
+            commityLink = (TextView) findViewById(R.id.udesk_im_commondity_link);
+            commodity_rl.setVisibility(View.GONE);
+            commityLink.setVisibility(View.GONE);
+
             sendBtn = (Button) findViewById(R.id.udesk_bottom_send);
             sendBtn.setOnClickListener(this);
             mInputEditView = (EditText) findViewById(R.id.udesk_bottom_input);
@@ -1152,11 +1197,16 @@ public class UdeskChatActivity extends Activity implements IChatActivityView,
         }
     }
 
-
     //发送广告的连接地址消息
-    public void sentLink(String linkMsg) {
+    public void sentProduct(Products products) {
         if (mPresenter != null) {
-            mPresenter.sendTxtMessage(linkMsg);
+            Products product = new Products();
+            product.setActitve(true);
+            product.setSendTime(System.currentTimeMillis());
+            product.setProduct(products.getProduct());
+            mChatAdapter.getList().add(product);
+            mPresenter.sendCommodity(product);
+            mChatAdapter.notifyDataSetChanged();
         }
 
     }
@@ -1192,16 +1242,6 @@ public class UdeskChatActivity extends Activity implements IChatActivityView,
     private void setTitlebar() {
         try {
             if (mTitlebar != null) {
-//                if (merchant != null && UdeskUtil.objectToBoolean(merchant.isOn_duty())) {
-//                    mTitlebar.setLeftTextSequence(UdeskUtil.objectToString(merchant.getName()));
-//                    mTitlebar.getudeskStateImg().setImageResource(R.drawable.udesk_online_status);
-//                } else if (merchant != null && !UdeskUtil.objectToBoolean(merchant.isOn_duty())) {
-//                    mTitlebar.setLeftTextSequence(UdeskUtil.objectToString(merchant.getOff_duty_tips()));
-//                    mTitlebar.getudeskStateImg().setImageResource(R.drawable.udesk_offline_status);
-//                } else {
-//                    mTitlebar.setLeftTextSequence(getString(R.string.udesk_agent_connecting_error_net_uavailabl));
-//                    mTitlebar.getudeskStateImg().setImageResource(R.drawable.udesk_offline_status);
-//                }
                 mTitlebar.getudeskStateImg().setVisibility(View.GONE);
                 if (merchant != null) {
                     mTitlebar.setLeftTextSequence(UdeskUtil.objectToString(merchant.getName()));
@@ -1273,23 +1313,6 @@ public class UdeskChatActivity extends Activity implements IChatActivityView,
 
 
     @Override
-    protected void onStop() {
-
-        recycleVoiceRes();
-        if (mPresenter != null) {
-            mPresenter.setMessageRead();
-        }
-
-        if (UdeskSDKManager.getInstance().getMessageArrived() != null) {
-            ReceiveMessage receiveMessage = mChatAdapter.getItem(mChatAdapter.getCount());
-            if (receiveMessage != null) {
-                UdeskSDKManager.getInstance().getMessageArrived().onNewMessage(receiveMessage);
-            }
-        }
-        super.onStop();
-    }
-
-    @Override
     public void onBackPressed() {
         finishAcitivty();
     }
@@ -1311,12 +1334,33 @@ public class UdeskChatActivity extends Activity implements IChatActivityView,
     }
 
     @Override
+    protected void onPause() {
+        super.onPause();
+        if (isFinishing()) {
+            cleanSource();
+        }
+
+    }
+
+    @Override
     protected void onDestroy() {
+        cleanSource();
+        super.onDestroy();
+
+    }
+
+    private void cleanSource() {
+        if (isDestroyed) {
+            return;
+        }
+        // 回收资源
+        isDestroyed = true;
         try {
-
-
+            recycleVoiceRes();
+            if (mPresenter != null) {
+                mPresenter.setMessageRead();
+            }
             unRegister();
-
             if (mPresenter != null) {
                 mPresenter.unBind();
                 mPresenter = null;
@@ -1324,8 +1368,8 @@ public class UdeskChatActivity extends Activity implements IChatActivityView,
         } catch (Exception e) {
             e.printStackTrace();
         }
-        super.onDestroy();
 
     }
+
 
 }
