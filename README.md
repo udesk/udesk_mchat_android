@@ -1,6 +1,5 @@
 ### 1.导入multichat
 
-
 ### 2.快速使用
 
 ```java
@@ -18,6 +17,15 @@
   
   UdeskSDKManager.getInstance().init(content, uuid, sign, time);
   UdeskSDKManager.getInstance().setCustomerInfo(customer_euid, customer_name);     
+  
+  备注：签名生成规则：建议由客户的服务端提供接口计算签名并返回对应的参数
+|  数据名称  |     说明                                 |
+|-----------|-----------------------------------------|
+| uuid      | Udesk后台提供                            |
+| secret    | Udesk后台提供                            |
+| timestamp | 获取精确到秒的时间戳                       |
+ 
+ sign = SHA1("uuid+secret+timestamp")
 
   2 客户通过某个商品详情页点击咨询按钮直接和客服进行会话
   
