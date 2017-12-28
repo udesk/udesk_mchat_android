@@ -192,7 +192,7 @@ public class MessageAdatper extends BaseAdapter {
     /**
      * 添加一条消息
      */
-    public void addItem(ReceiveMessage message) {
+    public synchronized void addItem(ReceiveMessage message) {
         if (message == null) {
             return;
         }

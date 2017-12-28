@@ -73,6 +73,32 @@
             />
 
         <TextView
+            android:id="@+id/commity_set_null"
+            android:layout_width="fill_parent"
+            android:layout_height="@dimen/udesk_40"
+            android:layout_margin="10dip"
+            android:background="@drawable/udesk_btn_bg"
+            android:gravity="center"
+            android:text="不显示咨询对象"
+            android:textColor="#0D253E"
+            android:textSize="16sp"
+
+            />
+
+        <TextView
+            android:id="@+id/commity_show"
+            android:layout_width="fill_parent"
+            android:layout_height="@dimen/udesk_40"
+            android:layout_margin="10dip"
+            android:background="@drawable/udesk_btn_bg"
+            android:gravity="center"
+            android:text="显示咨询对象"
+            android:textColor="#0D253E"
+            android:textSize="16sp"
+
+            />
+
+        <TextView
             android:id="@+id/commity_callback"
             android:layout_width="fill_parent"
             android:layout_height="@dimen/udesk_40"

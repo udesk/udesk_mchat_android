@@ -51,6 +51,9 @@
 
     }
 	
+	//如果不需要咨询对象显示
+	 UdeskSDKManager.getInstance().setProducts(null);
+	
 	//通过商户ID，咨询商户
      // merchantId  商户ID
     UdeskSDKManager.getInstance().entryChat(content, merchantId);
@@ -123,7 +126,17 @@
 
 ```
 
-### 9.混淆配置
+### 9.退出断开xmpp链接
+
+```java
+
+//退出登录时 断开xmpp链接 
+
+UdeskSDKManager.getInstance().logout();
+
+```
+
+### 10.混淆配置
 
 ``` java
 //udesk
@@ -136,6 +149,17 @@
 -keep org.jxmpp.**{*; } 
 -keep  de.measite.minidns.**{*; } 
 
+//eventbus
+-keepattributes *Annotation*
+-keepclassmembers class ** {
+    @org.greenrobot.eventbus.Subscribe <methods>;
+}
+-keep enum org.greenrobot.eventbus.ThreadMode { *; }
+ 
+# Only required if you use AsyncExecutor
+-keepclassmembers class * extends org.greenrobot.eventbus.util.ThrowableFailureEvent {
+    <init>(java.lang.Throwable);
+}
 
 //smack
 -keep class org.jxmpp.** {*;} 
@@ -174,6 +198,18 @@
 # Keep native methods
 -keepclassmembers class * {
     native <methods>;
+}
+
+//eventbus
+-keepattributes *Annotation*
+-keepclassmembers class ** {
+    @org.greenrobot.eventbus.Subscribe <methods>;
+}
+-keep enum org.greenrobot.eventbus.ThreadMode { *; }
+ 
+# Only required if you use AsyncExecutor
+-keepclassmembers class * extends org.greenrobot.eventbus.util.ThrowableFailureEvent {
+    <init>(java.lang.Throwable);
 }
 
 -dontwarn okio.**

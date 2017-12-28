@@ -9,6 +9,9 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import cn.jpush.android.api.JPushInterface;
 import cn.udesk.callback.ICommodityCallBack;
 import cn.udesk.callback.IMessageArrived;
@@ -32,6 +35,8 @@ public class UdeskUseGuideActivity extends Activity implements View.OnClickListe
         findViewById(R.id.merchant_unread_msg).setOnClickListener(this);
         findViewById(R.id.msg_callback).setOnClickListener(this);
         findViewById(R.id.commity_callback).setOnClickListener(this);
+        findViewById(R.id.commity_set_null).setOnClickListener(this);
+        findViewById(R.id.commity_show).setOnClickListener(this);
         findViewById(R.id.all_unread_msg).setOnClickListener(this);
         merchant_unread_count = (TextView) findViewById(R.id.merchant_unread_count);
         all_unread_count = (TextView) findViewById(R.id.all_unread_count);
@@ -160,7 +165,38 @@ public class UdeskUseGuideActivity extends Activity implements View.OnClickListe
                 }
             });
             Toast.makeText(UdeskUseGuideActivity.this, "设置成功", Toast.LENGTH_SHORT).show();
+        } else if (v.getId() == R.id.commity_set_null) {
+            UdeskSDKManager.getInstance().setProducts(null);
+            Toast.makeText(UdeskUseGuideActivity.this, "设置成功", Toast.LENGTH_SHORT).show();
+        }else if (v.getId() == R.id.commity_show) {
+            createProducts();
+            Toast.makeText(UdeskUseGuideActivity.this, "设置成功", Toast.LENGTH_SHORT).show();
         }
+    }
+
+
+
+
+
+    //设置咨询的商品
+    private void createProducts() {
+        Products products = new Products();
+        Products.ProductBean productBean = new Products.ProductBean();
+        productBean.setImage("http://img14.360buyimg.com/n1/s450x450_jfs/t3157/63/1645131029/112074/f4f79169/57d0d44dN8cddf5c5.jpg?v=1483595726320");
+        productBean.setTitle("Apple iPhone 7");
+        productBean.setUrl("http://item.jd.com/3133829.html?cu=true&amp;utm_source…erm=9457752645_0_11333d2bdbd545f1839f020ae9b27f14");
+        List<Products.ProductBean.ExtrasBean> extras = new ArrayList<>();
+
+        Products.ProductBean.ExtrasBean extrasBean = new Products.ProductBean.ExtrasBean();
+        extrasBean.setTitle("价格");
+        extrasBean.setContent("￥6189.00");
+
+        extras.add(extrasBean);
+        productBean.setExtras(extras);
+        products.setProduct(productBean);
+
+        UdeskSDKManager.getInstance().setProducts(products);
+
     }
 
 }

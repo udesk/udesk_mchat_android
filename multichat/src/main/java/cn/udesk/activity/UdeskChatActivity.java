@@ -19,6 +19,7 @@ import android.os.Message;
 import android.provider.MediaStore;
 import android.support.v4.app.ActivityCompat;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -37,6 +38,10 @@ import android.widget.Toast;
 
 import com.facebook.drawee.backends.pipeline.Fresco;
 import com.facebook.drawee.view.SimpleDraweeView;
+
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
 import java.io.File;
 import java.lang.ref.WeakReference;
@@ -69,6 +74,7 @@ import cn.udesk.widget.UDPullGetMoreListView;
 import cn.udesk.widget.UdeskMultiMenuHorizontalWindow;
 import cn.udesk.widget.UdeskMultiMenuHorizontalWindow.OnPopMultiMenuClick;
 import cn.udesk.widget.UdeskTitleBar;
+import cn.udesk.xmpp.ConnectManager;
 import udesk.core.utils.UdeskUtils;
 
 public class UdeskChatActivity extends Activity implements IChatActivityView,
@@ -181,7 +187,6 @@ public class UdeskChatActivity extends Activity implements IChatActivityView,
                             int arg1 = msg.arg1;
                             if (UdeskSDKManager.getInstance().getProducts() != null && !activity.hasAddCommodity) {
                                 activity.hasAddCommodity = true;
-//                                messages.add(UdeskSDKManager.getInstance().getProducts());
                                 activity.showCommityThunbnail(UdeskSDKManager.getInstance().getProducts());
                                 activity.mPresenter.sendCommodity(UdeskSDKManager.getInstance().getProducts());
                             }
@@ -235,17 +240,20 @@ public class UdeskChatActivity extends Activity implements IChatActivityView,
         if (!Fresco.hasBeenInitialized()) {
             UdeskSDKManager.getInstance().init(this);
         }
-
+        if (!EventBus.getDefault().isRegistered(this)) {
+            EventBus.getDefault().register(this);
+        }
         try {
             setContentView(R.layout.udesk_activity_im);
             mHandler = new MyHandler(UdeskChatActivity.this);
             mPresenter = new ChatActivityPresenter(this);
-            mPresenter.setDialogMessageArrived();
             initIntent();
             settingTitlebar();
             initView();
+            mPresenter.getMessages("");
             mPresenter.getMerchantInfo();
-
+            mPresenter.setMessageRead();
+            checkConnect();
         } catch (Exception e) {
             e.printStackTrace();
         } catch (OutOfMemoryError error) {
@@ -254,12 +262,13 @@ public class UdeskChatActivity extends Activity implements IChatActivityView,
 
     }
 
-
     @Override
-    protected void onStart() {
-        super.onStart();
-
-        mPresenter.getMessages("");
+    public synchronized void checkConnect() {
+        if (UdeskSDKManager.getInstance().getInitMode() != null) {
+            if (!ConnectManager.getInstance().isConnection()) {
+                UdeskSDKManager.getInstance().connectXmpp(UdeskSDKManager.getInstance().getInitMode());
+            }
+        }
     }
 
     //在指定客服组ID  或者指定客服ID  会传入值  其它的方式进入不会传值
@@ -377,6 +386,15 @@ public class UdeskChatActivity extends Activity implements IChatActivityView,
             audioPop = (ImageView) findViewById(R.id.udesk_audio_pop);
             setListView();
             UdeskSDKManager.getInstance().setCustomerOffline(true);
+
+            mInputEditView.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+                @Override
+                public void onFocusChange(View view, boolean b) {
+                    setUdeskAudioPanelVis(View.GONE);
+                    setUdeskEmojisPannel(View.GONE);
+                    emjoGridView.setVisibility(View.GONE);
+                }
+            });
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -683,7 +701,9 @@ public class UdeskChatActivity extends Activity implements IChatActivityView,
     private void loadHistoryRecords() {
         try {
             mListView.setTranscriptMode(ListView.TRANSCRIPT_MODE_NORMAL);
-            mPresenter.getMessages(UdeskUtil.objectToString(mChatAdapter.getItem(0).getUuid()));
+            if (mChatAdapter.getItem(0) != null) {
+                mPresenter.getMessages(UdeskUtil.objectToString(mChatAdapter.getItem(0).getUuid()));
+            }
         } catch (Exception e) {
             e.printStackTrace();
         } catch (OutOfMemoryError error) {
@@ -1333,9 +1353,25 @@ public class UdeskChatActivity extends Activity implements IChatActivityView,
         }
     }
 
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onReceiveMessage(ReceiveMessage msgInfo) {
+        try {
+            if (mChatAdapter != null) {
+                mChatAdapter.addItem(msgInfo);
+                mListView.smoothScrollToPosition(mChatAdapter.getCount());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     @Override
     protected void onPause() {
         super.onPause();
+        if (mPresenter != null) {
+            mPresenter.setMessageRead();
+        }
         if (isFinishing()) {
             cleanSource();
         }
@@ -1350,6 +1386,7 @@ public class UdeskChatActivity extends Activity implements IChatActivityView,
     }
 
     private void cleanSource() {
+        EventBus.getDefault().unregister(this);
         if (isDestroyed) {
             return;
         }
@@ -1357,9 +1394,6 @@ public class UdeskChatActivity extends Activity implements IChatActivityView,
         isDestroyed = true;
         try {
             recycleVoiceRes();
-            if (mPresenter != null) {
-                mPresenter.setMessageRead();
-            }
             unRegister();
             if (mPresenter != null) {
                 mPresenter.unBind();

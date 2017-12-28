@@ -20,6 +20,7 @@ import java.io.InputStream;
 import cn.udesk.R;
 import cn.udesk.UdeskSDKManager;
 import cn.udesk.UdeskUtil;
+import me.relex.photodraweeview.OnPhotoTapListener;
 import me.relex.photodraweeview.PhotoDraweeView;
 
 public class UdeskZoomImageActivty extends Activity implements
@@ -44,9 +45,15 @@ public class UdeskZoomImageActivty extends Activity implements
             UdeskUtil.loadImage(zoomImageView, uri);
             saveIdBtn = findViewById(R.id.udesk_zoom_save);
             saveIdBtn.setOnClickListener(this);
+            zoomImageView.setOnPhotoTapListener(new OnPhotoTapListener() {
+                @Override
+                public void onPhotoTap(View view, float x, float y) {
+                    finish();
+                }
+            });
         } catch (Exception e) {
             e.printStackTrace();
-        }catch (OutOfMemoryError error){
+        } catch (OutOfMemoryError error) {
             error.printStackTrace();
         }
 

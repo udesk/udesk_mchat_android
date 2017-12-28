@@ -4,6 +4,7 @@ import android.os.Handler;
 import android.text.TextUtils;
 import android.util.Log;
 
+import org.greenrobot.eventbus.EventBus;
 import org.jivesoftware.smack.AbstractXMPPConnection;
 import org.jivesoftware.smack.ConnectionConfiguration;
 import org.jivesoftware.smack.ConnectionListener;
@@ -25,8 +26,6 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.UUID;
 
-import cn.udesk.callback.IConversionMsgArrived;
-import cn.udesk.callback.IDialogMessageArrived;
 import cn.udesk.JsonUtils;
 import cn.udesk.UdeskSDKManager;
 import cn.udesk.muchat.UdeskLibConst;
@@ -42,8 +41,7 @@ public class UdeskXmppManager implements ConnectionListener, StanzaListener {
     XMPPTCPConnectionConfiguration.Builder mConfiguration;
     private Handler handler = new Handler();
 
-    private IDialogMessageArrived dialogMessageArrived;
-    private IConversionMsgArrived conversionMsgArrived;
+
     volatile boolean isConnecting = false;
 
 
@@ -58,13 +56,6 @@ public class UdeskXmppManager implements ConnectionListener, StanzaListener {
 
     }
 
-    public void setDialogMessageArrived(IDialogMessageArrived dialogMessageArrived) {
-        this.dialogMessageArrived = dialogMessageArrived;
-    }
-
-    public void setConversionMsgArrived(IConversionMsgArrived conversionMsgArrived) {
-        this.conversionMsgArrived = conversionMsgArrived;
-    }
 
     /**
      * @param loginName
@@ -165,6 +156,7 @@ public class UdeskXmppManager implements ConnectionListener, StanzaListener {
             }
         } catch (Exception e) {
             e.printStackTrace();
+            reConnected();
         }
     }
 
@@ -196,12 +188,7 @@ public class UdeskXmppManager implements ConnectionListener, StanzaListener {
                         if (type.equals("message")) {
                             if (json.has("content")) {
                                 ReceiveMessage receiveMessage = JsonUtils.parserReceiveMessage(json.getString("content"));
-                                if (dialogMessageArrived != null) {
-                                    dialogMessageArrived.onNewMessage(receiveMessage);
-                                }
-                                if (conversionMsgArrived != null) {
-                                    conversionMsgArrived.onNewMessage(receiveMessage);
-                                }
+                                EventBus.getDefault().post(receiveMessage);
                                 if (UdeskSDKManager.getInstance().getMessageArrived() != null) {
                                     UdeskSDKManager.getInstance().getMessageArrived().onNewMessage(receiveMessage);
                                 }
@@ -298,7 +285,7 @@ public class UdeskXmppManager implements ConnectionListener, StanzaListener {
 
     @Override
     public void reconnectionSuccessful() {
-
+        time = 0;
     }
 
 
@@ -326,6 +313,8 @@ public class UdeskXmppManager implements ConnectionListener, StanzaListener {
             processPresence(pre);
         }
     }
+
+
 
 //    @Override
 //    public void processPacket(Stanza stanza) throws SmackException.NotConnectedException {

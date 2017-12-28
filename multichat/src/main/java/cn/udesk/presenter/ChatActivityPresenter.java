@@ -17,7 +17,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import cn.udesk.callback.IDialogMessageArrived;
 import cn.udesk.JsonUtils;
 import cn.udesk.R;
 import cn.udesk.UdeskConst;
@@ -43,7 +42,7 @@ import udesk.core.utils.BaseUtils;
 import udesk.core.utils.UdeskIdBuild;
 import udesk.core.utils.UdeskUtils;
 
-public class ChatActivityPresenter implements IDialogMessageArrived {
+public class ChatActivityPresenter {
 
     private IChatActivityView mChatView;
     private VoiceRecord mVoiceRecord = null;
@@ -55,15 +54,8 @@ public class ChatActivityPresenter implements IDialogMessageArrived {
 
     }
 
-
-    public void setDialogMessageArrived() {
-        ConnectManager.getInstance().getmUdeskXmppManager().setDialogMessageArrived(this);
-    }
-
-
     public void unBind() {
         mChatView = null;
-        ConnectManager.getInstance().getmUdeskXmppManager().setDialogMessageArrived(null);
     }
 
 
@@ -454,7 +446,9 @@ public class ChatActivityPresenter implements IDialogMessageArrived {
                     try {
                         JSONObject object = new JSONObject(message);
                         String error = object.optString("message");
-                        Toast.makeText(mChatView.getContext(), error, Toast.LENGTH_SHORT).show();
+                        if (!TextUtils.isEmpty(error)) {
+                            Toast.makeText(mChatView.getContext(), error, Toast.LENGTH_SHORT).show();
+                        }
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
@@ -480,6 +474,7 @@ public class ChatActivityPresenter implements IDialogMessageArrived {
                     UdeskUtil.objectToString(initMode.getIm_password())), mChatView.getEuid(), sendMessage, new HttpCallBack() {
                 @Override
                 public void onSuccess(String backstirng) {
+                    mChatView.checkConnect();
                     sendMessageResult(id, UdeskConst.SendFlag.RESULT_SUCCESS, JsonUtils.getCreateTime(backstirng));
                 }
 

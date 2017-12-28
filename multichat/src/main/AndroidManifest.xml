@@ -17,6 +17,7 @@
         <activity
             android:name="cn.udesk.activity.UdeskChatActivity"
             android:configChanges="screenSize|orientation|keyboardHidden"
+            android:windowSoftInputMode="stateAlwaysHidden"
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
             android:theme="@style/Udesk_Theme" />

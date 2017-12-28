@@ -60,7 +60,6 @@ public class ConnectManager {
         }
     }
 
-
     public void cancleXmpp() {
         try {
             ensureMessageExecutor();

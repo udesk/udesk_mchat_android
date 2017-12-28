@@ -30,4 +30,6 @@ public interface IChatActivityView {
 
 	void setMerchant(Merchant merchant);
 
+	void checkConnect();
+
 }

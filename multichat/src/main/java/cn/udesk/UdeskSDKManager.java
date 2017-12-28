@@ -188,34 +188,28 @@ public class UdeskSDKManager {
         messageExecutor.submit(new Runnable() {
             @Override
             public void run() {
-                initMode = UdeskDBManager.getInstance().getInitMode(customer_euid);
-                if (initMode == null) {
-                    HttpFacade.getInstance().init(customer_euid, customer_name, new HttpCallBack() {
-                        @Override
-                        public void onSuccess(String message) {
-                            initMode = JsonUtils.parserInitMessage(message);
-                            if (initMode != null) {
-                                UdeskDBManager.getInstance().addInitInfo(initMode);
-                                connectXmpp(initMode);
-                                getUnReadMessages();
-
-                            }
-                        }
-
-                        @Override
-                        public void onFail(Throwable message) {
+                HttpFacade.getInstance().init(customer_euid, customer_name, new HttpCallBack() {
+                    @Override
+                    public void onSuccess(String message) {
+                        initMode = JsonUtils.parserInitMessage(message);
+                        if (initMode != null) {
+                            UdeskDBManager.getInstance().addInitInfo(initMode);
+                            connectXmpp(initMode);
+                            getUnReadMessages();
 
                         }
+                    }
 
-                        @Override
-                        public void onSuccessFail(String message) {
+                    @Override
+                    public void onFail(Throwable message) {
 
-                        }
-                    });
-                } else {
-                    connectXmpp(initMode);
-                    getUnReadMessages();
-                }
+                    }
+
+                    @Override
+                    public void onSuccessFail(String message) {
+
+                    }
+                });
             }
         });
     }
@@ -299,6 +293,13 @@ public class UdeskSDKManager {
      */
     public void releaseDB() {
         UdeskDBManager.getInstance().release();
+    }
+
+    /**
+     * 断开xmpp链接
+     */
+    public void logout(){
+        ConnectManager.getInstance().cancleXmpp();
     }
 
 

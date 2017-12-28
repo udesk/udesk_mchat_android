@@ -21,6 +21,9 @@ import com.facebook.drawee.backends.pipeline.Fresco;
 import com.facebook.drawee.view.SimpleDraweeView;
 
 import org.apache.http.conn.ConnectTimeoutException;
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -28,7 +31,6 @@ import java.util.Collections;
 import java.util.List;
 
 import cn.udesk.activity.UdeskChatActivity;
-import cn.udesk.callback.IConversionMsgArrived;
 import cn.udesk.JsonUtils;
 import cn.udesk.R;
 import cn.udesk.UdeskConst;
@@ -54,7 +56,7 @@ import udesk.core.utils.BaseUtils;
 /**
  * Created by Administrator on 2017/10/18.
  */
-public class ConversationFragment extends BaseFragment implements PullToRefreshSwipeMenuListView.IXListViewListener, AdapterView.OnItemClickListener, IConversionMsgArrived {
+public class ConversationFragment extends BaseFragment implements PullToRefreshSwipeMenuListView.IXListViewListener, AdapterView.OnItemClickListener {
 
     private EditText mSearchEt;
     private ImageView mClearIv;
@@ -108,10 +110,12 @@ public class ConversationFragment extends BaseFragment implements PullToRefreshS
         if (!Fresco.hasBeenInitialized()) {
             UdeskSDKManager.getInstance().init(ConversationFragment.this.getActivity());
         }
+        if (!EventBus.getDefault().isRegistered(this)) {
+            EventBus.getDefault().register(this);
+        }
         UdeskSDKManager.getInstance().setCustomerOffline(true);
         mHandler = new MyHandler(ConversationFragment.this);
         UdeskSDKManager.getInstance().setCustomerOffline(true);
-        ConnectManager.getInstance().getmUdeskXmppManager().setConversionMsgArrived(this);
         mClearIv = (ImageView) rootView.findViewById(R.id.iv_clear);
         mSearchEt = (EditText) rootView.findViewById(R.id.et_search_msg);
         mSearchEt.addTextChangedListener(new TextWatcher() {
@@ -256,6 +260,7 @@ public class ConversationFragment extends BaseFragment implements PullToRefreshS
             }
         });
         refreshData();
+        checkConnect();
     }
 
     @Override
@@ -266,6 +271,14 @@ public class ConversationFragment extends BaseFragment implements PullToRefreshS
     @Override
     protected void initData() {
 
+    }
+
+    private void checkConnect(){
+        if (UdeskSDKManager.getInstance().getInitMode() != null){
+            if (!ConnectManager.getInstance().isConnection()){
+                UdeskSDKManager.getInstance().connectXmpp(UdeskSDKManager.getInstance().getInitMode());
+            }
+        }
     }
 
     private void refreshData() {
@@ -398,14 +411,6 @@ public class ConversationFragment extends BaseFragment implements PullToRefreshS
         refreshData();
     }
 
-    @Override
-    public void onNewMessage(ReceiveMessage receiveMessage) {
-
-        if (receiveMessage != null) {
-            addMessage(receiveMessage);
-        }
-    }
-
     private void addMessage(ReceiveMessage receiveMessage) {
         if (receiveMessage != null && mAdapter != null) {
             List<Merchant> merchants = mAdapter.getDatas();
@@ -461,4 +466,20 @@ public class ConversationFragment extends BaseFragment implements PullToRefreshS
 
     }
 
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onReceiveMessage(ReceiveMessage receiveMessage) {
+        try {
+            if (receiveMessage != null) {
+                addMessage(receiveMessage);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void onDestroyView() {
+        EventBus.getDefault().unregister(this);
+        super.onDestroyView();
+    }
 }
