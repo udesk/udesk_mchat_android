@@ -1,15 +1,29 @@
 package cn.udesk.activity;
 
 import android.app.Activity;
+import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 
-import com.facebook.drawee.backends.pipeline.Fresco;
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.load.resource.drawable.GlideDrawable;
+import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.animation.GlideAnimation;
+import com.bumptech.glide.request.target.SimpleTarget;
+import com.bumptech.glide.request.target.Target;
+import com.github.chrisbanes.photoview.OnPhotoTapListener;
+import com.github.chrisbanes.photoview.PhotoView;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -18,15 +32,13 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import cn.udesk.R;
-import cn.udesk.UdeskSDKManager;
 import cn.udesk.UdeskUtil;
-import me.relex.photodraweeview.OnPhotoTapListener;
-import me.relex.photodraweeview.PhotoDraweeView;
+
 
 public class UdeskZoomImageActivty extends Activity implements
         OnClickListener {
 
-    private PhotoDraweeView zoomImageView;
+    private PhotoView zoomImageView;
     private View saveIdBtn;
     private Uri uri;
 
@@ -35,19 +47,20 @@ public class UdeskZoomImageActivty extends Activity implements
         super.onCreate(arg0);
 
         try {
-            if (!Fresco.hasBeenInitialized()) {
-                UdeskSDKManager.getInstance().init(this);
-            }
             setContentView(R.layout.udesk_zoom_imageview);
-            zoomImageView = (PhotoDraweeView) findViewById(R.id.udesk_zoom_imageview);
+            zoomImageView = (PhotoView) findViewById(R.id.udesk_zoom_imageview);
             Bundle bundle = getIntent().getExtras();
             uri = bundle.getParcelable("image_path");
-            UdeskUtil.loadImage(zoomImageView, uri);
+            loadInto(getApplicationContext(),uri.toString(),R.drawable.udesk_defualt_failure,R.drawable.udesk_defalut_image_loading,zoomImageView);
+//            Glide.with(getApplicationContext())
+//                    .load(uri)
+//                    .diskCacheStrategy(DiskCacheStrategy.SOURCE ).error(R.drawable.udesk_defualt_failure)
+//                    .into(zoomImageView);
             saveIdBtn = findViewById(R.id.udesk_zoom_save);
             saveIdBtn.setOnClickListener(this);
             zoomImageView.setOnPhotoTapListener(new OnPhotoTapListener() {
                 @Override
-                public void onPhotoTap(View view, float x, float y) {
+                public void onPhotoTap(ImageView view, float x, float y) {
                     finish();
                 }
             });
@@ -58,6 +71,62 @@ public class UdeskZoomImageActivty extends Activity implements
         }
 
     }
+
+
+    public static void loadInto(final Context context, final String imageUrl, int errorImageId, int placeHolder, final ImageView imageView) {
+        final int screenWidth = UdeskUtil.getScreenWidth(context.getApplicationContext());
+        final int imgWidth = screenWidth ;
+        final int imgHight = UdeskUtil.getScreenHeight(context);
+        SimpleTarget<GlideDrawable> target = new SimpleTarget<GlideDrawable>() {
+            @Override
+            public void onResourceReady(GlideDrawable resource, GlideAnimation<? super GlideDrawable> glideAnimation) {
+                if (resource == null || TextUtils.equals(imageUrl, (String) imageView.getTag())) {
+                    return;
+                }
+                imageView.setTag(imageUrl);
+                int imageWidth = resource.getIntrinsicWidth();
+                int imageHeight = resource.getIntrinsicHeight();
+
+                double widthRatio = (double) imageWidth / imgWidth;
+                double heightRatio = (double) imageHeight / imgHight;
+
+                ViewGroup.LayoutParams layoutParams = imageView.getLayoutParams();
+                Log.i("xxxxxxx", "screenWidth = " + screenWidth + "screenHeight = " + UdeskUtil.getScreenHeight(context) +"; imageWidth=" + imageWidth + "   ;imageHeight=" + imageHeight + ";imgWidth=" + imgWidth + ";=imgHight" + imgHight + "; bitScalew= ");
+
+                if (heightRatio>1){
+                    layoutParams.height = (int) (imageHeight / heightRatio);
+                }else {
+                    layoutParams.height = imgHight/2;
+                }
+
+                if (widthRatio >1){
+                    layoutParams.width = (int) (imageWidth / widthRatio);
+                }else{
+                    layoutParams.width = imgWidth;
+                }
+
+                imageView.setLayoutParams(layoutParams);
+                imageView.setImageDrawable(resource);
+//                imageView.invalidate();
+            }
+
+            @Override
+            public void onLoadFailed(Exception e, Drawable errorDrawable) {
+                Exception exception = e;
+                super.onLoadFailed(e, errorDrawable);
+            }
+        };
+
+        Glide.with(context.getApplicationContext())
+                .load(imageUrl)
+                .diskCacheStrategy(DiskCacheStrategy.SOURCE)
+                .placeholder(placeHolder)
+                .error(errorImageId)
+                .override(UdeskUtil.getScreenWidth(context), UdeskUtil.getScreenHeight(context))
+                .into(target);
+//                .into(imageView);
+    }
+
 
     @Override
     public void onClick(View v) {
@@ -81,7 +150,11 @@ public class UdeskZoomImageActivty extends Activity implements
             return;
         }
         try {
-            File oldFile = UdeskUtil.getFileFromDiskCache(uri);
+//            File oldFile = UdeskUtil.getFileFromDiskCache(uri);
+            File oldFile = Glide.with(this)
+                    .load(uri)
+                    .downloadOnly(Target.SIZE_ORIGINAL, Target.SIZE_ORIGINAL)
+                    .get();
             if (oldFile == null) {
                 String oldPath = uri.getPath();
                 oldFile = new File(oldPath);
@@ -105,7 +178,7 @@ public class UdeskZoomImageActivty extends Activity implements
                                 UdeskZoomImageActivty.this,
                                 getResources().getString(
                                         R.string.udesk_success_save_image) + folder.getAbsolutePath(),
-                                Toast.LENGTH_SHORT).show();
+                                Toast.LENGTH_LONG).show();
                         UdeskZoomImageActivty.this.finish();
                     }
                 });

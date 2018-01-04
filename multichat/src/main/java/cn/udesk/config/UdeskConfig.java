@@ -66,4 +66,10 @@ public class UdeskConfig {
     //是否使用拍照的功能  true表示使用 false表示不使用
     public static boolean isUsecamera = true;
 
+    //上传图片是否使用原图 还是缩率图
+    public static  boolean isScaleImg = true;
+
+    //缩放图 设置宽高最大值，如果超出则压缩，否则不压缩
+    public static  int ScaleMax = 1024;
+
 }

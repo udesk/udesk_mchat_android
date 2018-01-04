@@ -1,4 +1,13 @@
 ### 1.导入multichat
+    ```java
+	Add this in your root build.gradle file (not your module build.gradle file):
+
+    allprojects {
+	repositories {
+        maven { url "https://jitpack.io" }
+    }
+   }
+```
 
 ### 2.快速使用
 
@@ -136,7 +145,20 @@ UdeskSDKManager.getInstance().logout();
 
 ```
 
-### 10.混淆配置
+### 10.图片上传压缩配置
+
+```java
+
+     在UdeskConfig类中
+    //上传图片是否使用原图 还是缩率图
+    public static  boolean isScaleImg = true;
+
+    //缩放图 设置宽高最大值，如果超出则压缩，否则不压缩
+    public static  int ScaleMax = 1024;
+
+```
+
+### 11.混淆配置
 
 ``` java
 //udesk
@@ -180,25 +202,7 @@ UdeskSDKManager.getInstance().logout();
 # Retain declared checked exceptions for use by a Proxy instance.
 -keepattributes Exceptions
 
-//freso
--keep class com.facebook.** {*; }  
--keep class com.facebook.imagepipeline.** {*; } 
--keep class com.facebook.animated.gif.** {*; }  
--keep class com.facebook.drawee.** {*; }  
--keep class com.facebook.drawee.backends.pipeline.** {*; }  
--keep class com.facebook.imagepipeline.** {*; }  
--keep class bolts.** {*; }  
--keep class me.relex.photodraweeview.** {*; }  
 
--keep,allowobfuscation @interface com.facebook.common.internal.DoNotStrip
--keep @com.facebook.common.internal.DoNotStrip class *
--keepclassmembers class * {
-    @com.facebook.common.internal.DoNotStrip *;
-}
-# Keep native methods
--keepclassmembers class * {
-    native <methods>;
-}
 
 //eventbus
 -keepattributes *Annotation*
@@ -211,6 +215,18 @@ UdeskSDKManager.getInstance().logout();
 -keepclassmembers class * extends org.greenrobot.eventbus.util.ThrowableFailureEvent {
     <init>(java.lang.Throwable);
 }
+
+//glide
+-keep public class * implements com.bumptech.glide.module.GlideModule
+-keep public enum com.bumptech.glide.load.resource.bitmap.ImageHeaderParser$** {
+  **[] $VALUES;
+  public *;
+}
+
+# for DexGuard only
+-keepresourcexmlelements manifest/application/meta-data@value=GlideModule
+
+-keep class com.github.chrisbanes.** {*;} 
 
 -dontwarn okio.**
 -dontwarn com.squareup.okhttp.**

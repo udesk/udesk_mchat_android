@@ -57,16 +57,22 @@ public class InitActivity extends AppCompatActivity implements View.OnClickListe
         udesk_sign.setText(key);
         udesk_next = (Button) findViewById(R.id.udesk_next);
         udesk_next.setOnClickListener(this);
-        testSign();
+
 
     }
 
     @Override
     public void onClick(View view) {
         if (view.getId() == R.id.udesk_next) {
-            Intent intent = new Intent();
-            intent.setClass(InitActivity.this, MainActivity.class);
-            startActivity(intent);
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    testSign();
+                    Intent intent = new Intent();
+                    intent.setClass(InitActivity.this, MainActivity.class);
+                    startActivity(intent);
+                }
+            });
         }
     }
 

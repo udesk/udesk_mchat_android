@@ -17,9 +17,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.facebook.drawee.backends.pipeline.Fresco;
-import com.facebook.drawee.view.SimpleDraweeView;
-
 import org.apache.http.conn.ConnectTimeoutException;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -107,9 +104,7 @@ public class ConversationFragment extends BaseFragment implements PullToRefreshS
 
     @Override
     protected void initView() {
-        if (!Fresco.hasBeenInitialized()) {
-            UdeskSDKManager.getInstance().init(ConversationFragment.this.getActivity());
-        }
+
         if (!EventBus.getDefault().isRegistered(this)) {
             EventBus.getDefault().register(this);
         }
@@ -182,7 +177,7 @@ public class ConversationFragment extends BaseFragment implements PullToRefreshS
         mAdapter = new AbsCommonAdapter<Merchant>(activity, R.layout.conversation_adapter_view) {
             @Override
             public void convert(AbsViewHolder helper, Merchant item, int pos) {
-                SimpleDraweeView head = helper.getView(R.id.iv_head);
+                ImageView head = helper.getView(R.id.iv_head);
                 BadgeView badgeView = helper.getView(R.id.id_unread_tips);
                 TextView nickTv = helper.getView(R.id.id_nickName);
                 TextView timeTv = helper.getView(R.id.tv_time);
@@ -219,7 +214,8 @@ public class ConversationFragment extends BaseFragment implements PullToRefreshS
                 } else {
                     badgeView.setVisibility(View.GONE);
                 }
-                UdeskUtil.loadHeadView(activity, head, Uri.parse(BaseUtils.objectToString(item.getLogo_url())));
+                UdeskUtil.loadInto(ConversationFragment.this.getContext().getApplicationContext(), BaseUtils.objectToString(item.getLogo_url()),
+                        R.drawable.udesk_im_default_agent_avatar, R.drawable.udesk_im_default_agent_avatar, head);
             }
         };
         SwipeMenuCreator creator = new SwipeMenuCreator() {
@@ -273,9 +269,9 @@ public class ConversationFragment extends BaseFragment implements PullToRefreshS
 
     }
 
-    private void checkConnect(){
-        if (UdeskSDKManager.getInstance().getInitMode() != null){
-            if (!ConnectManager.getInstance().isConnection()){
+    private void checkConnect() {
+        if (UdeskSDKManager.getInstance().getInitMode() != null) {
+            if (!ConnectManager.getInstance().isConnection()) {
                 UdeskSDKManager.getInstance().connectXmpp(UdeskSDKManager.getInstance().getInitMode());
             }
         }

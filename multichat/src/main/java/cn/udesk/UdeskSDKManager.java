@@ -9,18 +9,12 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.facebook.cache.disk.DiskCacheConfig;
-import com.facebook.common.internal.Supplier;
-import com.facebook.common.util.ByteConstants;
-import com.facebook.drawee.backends.pipeline.Fresco;
-import com.facebook.imagepipeline.cache.MemoryCacheParams;
-import com.facebook.imagepipeline.core.ImagePipelineConfig;
+
 import com.tencent.bugly.crashreport.CrashReport;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.File;
 import java.util.concurrent.ExecutorService;
 
 import cn.udesk.activity.UdeskChatActivity;
@@ -324,46 +318,7 @@ public class UdeskSDKManager {
         }
     }
 
-    public void init(final Context context) {
-        try {
-            final int MAX_HEAP_SIZE = (int) Runtime.getRuntime().maxMemory();
-            final int MAX_DISK_CACHE_SIZE = 300 * ByteConstants.MB;
-            final int MAX_MEMORY_CACHE_SIZE = MAX_HEAP_SIZE / 3;
-            final MemoryCacheParams bitmapCacheParams = new MemoryCacheParams(
-                    MAX_MEMORY_CACHE_SIZE,
-                    Integer.MAX_VALUE,
-                    MAX_MEMORY_CACHE_SIZE,
-                    Integer.MAX_VALUE,
-                    Integer.MAX_VALUE);
 
-            DiskCacheConfig diskCacheConfig = DiskCacheConfig.newBuilder(context)
-                    .setMaxCacheSize(MAX_DISK_CACHE_SIZE)//最大缓存
-                    .setBaseDirectoryName("udesk")//子目录
-                    .setBaseDirectoryPathSupplier(new Supplier<File>() {
-                        @Override
-                        public File get() {
-                            return UdeskUtil.getExternalCacheDir(context);
-                        }
-                    })
-                    .build();
-            ImagePipelineConfig config = ImagePipelineConfig.newBuilder(context)
-                    .setBitmapMemoryCacheParamsSupplier(
-                            new Supplier<MemoryCacheParams>() {
-                                public MemoryCacheParams get() {
-                                    return bitmapCacheParams;
-                                }
-                            })
-                    .setMainDiskCacheConfig(diskCacheConfig)
-                    .setDownsampleEnabled(true)
-                    .setBitmapsConfig(Bitmap.Config.RGB_565)
-                    .build();
-
-            Fresco.initialize(context, config);
-        } catch (Exception e) {
-            e.printStackTrace();
-            Fresco.initialize(context);
-        }
-    }
 
     /**
      * @param merchant_euid 指定商户euid

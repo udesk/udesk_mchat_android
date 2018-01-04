@@ -36,8 +36,8 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.facebook.drawee.backends.pipeline.Fresco;
-import com.facebook.drawee.view.SimpleDraweeView;
+
+import com.bumptech.glide.Glide;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -118,7 +118,7 @@ public class UdeskChatActivity extends Activity implements IChatActivityView,
 
     //咨询对象
     public View commodity_rl;
-    public SimpleDraweeView commityThumbnail;
+    public ImageView commityThumbnail;
     public TextView commityTitle;
     public TextView commitySubTitle;
     public TextView commityLink;
@@ -237,9 +237,7 @@ public class UdeskChatActivity extends Activity implements IChatActivityView,
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (!Fresco.hasBeenInitialized()) {
-            UdeskSDKManager.getInstance().init(this);
-        }
+
         if (!EventBus.getDefault().isRegistered(this)) {
             EventBus.getDefault().register(this);
         }
@@ -327,7 +325,7 @@ public class UdeskChatActivity extends Activity implements IChatActivityView,
         if (extrasBeens != null && extrasBeens.size() > 0) {
             commitySubTitle.setText(extrasBeens.get(0).getTitle() + ": " + extrasBeens.get(0).getContent());
         }
-        UdeskUtil.loadNoChangeView(commityThumbnail, Uri.parse(products.getProduct().getImage()));
+        UdeskUtil.loadInto(getApplicationContext(), products.getProduct().getImage(), R.drawable.udesk_defualt_failure, R.drawable.udesk_defalut_image_loading, commityThumbnail);
         commityLink.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -339,7 +337,7 @@ public class UdeskChatActivity extends Activity implements IChatActivityView,
     private void initView() {
         try {
             commodity_rl = findViewById(R.id.commodity_rl);
-            commityThumbnail = (SimpleDraweeView) findViewById(R.id.udesk_im_commondity_thumbnail);
+            commityThumbnail = (ImageView) findViewById(R.id.udesk_im_commondity_thumbnail);
             commityTitle = (TextView) findViewById(R.id.udesk_im_commondity_title);
             commitySubTitle = (TextView) findViewById(R.id.udesk_im_commondity_subtitle);
             commityLink = (TextView) findViewById(R.id.udesk_im_commondity_link);
@@ -432,7 +430,7 @@ public class UdeskChatActivity extends Activity implements IChatActivityView,
     protected void onResume() {
         super.onResume();
         try {
-
+            Glide.with(this).resumeRequests();
             registerNetWorkReceiver();
         } catch (Exception e) {
             e.printStackTrace();
@@ -664,7 +662,11 @@ public class UdeskChatActivity extends Activity implements IChatActivityView,
             if (CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE == requestCode) { //拍照后发生图片
                 if (Activity.RESULT_OK == resultCode) {
                     if (mPresenter != null && photoUri != null && photoUri.getPath() != null) {
-                        mPresenter.sendBitmapMessage(UdeskUtil.parseOwnUri(photoUri, UdeskChatActivity.this, cameraFile));
+                        if (UdeskConfig.isScaleImg) {
+                            mPresenter.scaleBitmap(UdeskUtil.parseOwnUri(photoUri, UdeskChatActivity.this, cameraFile));
+                        } else {
+                            mPresenter.sendBitmapMessage(UdeskUtil.parseOwnUri(photoUri, UdeskChatActivity.this, cameraFile));
+                        }
                     }
 
                 }
@@ -677,7 +679,12 @@ public class UdeskChatActivity extends Activity implements IChatActivityView,
                     try {
                         if (mImageCaptureUri != null) {
                             String path = UdeskUtil.getFilePath(this, mImageCaptureUri);
-                            mPresenter.sendBitmapMessage(path);
+                            if (UdeskConfig.isScaleImg) {
+                                mPresenter.scaleBitmap(path);
+                            } else {
+                                mPresenter.sendBitmapMessage(path);
+                            }
+
                         }
 
                     } catch (Exception e) {
@@ -1370,6 +1377,7 @@ public class UdeskChatActivity extends Activity implements IChatActivityView,
     protected void onPause() {
         super.onPause();
         if (mPresenter != null) {
+            Glide.with(this).pauseRequests();
             mPresenter.setMessageRead();
         }
         if (isFinishing()) {

@@ -3,7 +3,6 @@ package cn.udesk;
 
 public class UdeskConst {
 
-
     /**
      * 上传图片的后缀
      */

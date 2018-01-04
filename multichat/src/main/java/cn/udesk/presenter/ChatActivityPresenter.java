@@ -1,5 +1,9 @@
 package cn.udesk.presenter;
 
+import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.os.AsyncTask;
 import android.os.Message;
 import android.text.Selection;
 import android.text.Spannable;
@@ -13,9 +17,15 @@ import org.apache.http.conn.ConnectTimeoutException;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
 
 import cn.udesk.JsonUtils;
 import cn.udesk.R;
@@ -24,6 +34,7 @@ import cn.udesk.UdeskSDKManager;
 import cn.udesk.UdeskUtil;
 import cn.udesk.activity.UdeskChatActivity.MessageWhat;
 import cn.udesk.adapter.UDEmojiAdapter;
+import cn.udesk.config.UdeskConfig;
 import cn.udesk.model.InitMode;
 import cn.udesk.model.Merchant;
 import cn.udesk.muchat.bean.ExtrasInfo;
@@ -37,6 +48,7 @@ import cn.udesk.muchat.bean.SendMessage;
 import cn.udesk.voice.AudioRecordState;
 import cn.udesk.voice.AudioRecordingAacThread;
 import cn.udesk.voice.VoiceRecord;
+import cn.udesk.xmpp.Concurrents;
 import cn.udesk.xmpp.ConnectManager;
 import udesk.core.utils.BaseUtils;
 import udesk.core.utils.UdeskIdBuild;
@@ -407,7 +419,17 @@ public class ChatActivityPresenter {
     //点击失败按钮 重试发送消息
     public void startRetryMsg(ReceiveMessage message) {
         try {
-            createMessage(UdeskUtil.objectToString(message.getId()), UdeskUtil.objectToString(message.getContent()), UdeskUtil.objectToString(message.getContent_type()), message.getExtras());
+            if (UdeskUtil.objectToString(message.getContent_type()).equals(UdeskConst.ChatMsgTypeString.TYPE_TEXT)) {
+                createMessage(UdeskUtil.objectToString(message.getId()), UdeskUtil.objectToString(message.getContent()), UdeskUtil.objectToString(message.getContent_type()), message.getExtras());
+            } else if (UdeskUtil.objectToString(message.getContent_type()).equals(UdeskConst.ChatMsgTypeString.TYPE_AUDIO)
+                    || UdeskUtil.objectToString(message.getContent_type()).equals(UdeskConst.ChatMsgTypeString.TYPE_IMAGE) ) {
+
+                if (!UdeskUtil.objectToString(message.getLocalPath()).isEmpty()) {
+                    upLoadFile(UdeskUtil.objectToString(message.getLocalPath()), message);
+
+                }
+            }
+
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -582,6 +604,103 @@ public class ChatActivityPresenter {
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+    }
+
+    private ExecutorService scaleExecutor;
+
+    private void ensureMessageExecutor() {
+        if (scaleExecutor == null) {
+            scaleExecutor = Concurrents
+                    .newSingleThreadExecutor("scaleExecutor");
+        }
+    }
+
+    public void scaleBitmap(final String path) {
+        if (!TextUtils.isEmpty(path)) {
+            ensureMessageExecutor();
+            scaleExecutor.submit(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        Bitmap scaleImage = null;
+                        byte[] data = null;
+                        int max = 0;
+                        BitmapFactory.Options options = new BitmapFactory.Options();
+                        /**
+                         * 在不分配空间状态下计算出图片的大小
+                         */
+                        options.inJustDecodeBounds = true;
+                        BitmapFactory.decodeFile(path, options);
+                        int width = options.outWidth;
+                        int height = options.outHeight;
+                        max = Math.max(width, height);
+                        options.inTempStorage = new byte[100 * 1024];
+                        options.inJustDecodeBounds = false;
+                        options.inPurgeable = true;
+                        options.inPreferredConfig = Bitmap.Config.ARGB_8888;
+                        InputStream inStream = new FileInputStream(path);
+                        data = readStream(inStream);
+                        if (data == null || data.length <= 0) {
+                            sendBitmapMessage(path);
+                            return;
+                        }
+                        String imageName = UdeskUtil.MD5(data);
+                        File scaleImageFile = UdeskUtil.getOutputMediaFile(mChatView.getContext(), imageName
+                                + UdeskConst.ORIGINAL_SUFFIX);
+                        if (!scaleImageFile.exists()) {
+                            // 缩略图不存在，生成上传图
+                            if (max > UdeskConfig.ScaleMax) {
+                                options.inSampleSize = max / UdeskConfig.ScaleMax;
+                            } else {
+                                options.inSampleSize = 1;
+                            }
+                            FileOutputStream fos = new FileOutputStream(scaleImageFile);
+                            scaleImage = BitmapFactory.decodeByteArray(data, 0,
+                                    data.length, options);
+                            scaleImage.compress(Bitmap.CompressFormat.JPEG, 80, fos);
+                            fos.close();
+                            fos = null;
+                        }
+
+                        if (scaleImage != null) {
+                            scaleImage.recycle();
+                            scaleImage = null;
+                        }
+                        data = null;
+                        if (TextUtils.isEmpty(scaleImageFile.getPath())) {
+                            sendBitmapMessage(path);
+                        } else {
+                            sendBitmapMessage(scaleImageFile.getPath());
+                        }
+
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    } catch (OutOfMemoryError error) {
+                        error.printStackTrace();
+                    }
+                }
+            });
+        }
+    }
+
+
+    /**
+     * @param inStream
+     * @return byte[]
+     * @throws Exception
+     */
+    public byte[] readStream(InputStream inStream) throws Exception {
+        byte[] buffer = new byte[1024];
+        int len = -1;
+        ByteArrayOutputStream outStream = new ByteArrayOutputStream();
+        while ((len = inStream.read(buffer)) != -1) {
+            outStream.write(buffer, 0, len);
+        }
+        byte[] data = outStream.toByteArray();
+        outStream.close();
+        inStream.close();
+        return data;
 
     }
 

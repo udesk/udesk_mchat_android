@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:fresco="http://schemas.android.com/apk/res-auto"
     android:id="@+id/commodity_rl"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/udesk_color_bg_white">
 
-    <com.facebook.drawee.view.SimpleDraweeView
+    <ImageView
         android:id="@+id/udesk_iv_head"
         android:layout_width="@dimen/udesk_chat_head"
         android:layout_height="@dimen/udesk_chat_head"
@@ -16,11 +15,7 @@
         android:layout_marginTop="@dimen/udesk_10"
         android:paddingRight="@dimen/udesk_chat_head_margin_left_or_right"
         android:visibility="gone"
-        fresco:actualImageScaleType="centerCrop"
-        fresco:placeholderImage="@drawable/udesk_im_default_user_avatar"
-        fresco:roundAsCircle="true"
-        fresco:roundingBorderColor="@color/udesk_color_line2"
-        fresco:roundingBorderWidth="1dp" />
+        />
 
     <LinearLayout
         android:id="@+id/udesk_name_ll"
@@ -68,17 +63,14 @@
         android:layout_toLeftOf="@id/udesk_iv_head"
         android:background="@color/udesk_color_im_commondity_bg1">
 
-        <com.facebook.drawee.view.SimpleDraweeView
+        <ImageView
             android:id="@+id/udesk_im_commondity_thumbnail"
             android:layout_width="@dimen/udesk_im_commondity_width_height"
             android:layout_height="@dimen/udesk_im_commondity_width_height"
+            android:scaleType="fitXY"
             android:layout_centerVertical="true"
             android:layout_margin="10dp"
-            fresco:actualImageScaleType="centerCrop"
-            fresco:failureImage="@drawable/udesk_defualt_failure"
-            fresco:failureImageScaleType="centerCrop"
-            fresco:placeholderImage="@drawable/udesk_defalut_image_loading"
-            fresco:placeholderImageScaleType="centerCrop" />
+          />
 
         <TextView
             android:id="@+id/udesk_im_commondity_title"

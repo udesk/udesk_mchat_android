@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:fresco="http://schemas.android.com/apk/res-auto"
     android:id="@+id/id_root"
     android:layout_width="match_parent"
     android:layout_height="@dimen/udesk_66"
@@ -13,7 +12,7 @@
         android:layout_alignParentLeft="true">
 
 
-        <com.facebook.drawee.view.SimpleDraweeView
+        <ImageView
             android:id="@+id/iv_head"
             android:layout_width="@dimen/udesk_50"
             android:layout_height="@dimen/udesk_50"
@@ -22,8 +21,7 @@
             android:layout_marginLeft="@dimen/udesk_11"
             android:layout_marginRight="@dimen/udesk_11"
             android:layout_marginTop="@dimen/udesk_6"
-            fresco:failureImage="@drawable/udesk_im_default_user_avatar"
-            fresco:placeholderImage="@drawable/udesk_im_default_user_avatar" />
+          />
 
         <cn.udesk.widget.BadgeView
             android:id="@+id/id_unread_tips"
@@ -35,7 +33,7 @@
             android:layout_marginTop="-2.0dip"
             android:gravity="center"
             android:minWidth="@dimen/udesk_23"
-            android:textColor="@android:color/white"
+            android:textColor="@color/color_white"
             android:textSize="@dimen/defalut_largr_small_size" />
     </RelativeLayout>
 

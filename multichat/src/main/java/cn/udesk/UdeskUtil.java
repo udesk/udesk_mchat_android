@@ -7,8 +7,11 @@ import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
 import android.graphics.drawable.Animatable;
+import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
@@ -20,34 +23,29 @@ import android.provider.MediaStore;
 import android.text.TextUtils;
 import android.util.Base64;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.Display;
 import android.view.ViewGroup;
 import android.view.WindowManager;
+import android.widget.ImageView;
 
-import com.facebook.binaryresource.BinaryResource;
-import com.facebook.binaryresource.FileBinaryResource;
-import com.facebook.cache.common.CacheKey;
-import com.facebook.drawee.backends.pipeline.Fresco;
-import com.facebook.drawee.backends.pipeline.PipelineDraweeControllerBuilder;
-import com.facebook.drawee.controller.BaseControllerListener;
-import com.facebook.drawee.controller.ControllerListener;
-import com.facebook.drawee.generic.GenericDraweeHierarchy;
-import com.facebook.drawee.generic.GenericDraweeHierarchyBuilder;
-import com.facebook.drawee.generic.RoundingParams;
-import com.facebook.drawee.interfaces.DraweeController;
-import com.facebook.drawee.view.SimpleDraweeView;
-import com.facebook.imagepipeline.cache.DefaultCacheKeyFactory;
-import com.facebook.imagepipeline.common.ResizeOptions;
-import com.facebook.imagepipeline.common.RotationOptions;
-import com.facebook.imagepipeline.core.ImagePipelineFactory;
-import com.facebook.imagepipeline.image.ImageInfo;
-import com.facebook.imagepipeline.request.ImageRequest;
-import com.facebook.imagepipeline.request.ImageRequestBuilder;
+
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.load.resource.drawable.GlideDrawable;
+import com.bumptech.glide.load.resource.gif.GifDrawable;
+import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.animation.GlideAnimation;
+import com.bumptech.glide.request.target.GlideDrawableImageViewTarget;
+import com.bumptech.glide.request.target.SimpleTarget;
+import com.bumptech.glide.request.target.Target;
+import com.github.chrisbanes.photoview.PhotoViewAttacher;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.security.MessageDigest;
 import java.text.DecimalFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -59,7 +57,7 @@ import java.util.regex.Pattern;
 
 import cn.udesk.activity.UdeskZoomImageActivty;
 import cn.udesk.provider.UdeskFileProvider;
-import me.relex.photodraweeview.PhotoDraweeView;
+
 
 public class UdeskUtil {
     public static final String ImgFolderName = "UDeskIMg";
@@ -559,15 +557,6 @@ public class UdeskUtil {
         return date.getTime();
     }
 
-    // 暂停图片请求
-    public static void imagePause() {
-        Fresco.getImagePipeline().pause();
-    }
-
-    // 恢复图片请求
-    public static void imageResume() {
-        Fresco.getImagePipeline().resume();
-    }
 
     /**
      * 获取图像的宽高
@@ -594,165 +583,22 @@ public class UdeskUtil {
         return wh;
     }
 
-    public static File getFileFromDiskCache(Uri url) {
-        File localFile = null;
-        if (url != null) {
-            ImageRequest imageRequest = ImageRequestBuilder.newBuilderWithSource(url).build();
-            CacheKey cacheKey = DefaultCacheKeyFactory.getInstance().getEncodedCacheKey(imageRequest, new Object());
-            if (ImagePipelineFactory.getInstance().getMainFileCache().hasKey(cacheKey)) {
-                BinaryResource resource = ImagePipelineFactory.getInstance().getMainFileCache().getResource(cacheKey);
-                localFile = ((FileBinaryResource) resource).getFile();
-            } else if (ImagePipelineFactory.getInstance().getSmallImageFileCache().hasKey(cacheKey)) {
-                BinaryResource resource = ImagePipelineFactory.getInstance().getSmallImageFileCache().getResource(cacheKey);
-                localFile = ((FileBinaryResource) resource).getFile();
-            }
-        }
-        return localFile;
-    }
 
-    public static void loadImage(final PhotoDraweeView mPhotoDraweeView,
-                                 Uri uri) {
-        PipelineDraweeControllerBuilder controller = Fresco.newDraweeControllerBuilder();
-        controller.setUri(uri);
-        controller.setAutoPlayAnimations(true);
-        controller.setOldController(mPhotoDraweeView.getController());
-        controller.setControllerListener(new BaseControllerListener<ImageInfo>() {
-            @Override
-            public void onFinalImageSet(String id, ImageInfo imageInfo, Animatable animatable) {
-                super.onFinalImageSet(id, imageInfo, animatable);
-                if (imageInfo == null || mPhotoDraweeView == null) {
-                    return;
-                }
-                mPhotoDraweeView.update(imageInfo.getWidth(), imageInfo.getHeight());
-            }
-        });
-        mPhotoDraweeView.setController(controller.build());
-    }
-
-    public static void loadHeadView(Context context, SimpleDraweeView simpleDraweeView, Uri httpUri) {
-        //初始化圆角圆形参数对象
-        RoundingParams rp = new RoundingParams();
-        //设置图像是否为圆形
-        rp.setRoundAsCircle(true);
-
-        final GenericDraweeHierarchy hierarchy = new GenericDraweeHierarchyBuilder(context.getResources())
-                .setRoundingParams(rp)
-                .setFailureImage(R.drawable.udesk_im_default_user_avatar)
-                .setPlaceholderImage(R.drawable.udesk_im_default_user_avatar)
-                .build();
-
-        DraweeController controller = Fresco.newDraweeControllerBuilder()
-                .setUri(httpUri)
-                .setTapToRetryEnabled(true)
-                .setOldController(simpleDraweeView.getController())
-                .setRetainImageOnFailure(true)
-                .build();
-        simpleDraweeView.setHierarchy(hierarchy);
-        simpleDraweeView.setController(controller);
-    }
-
-    public static void loadFileFromSdcard(final Context context, final SimpleDraweeView draweeView, Uri loackUri, final int reqWidth, final int reqHeight) {
-        ImageRequest request = ImageRequestBuilder.newBuilderWithSource(loackUri)
-                .setRotationOptions(RotationOptions.autoRotate())
-                .setLocalThumbnailPreviewsEnabled(true)
-                .setResizeOptions(new ResizeOptions(dip2px(context, 140), dip2px(context, 220)))
-                .build();
-        DraweeController controller = Fresco.newDraweeControllerBuilder()
-                .setImageRequest(request)
-                .setOldController(draweeView.getController())
-                .setTapToRetryEnabled(true)
-                .setControllerListener(new BaseControllerListener<ImageInfo>() {
-                    @Override
-                    public void onFinalImageSet(String id, ImageInfo imageInfo, Animatable anim) {
-                        if (imageInfo == null) {
-                            return;
-                        }
-
-                        ViewGroup.LayoutParams layoutParams = draweeView.getLayoutParams();
-                        int width = reqWidth;
-                        int height = reqHeight;
-                        int imgWidth = dip2px(context, 140);
-                        int imgHight = dip2px(context, 220);
-                        int bitScalew = getRatioSize(width, height, imgHight, imgWidth);
-                        layoutParams.height = height / bitScalew;
-                        layoutParams.width = width / bitScalew;
-                        draweeView.requestLayout();
-                    }
-                })
-                .setAutoPlayAnimations(true)
-                .build();
-        draweeView.setController(controller);
-    }
-
-    public static void loadImageView(final Context context, final SimpleDraweeView simpleDraweeView, Uri httpUri) {
-
-        final ViewGroup.LayoutParams layoutParams = simpleDraweeView.getLayoutParams();
-        ControllerListener controllerListener = new BaseControllerListener<ImageInfo>() {
-            @Override
-            public void onFinalImageSet(String id, ImageInfo imageInfo, Animatable anim) {
-                if (imageInfo == null) {
-                    return;
-                }
-                int height = imageInfo.getHeight();
-                int width = imageInfo.getWidth();
-                int imgWidth = dip2px(context, 140);
-                int imgHight = dip2px(context, 220);
-                int bitScalew = getRatioSize(width, height, imgHight, imgWidth);
-                layoutParams.height = height / bitScalew;
-                layoutParams.width = width / bitScalew;
-                simpleDraweeView.setLayoutParams(layoutParams);
-                simpleDraweeView.invalidate();
-            }
-
-            @Override
-            public void onIntermediateImageSet(String id, ImageInfo imageInfo) {
-
-            }
-
-            @Override
-            public void onFailure(String id, Throwable throwable) {
-                throwable.printStackTrace();
-            }
-        };
-        ImageRequest request = ImageRequestBuilder.newBuilderWithSource(httpUri).
-                setProgressiveRenderingEnabled(true).
-                setResizeOptions(new ResizeOptions(dip2px(context, 140), dip2px(context, 220))).
-                setRotationOptions(RotationOptions.disableRotation()).build();
-        DraweeController controller = Fresco.newDraweeControllerBuilder()
-                .setImageRequest(request)
-                .setTapToRetryEnabled(true)
-                .setOldController(simpleDraweeView.getController())
-                .setAutoPlayAnimations(true)
-                .setControllerListener(controllerListener)
-                .build();
-        simpleDraweeView.setController(controller);
-    }
-
-    public static void loadNoChangeView(SimpleDraweeView simpleDraweeView, Uri httpUri) {
-        DraweeController controller = Fresco.newDraweeControllerBuilder()
-                .setUri(httpUri)
-                .setTapToRetryEnabled(true)
-                .setOldController(simpleDraweeView.getController())
-                .build();
-        simpleDraweeView.setController(controller);
-    }
-
-
-    public static int getRatioSize(int bitWidth, int bitHeight, int imageHeight, int imageWidth) {
+    public static double getRatioSize(int bitWidth, int bitHeight, int imageHeight, int imageWidth) {
 
         // 缩放比
-        int ratio = 1;
+        double ratio = 1.0;
         // 缩放比,由于是固定比例缩放，只用高或者宽其中一个数据进行计算即可
         if (bitWidth > bitHeight && bitWidth > imageWidth) {
             // 如果图片宽度比高度大,以宽度为基准
-            ratio = bitWidth / imageWidth;
+            ratio = (double) bitWidth / imageWidth;
         } else if (bitWidth < bitHeight && bitHeight > imageHeight) {
             // 如果图片高度比宽度大，以高度为基准
-            ratio = bitHeight / imageHeight;
+            ratio = (double) bitHeight / imageHeight;
         }
         // 最小比率为1
         if (ratio <= 0)
-            ratio = 1;
+            ratio = 1.0;
         return ratio;
     }
 
@@ -766,13 +612,6 @@ public class UdeskUtil {
                 .getSystemService(Context.WINDOW_SERVICE);
         Display display = manager.getDefaultDisplay();
         return display.getWidth();
-    }
-
-    public static int getScreenHeight(Context context) {
-        WindowManager manager = (WindowManager) context
-                .getSystemService(Context.WINDOW_SERVICE);
-        Display display = manager.getDefaultDisplay();
-        return display.getHeight();
     }
 
     public static String getFilePath(Activity context, Uri uri) {
@@ -1039,5 +878,108 @@ public class UdeskUtil {
         basic = "Basic " + Base64.encodeToString(basic.getBytes(), Base64.NO_WRAP);
         return basic;
     }
+
+
+    public static void loadInto(final Context context, final String imageUrl, int errorImageId, int placeHolder, final ImageView imageView) {
+
+        Glide.with(context.getApplicationContext())
+                .load(imageUrl)
+                .diskCacheStrategy(DiskCacheStrategy.SOURCE)
+                .placeholder(placeHolder)
+                .error(errorImageId)
+                .into(imageView);
+    }
+
+    /**
+     * 自适应宽度加载图片。保持图片的长宽比例不变，通过修改imageView的高度来完全显示图片。
+     */
+    public static void loadIntoFitSize(final Context context, final String imageUrl, int errorImageId, int placeHolder, final ImageView imageView) {
+        final int screenWidth = getScreenWidth(context.getApplicationContext());
+        final int imgWidth = screenWidth / 3;
+        final int imgHight = getScreenHeight(context) / 3;
+        SimpleTarget<GlideDrawable> target = new SimpleTarget<GlideDrawable>() {
+            @Override
+            public void onResourceReady(GlideDrawable resource, GlideAnimation<? super GlideDrawable> glideAnimation) {
+                if (resource == null || TextUtils.equals(imageUrl, (String) imageView.getTag())) {
+                    return;
+                }
+                imageView.setTag(imageUrl);
+                int imageWidth = resource.getIntrinsicWidth();
+                int imageHeight = resource.getIntrinsicHeight();
+
+
+                double bitScalew = getRatioSize(imageWidth, imageHeight, imgHight, imgWidth);
+                ViewGroup.LayoutParams layoutParams = imageView.getLayoutParams();
+                Log.i("xxxxxxx", "screenWidth = " + screenWidth + "; imageWidth=" + imageWidth + "   ;imageHeight=" + imageHeight + ";imgWidth=" + imgWidth + ";=imgHight" + imgHight + "; bitScalew= " + bitScalew);
+                layoutParams.height = (int) (imageHeight / bitScalew);
+                layoutParams.width = (int) (imageWidth / bitScalew);
+                imageView.setLayoutParams(layoutParams);
+                imageView.setImageDrawable(resource);
+//                imageView.invalidate();
+            }
+        };
+
+        Glide.with(context.getApplicationContext())
+                .load(imageUrl)
+                .diskCacheStrategy(DiskCacheStrategy.SOURCE)
+                .placeholder(placeHolder)
+                .error(errorImageId)
+                .override(getScreenWidth(context), getScreenHeight(context))
+                .into(target);
+//                .into(imageView);
+    }
+
+    public static int getScreenWidth(Context context) {
+        WindowManager windowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+        DisplayMetrics dm = new DisplayMetrics();
+        windowManager.getDefaultDisplay().getMetrics(dm);
+        return dm.widthPixels;
+    }
+
+    public static int getScreenHeight(Context context) {
+        WindowManager windowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+        DisplayMetrics dm = new DisplayMetrics();
+        windowManager.getDefaultDisplay().getMetrics(dm);
+        return dm.heightPixels;
+    }
+
+
+    /**
+     * @return
+     */
+    public static String MD5(byte[] btInput) {
+        char hexDigits[] = {
+                '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+                'a', 'b', 'c', 'd', 'e', 'f'};
+        try {
+            // 获得MD5摘要算法的 MessageDigest 对象
+            MessageDigest mdInst = MessageDigest.getInstance("MD5");
+            // 使用指定的字节更新摘要
+            mdInst.update(btInput);
+            // 获得密文
+            byte[] md = mdInst.digest();
+            // 把密文转换成十六进制的字符串形式
+            int j = md.length;
+            char str[] = new char[j * 2];
+            int k = 0;
+            for (int i = 0; i < j; i++) {
+                byte byte0 = md[i];
+                str[k++] = hexDigits[byte0 >>> 4 & 0xf];
+                str[k++] = hexDigits[byte0 & 0xf];
+            }
+            return new String(str);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    /**
+     * @param s
+     * @return
+     */
+    public static String MD5(String s) {
+        return MD5(s.getBytes());
+    }
+
 
 }

@@ -17,10 +17,10 @@
         <activity
             android:name="cn.udesk.activity.UdeskChatActivity"
             android:configChanges="screenSize|orientation|keyboardHidden"
-            android:windowSoftInputMode="stateAlwaysHidden"
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
-            android:theme="@style/Udesk_Theme" />
+            android:theme="@style/Udesk_Theme"
+            android:windowSoftInputMode="stateAlwaysHidden" />
         <activity
             android:name="cn.udesk.activity.UdeskZoomImageActivty"
             android:configChanges="screenSize|orientation|keyboardHidden"
@@ -42,6 +42,9 @@
                 android:resource="@xml/udesk_provider_paths" />
         </provider>
 
+        <meta-data
+            android:name="cn.udesk.config.UdeskGlideModule"
+            android:value="GlideModule" />
 
     </application>
 

@@ -1,10 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:fresco="http://schemas.android.com/tools"
     android:id="@+id/udesk_panel_zoom_imageview"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/udesk_black">
+
+
+
+    <com.github.chrisbanes.photoview.PhotoView
+        android:id="@+id/udesk_zoom_imageview"
+        android:layout_centerInParent="true"
+        android:layout_gravity="center_horizontal|center_vertical"
+        android:scaleType="center"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+
 
     <Button
         android:id="@+id/udesk_zoom_save"
@@ -18,13 +28,12 @@
         android:textColor="@android:color/white"
         android:textSize="@dimen/udesk_sp16" />
 
-
-    <me.relex.photodraweeview.PhotoDraweeView
-        android:id="@+id/udesk_zoom_imageview"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_above="@id/udesk_zoom_save"
-        android:layout_alignParentTop="true"
-        fresco:actualImageScaleType="centerCrop" />
+    <!--<me.relex.photodraweeview.PhotoDraweeView-->
+        <!--android:id="@+id/udesk_zoom_imageview"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="match_parent"-->
+        <!--android:layout_above="@id/udesk_zoom_save"-->
+        <!--android:layout_alignParentTop="true"-->
+        <!--fresco:actualImageScaleType="centerCrop" />-->
 
 </RelativeLayout>

@@ -25,7 +25,8 @@ import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.facebook.drawee.view.SimpleDraweeView;
+
+import com.bumptech.glide.Glide;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -327,17 +328,17 @@ public class MessageAdatper extends BaseAdapter {
                     case MSG_IMG_R: {
                         ImgViewHolder holder = new ImgViewHolder();
                         initItemNormalView(convertView, holder);
-                        holder.imgView = (SimpleDraweeView) convertView.findViewById(R.id.udesk_im_image);
+                        holder.imgView = (ImageView) convertView.findViewById(R.id.udesk_im_image);
                         convertView.setTag(holder);
                         break;
                     }
                     case COMMODITY: {
                         CommodityViewHolder holder = new CommodityViewHolder();
-                        holder.ivHeader = (SimpleDraweeView) convertView.findViewById(R.id.udesk_iv_head);
+                        holder.ivHeader = (ImageView) convertView.findViewById(R.id.udesk_iv_head);
                         holder.tvTime = (TextView) convertView.findViewById(R.id.udesk_tv_time);
                         holder.rootView = convertView.findViewById(R.id.udesk_commit_root);
                         holder.udesk_name_ll = convertView.findViewById(R.id.udesk_name_ll);
-                        holder.thumbnail = (SimpleDraweeView) convertView
+                        holder.thumbnail = (ImageView) convertView
                                 .findViewById(R.id.udesk_im_commondity_thumbnail);
                         holder.title = (TextView) convertView
                                 .findViewById(R.id.udesk_im_commondity_title);
@@ -369,7 +370,7 @@ public class MessageAdatper extends BaseAdapter {
 
 
     abstract class BaseViewHolder {
-        public SimpleDraweeView ivHeader;
+        public ImageView ivHeader;
         public ImageView ivStatus;
         public TextView tvTime;
         public ProgressBar pbWait;
@@ -406,8 +407,10 @@ public class MessageAdatper extends BaseAdapter {
                     case COMMODITY:
                         this.isLeft = false;
                         if (!TextUtils.isEmpty(UdeskConfig.customerUrl)) {
-                            UdeskUtil.loadHeadView(mContext, ivHeader, Uri.parse(UdeskConfig.customerUrl));
+//                            UdeskUtil.loadHeadView(mContext, ivHeader, Uri.parse(UdeskConfig.customerUrl));
+
                         }
+                        Glide.with(mContext).load(UdeskConfig.customerUrl).error(R.drawable.udesk_im_default_user_avatar).placeholder(R.drawable.udesk_im_default_user_avatar).into(ivHeader);
                         break;
                     case MSG_TXT_L:
                     case MSG_AUDIO_L:
@@ -416,7 +419,9 @@ public class MessageAdatper extends BaseAdapter {
                         this.isLeft = true;
                         Merchant merchant = ((UdeskChatActivity) mContext).getMerchant();
                         if (merchant != null && !TextUtils.isEmpty(UdeskUtil.objectToString(merchant.getLogo_url()))) {
-                            UdeskUtil.loadHeadView(mContext, ivHeader, Uri.parse(UdeskUtil.objectToString(merchant.getLogo_url())));
+                            Glide.with(mContext).load(Uri.parse(UdeskUtil.objectToString(merchant.getLogo_url()))).error(R.drawable.udesk_im_default_user_avatar).placeholder(R.drawable.udesk_im_default_user_avatar).into(ivHeader);
+                        } else {
+                            Glide.with(mContext).load(R.drawable.udesk_im_default_agent_avatar).into(ivHeader);
                         }
                         if (merchant != null) {
                             agentnickName.setText(UdeskUtil.objectToString(merchant.getName()));
@@ -825,19 +830,16 @@ public class MessageAdatper extends BaseAdapter {
      * 展示图片消息
      */
     public class ImgViewHolder extends BaseViewHolder {
-        public SimpleDraweeView imgView;
+        public ImageView imgView;
 
         @Override
         void bind(Context context) {
             try {
                 if (!TextUtils.isEmpty(message.getLocalPath()) && UdeskUtil.isExitFileByPath(message.getLocalPath())) {
-                    int[] wh = UdeskUtil.getImageWH(message.getLocalPath());
-                    UdeskUtil.loadFileFromSdcard(context, imgView, Uri.fromFile(new File(message.getLocalPath())), wh[0], wh[1]);
+                    UdeskUtil.loadIntoFitSize(context, message.getLocalPath(), R.drawable.udesk_defualt_failure, R.drawable.udesk_defalut_image_loading, imgView);
                 } else {
-                    UdeskUtil.loadImageView(context, imgView, Uri.parse(UdeskUtil.objectToString(message.getContent())));
+                    UdeskUtil.loadIntoFitSize(context, UdeskUtil.objectToString(message.getContent()), R.drawable.udesk_defualt_failure, R.drawable.udesk_defalut_image_loading, imgView);
                 }
-
-                imgView.setTag(message.getCreated_at());
                 imgView.setOnClickListener(new OnClickListener() {
 
                     @Override
@@ -894,7 +896,7 @@ public class MessageAdatper extends BaseAdapter {
      */
     public class CommodityViewHolder extends BaseViewHolder {
         public View rootView;
-        public SimpleDraweeView thumbnail;
+        public ImageView thumbnail;
         public TextView title;
         public TextView subTitle;
         public TextView link;
@@ -930,7 +932,7 @@ public class MessageAdatper extends BaseAdapter {
                 if (extrasBeens != null && extrasBeens.size() > 0) {
                     subTitle.setText(extrasBeens.get(0).getTitle() + ": " + extrasBeens.get(0).getContent());
                 }
-                UdeskUtil.loadNoChangeView(thumbnail, Uri.parse(item.getProduct().getImage()));
+//                UdeskUtil.loadNoChangeView(thumbnail, Uri.parse(item.getProduct().getImage()));
                 link.setOnClickListener(new OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -948,7 +950,7 @@ public class MessageAdatper extends BaseAdapter {
 
     private void initItemNormalView(View convertView, BaseViewHolder holder) {
         try {
-            holder.ivHeader = (SimpleDraweeView) convertView.findViewById(R.id.udesk_iv_head);
+            holder.ivHeader = (ImageView) convertView.findViewById(R.id.udesk_iv_head);
             holder.tvTime = (TextView) convertView.findViewById(R.id.udesk_tv_time);
             holder.ivStatus = (ImageView) convertView.findViewById(R.id.udesk_iv_status);
             holder.pbWait = (ProgressBar) convertView.findViewById(R.id.udesk_im_wait);
