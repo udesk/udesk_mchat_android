@@ -208,6 +208,9 @@ public class UdeskXmppManager implements ConnectionListener, StanzaListener {
         if (time > 5) {
             return;
         }
+        if (isConnection()) {
+            return;
+        }
         new Thread(new Runnable() {
 
             @Override

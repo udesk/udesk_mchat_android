@@ -326,6 +326,9 @@ public class ConversationFragment extends BaseFragment implements PullToRefreshS
                 public void onMenuItemClick(int position,
                                             SwipeMenu menu, int index) {
                     Merchant deleteMerchant = mAdapter.getItem(position);
+                    if (deleteMerchant == null){
+                        return;
+                    }
                     switch (index) {
                         case UdeskLibConst.SwipeMenuItemDeleteId:
                             List<Merchant> merchantList = mAdapter.getDatas();
@@ -396,9 +399,11 @@ public class ConversationFragment extends BaseFragment implements PullToRefreshS
     @Override
     public void onItemClick(AdapterView<?> adapterView, View view, int i, long id) {
         Merchant merchant = mAdapter.getItem((int) id);
-        Intent intent = new Intent(ConversationFragment.this.getContext(), UdeskChatActivity.class);
-        intent.putExtra(UdeskConst.Euid, UdeskUtil.objectToString(merchant.getEuid()));
-        startActivityForResult(intent, REQUEST_CODE);
+        if (merchant != null){
+            Intent intent = new Intent(ConversationFragment.this.getContext(), UdeskChatActivity.class);
+            intent.putExtra(UdeskConst.Euid, UdeskUtil.objectToString(merchant.getEuid()));
+            startActivityForResult(intent, REQUEST_CODE);
+        }
     }
 
     @Override
@@ -412,7 +417,7 @@ public class ConversationFragment extends BaseFragment implements PullToRefreshS
             List<Merchant> merchants = mAdapter.getDatas();
             Merchant tempMerchant = null;
             for (Merchant merchant : merchants) {
-                if (UdeskUtil.objectToString(merchant.getEuid()).equals(receiveMessage.getMerchant_euid())) {
+                if (merchant != null && UdeskUtil.objectToString(merchant.getEuid()).equals(receiveMessage.getMerchant_euid())) {
 
                     merchant.setLast_message(receiveMessage);
                     merchant.setUnread_count(UdeskUtil.objectToInt(merchant.getUnread_count()) + 1);
