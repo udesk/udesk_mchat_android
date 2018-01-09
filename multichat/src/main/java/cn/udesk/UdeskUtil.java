@@ -597,7 +597,7 @@ public class UdeskUtil {
             ratio = (double) bitHeight / imageHeight;
         }
         // 最小比率为1
-        if (ratio <= 0)
+        if (ratio <= 1.0)
             ratio = 1.0;
         return ratio;
     }

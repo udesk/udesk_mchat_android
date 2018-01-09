@@ -46,12 +46,13 @@ dependencies {
     compile 'com.squareup.retrofit2:retrofit:2.1.0'
     compile 'com.squareup.okhttp3:okhttp:3.5.0'
     compile 'com.squareup.retrofit2:converter-gson:2.1.0'
-    compile 'com.aliyun.dpa:oss-android-sdk:2.4.4'
+//    compile 'com.aliyun.dpa:oss-android-sdk:2.4.4'
     compile 'com.squareup.okio:okio:1.9.0'
     compile 'org.greenrobot:eventbus:3.0.0'
-    compile(name: 'udeskmchat_1.0.1', ext: 'aar')
+    compile(name: 'udeskmchat_1.0.3', ext: 'aar')
 
 
     compile 'com.github.bumptech.glide:glide:3.7.0'
     compile 'com.github.chrisbanes:PhotoView:2.0.0'
+    compile 'com.lzy.net:okgo:3.0.4'
 }

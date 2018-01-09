@@ -9,6 +9,7 @@ import java.util.List;
 
 import cn.udesk.model.InitMode;
 import cn.udesk.model.Merchant;
+import cn.udesk.muchat.bean.AliBean;
 import cn.udesk.muchat.bean.ExtrasInfo;
 import cn.udesk.muchat.bean.ReceiveMessage;
 import cn.udesk.model.SendMsgResult;
@@ -250,5 +251,22 @@ public class JsonUtils {
             e.printStackTrace();
         }
         return result;
+    }
+
+    public static AliBean parseAlInfo(String message) {
+        AliBean aliBean = new AliBean();
+        try {
+            JSONObject content = new JSONObject(message);
+            aliBean.setAccess_id(content.opt("access_id"));
+            aliBean.setEndpoint(content.opt("endpoint"));
+            aliBean.setBucket(content.opt("bucket"));
+            aliBean.setPrefix(content.opt("prefix"));
+            aliBean.setPolicy_Base64(content.opt("policy_Base64"));
+            aliBean.setExpire_at(content.opt("expire_at"));
+            aliBean.setSignature(content.opt("signature"));
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return aliBean;
     }
 }

@@ -1,9 +1,7 @@
 package cn.udesk.presenter;
 
-import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.os.AsyncTask;
 import android.os.Message;
 import android.text.Selection;
 import android.text.Spannable;
@@ -11,7 +9,12 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.alibaba.sdk.android.oss.ClientConfiguration;
+import com.lzy.okgo.OkGo;
+import com.lzy.okgo.callback.Callback;
+import com.lzy.okgo.model.HttpParams;
+import com.lzy.okgo.model.Progress;
+import com.lzy.okgo.model.Response;
+import com.lzy.okgo.request.base.Request;
 
 import org.apache.http.conn.ConnectTimeoutException;
 import org.json.JSONException;
@@ -37,20 +40,19 @@ import cn.udesk.adapter.UDEmojiAdapter;
 import cn.udesk.config.UdeskConfig;
 import cn.udesk.model.InitMode;
 import cn.udesk.model.Merchant;
-import cn.udesk.muchat.bean.ExtrasInfo;
-import cn.udesk.muchat.bean.Products;
-import cn.udesk.muchat.bean.ReceiveMessage;
 import cn.udesk.model.SendMsgResult;
 import cn.udesk.muchat.HttpCallBack;
 import cn.udesk.muchat.HttpFacade;
 import cn.udesk.muchat.UdeskLibConst;
+import cn.udesk.muchat.bean.AliBean;
+import cn.udesk.muchat.bean.ExtrasInfo;
+import cn.udesk.muchat.bean.Products;
+import cn.udesk.muchat.bean.ReceiveMessage;
 import cn.udesk.muchat.bean.SendMessage;
 import cn.udesk.voice.AudioRecordState;
 import cn.udesk.voice.AudioRecordingAacThread;
 import cn.udesk.voice.VoiceRecord;
 import cn.udesk.xmpp.Concurrents;
-import cn.udesk.xmpp.ConnectManager;
-import udesk.core.utils.BaseUtils;
 import udesk.core.utils.UdeskIdBuild;
 import udesk.core.utils.UdeskUtils;
 
@@ -362,51 +364,101 @@ public class ChatActivityPresenter {
 
     }
 
-    //上传图片文件
-    private void upLoadFile(String filePath, final ReceiveMessage receiveMessage) {
+    private void upLoadFile(final String filePath, final ReceiveMessage receiveMessage) {
         try {
+
             InitMode initMode = UdeskSDKManager.getInstance().getInitMode();
             if (initMode != null) {
-                ClientConfiguration conf = new ClientConfiguration();
-                conf.setConnectionTimeout(15 * 1000); // 连接超时，默认15秒
-                conf.setSocketTimeout(15 * 1000); // socket超时，默认15秒
-                conf.setMaxConcurrentRequest(5); // 最大并发请求书，默认5个
-                conf.setMaxErrorRetry(2); // 失败后最大重试次数，默认2次
-                String authorization = UdeskUtil.getAuthToken(UdeskUtil.objectToString(initMode.getIm_username()),
-                        UdeskUtil.objectToString(initMode.getIm_password()));
-                String endpoint = BaseUtils.objectToString(initMode.getEndpoint());
-                String bucket = BaseUtils.objectToString(initMode.getBucket());
-                String fileName = UdeskUtil.getFileName(filePath);
-                String object = BaseUtils.objectToString(initMode.getPrefix()) + "/" + fileName;
-                HttpFacade.getInstance().uploadFileBySelfSignatureMode(mChatView.getContext(), authorization, UdeskLibConst.uuid,
-                        endpoint, conf, bucket, object, filePath, new HttpCallBack() {
-                            @Override
-                            public void onSuccess(String message) {
-                                message = "https://" + message;
-                                createMessage(UdeskUtil.objectToString(receiveMessage.getId()), message, UdeskUtil.objectToString(receiveMessage.getContent_type()), receiveMessage.getExtras());
-                            }
 
-                            @Override
-                            public void onFail(Throwable message) {
-                                sendMessageResult(UdeskUtil.objectToString(receiveMessage.getId()), UdeskConst.SendFlag.RESULT_FAIL, new SendMsgResult());
-                                if (message instanceof ConnectTimeoutException) {
-                                    if (UdeskLibConst.isDebug) {
-                                        Log.i("udesk", "upLoadFile result =" + mChatView.getContext().getString(R.string.time_out));
+                HttpFacade.getInstance().getAliInfo(UdeskUtil.getAuthToken(UdeskUtil.objectToString(initMode.getIm_username()),
+                        UdeskUtil.objectToString(initMode.getIm_password())), new HttpCallBack() {
+                    @Override
+                    public void onSuccess(final String message) {
+
+                        if (UdeskLibConst.isDebug) {
+                            Log.i("udesk", "getAliInfo result =" + message);
+                        }
+                        File file = new File(filePath);
+                        String fileName = file.getName();
+                        final AliBean aliBean = JsonUtils.parseAlInfo(message);
+                        final String alikey =UdeskUtil.objectToString(aliBean.getPrefix())+"/"+fileName;
+                        String endpoint = UdeskUtil.objectToString(aliBean.getEndpoint());
+                        if (!endpoint.contains("http")){
+                            endpoint = "https://"+ UdeskUtil.objectToString(aliBean.getBucket())+"."+endpoint;
+                        }
+                        final String uploadurl = endpoint+"/"+alikey;
+                        OkGo.<String>post(endpoint).isMultipart(true).params("file", new File(filePath))
+                                .execute(new Callback<String>() {
+                                    @Override
+                                    public void onStart(Request<String, ? extends Request> request) {
+
+                                        HttpParams params = new HttpParams();
+                                        try {
+                                            params.put("OSSAccessKeyId", UdeskUtil.objectToString(aliBean.getAccess_id()));
+                                            params.put("bucket",  UdeskUtil.objectToString(aliBean.getBucket()));
+                                            params.put("policy", UdeskUtil.objectToString(aliBean.getPolicy_Base64()));
+                                            params.put("Signature", UdeskUtil.objectToString(aliBean.getSignature()));
+                                            params.put("key", alikey);
+                                            params.put("expire", UdeskUtil.objectToString(aliBean.getExpire_at()));
+                                            params.put("file", new File(filePath));
+                                            request.getParams().put(params);
+                                        } catch (Exception e) {
+                                            e.printStackTrace();
+                                        }
                                     }
-                                }
-                            }
 
-                            @Override
-                            public void onSuccessFail(String message) {
-                                sendMessageResult(UdeskUtil.objectToString(receiveMessage.getId()), UdeskConst.SendFlag.RESULT_FAIL, new SendMsgResult());
-                                if (UdeskLibConst.isDebug) {
-                                    Log.i("udesk", "upLoadFile result =" + message);
-                                }
-                            }
-                        });
+                                    @Override
+                                    public void onSuccess(Response<String> response) {
+
+                                    }
+
+                                    @Override
+                                    public void onCacheSuccess(Response<String> response) {
+
+                                    }
+
+                                    @Override
+                                    public void onError(Response<String> response) {
+                                        sendMessageResult(UdeskUtil.objectToString(receiveMessage.getId()), UdeskConst.SendFlag.RESULT_FAIL, new SendMsgResult());
+                                    }
+
+                                    @Override
+                                    public void onFinish() {
+
+                                    }
+
+                                    @Override
+                                    public void uploadProgress(Progress progress) {
+
+                                    }
+
+                                    @Override
+                                    public void downloadProgress(Progress progress) {
+
+                                    }
+
+                                    @Override
+                                    public String convertResponse(okhttp3.Response response) throws Throwable {
+                                        createMessage(UdeskUtil.objectToString(receiveMessage.getId()), uploadurl, UdeskUtil.objectToString(receiveMessage.getContent_type()), receiveMessage.getExtras());
+                                        return null;
+                                    }
+                                });
+                    }
+
+                    @Override
+                    public void onFail(Throwable message) {
+
+                    }
+
+                    @Override
+                    public void onSuccessFail(String message) {
+                        if (UdeskLibConst.isDebug) {
+                            Log.i("udesk", "getAliInfo result =" + message);
+                        }
+                    }
+                });
+
             }
-
-
         } catch (Exception e) {
             e.printStackTrace();
         } catch (OutOfMemoryError error) {
@@ -414,6 +466,7 @@ public class ChatActivityPresenter {
         }
 
     }
+
 
 
     //点击失败按钮 重试发送消息
