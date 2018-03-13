@@ -19,6 +19,7 @@ import android.os.Message;
 import android.provider.MediaStore;
 import android.support.v4.app.ActivityCompat;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -122,6 +123,7 @@ public class UdeskChatActivity extends Activity implements IChatActivityView,
     public TextView commityLink;
 
     private boolean isDestroyed = false;
+    private long QUEUE_RETEY_TIME = 5 * 1000;
 
     public static class MessageWhat {
 
@@ -133,7 +135,7 @@ public class UdeskChatActivity extends Activity implements IChatActivityView,
         public static final int RECORD_Too_Short = 6;
         public static final int UPDATE_VOCIE_STATUS = 7;
         public static final int recordllegal = 8;
-
+        public static final int Xmpp_is_disConent = 9;
 
     }
 
@@ -225,6 +227,9 @@ public class UdeskChatActivity extends Activity implements IChatActivityView,
                         UdeskUtils.showToast(activity, activity.getResources()
                                 .getString(R.string.udesk_im_record_error));
                         break;
+                    case MessageWhat.Xmpp_is_disConent:
+                        this.postDelayed(activity.myRunnable, activity.QUEUE_RETEY_TIME);
+                        break;
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -262,6 +267,7 @@ public class UdeskChatActivity extends Activity implements IChatActivityView,
     public synchronized void checkConnect() {
         if (UdeskSDKManager.getInstance().getInitMode() != null) {
             if (!UdeskSDKManager.getInstance().isConnection()) {
+                sendXmppIsDisConnect();
                 mPresenter.getMessages("");
                 UdeskSDKManager.getInstance().connectXmpp(UdeskSDKManager.getInstance().getInitMode());
             }
@@ -431,6 +437,7 @@ public class UdeskChatActivity extends Activity implements IChatActivityView,
         try {
             Glide.with(this).resumeRequests();
             if (!UdeskSDKManager.getInstance().isConnection()) {
+                sendXmppIsDisConnect();
                 UdeskSDKManager.getInstance().connectXmpp(UdeskSDKManager.getInstance().getInitMode());
             }
             registerNetWorkReceiver();
@@ -438,6 +445,27 @@ public class UdeskChatActivity extends Activity implements IChatActivityView,
             e.printStackTrace();
         }
     }
+
+    private void sendXmppIsDisConnect() {
+        if (mHandler != null) {
+            mHandler.removeCallbacks(myRunnable);
+            Message msgWaitAgent = mHandler
+                    .obtainMessage(MessageWhat.Xmpp_is_disConent);
+            mHandler.sendMessage(msgWaitAgent);
+        }
+    }
+
+    private Runnable myRunnable = new Runnable() {
+        @Override
+        public void run() {
+            if (!UdeskSDKManager.getInstance().isConnection()) {
+                if (mPresenter != null) {
+                    mPresenter.getMessages("");
+                }
+                sendXmppIsDisConnect();
+            }
+        }
+    };
 
     @Override
     public boolean onTouch(View v, MotionEvent event) {
@@ -1344,6 +1372,11 @@ public class UdeskChatActivity extends Activity implements IChatActivityView,
 
     @Override
     public void onBackPressed() {
+        if (audioPanel.getVisibility() == View.VISIBLE || emojisPannel.getVisibility() == View.VISIBLE) {
+            setUdeskAudioPanelVis(View.GONE);
+            setUdeskEmojisPannel(View.GONE);
+            return;
+        }
         finishAcitivty();
     }
 
@@ -1367,7 +1400,7 @@ public class UdeskChatActivity extends Activity implements IChatActivityView,
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onReceiveMessage(ReceiveMessage msgInfo) {
         try {
-            if (mChatAdapter != null && UdeskUtil.objectToString(msgInfo.getMerchant_euid()).equals(euid) ) {
+            if (mChatAdapter != null && UdeskUtil.objectToString(msgInfo.getMerchant_euid()).equals(euid)) {
                 mChatAdapter.addItem(msgInfo);
                 mListView.smoothScrollToPosition(mChatAdapter.getCount());
             }
@@ -1389,6 +1422,7 @@ public class UdeskChatActivity extends Activity implements IChatActivityView,
 
     }
 
+
     @Override
     protected void onDestroy() {
         cleanSource();
@@ -1403,6 +1437,9 @@ public class UdeskChatActivity extends Activity implements IChatActivityView,
         }
         // 回收资源
         isDestroyed = true;
+        if (mHandler != null) {
+            mHandler.removeCallbacks(myRunnable);
+        }
         try {
             recycleVoiceRes();
             unRegister();

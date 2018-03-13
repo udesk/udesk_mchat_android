@@ -26,15 +26,15 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import cn.udesk.activity.UdeskChatActivity;
 import cn.udesk.JsonUtils;
 import cn.udesk.R;
 import cn.udesk.UdeskConst;
 import cn.udesk.UdeskSDKManager;
 import cn.udesk.UdeskUtil;
-import cn.udesk.adapter.UDEmojiAdapter;
+import cn.udesk.activity.UdeskChatActivity;
 import cn.udesk.adapter.AbsCommonAdapter;
 import cn.udesk.adapter.AbsViewHolder;
+import cn.udesk.adapter.UDEmojiAdapter;
 import cn.udesk.model.InitMode;
 import cn.udesk.model.Merchant;
 import cn.udesk.muchat.HttpCallBack;
@@ -65,6 +65,8 @@ public class ConversationFragment extends BaseFragment implements PullToRefreshS
     private MyHandler mHandler;
     private final int REQUEST_CODE = 1;
     public static final int ReceviveMessageWhat = 1;
+    public static final int Xmpp_is_disConent = 2;
+    private long QUEUE_RETEY_TIME = 5 * 1000;
 
     private static class MyHandler extends Handler {
         WeakReference<ConversationFragment> mWeaks;
@@ -86,12 +88,34 @@ public class ConversationFragment extends BaseFragment implements PullToRefreshS
                         fragment.mAdapter.notifyDataSetChanged();
                         fragment.getTotalCount();
                         break;
+                    case Xmpp_is_disConent:
+                        this.postDelayed(fragment.myRunnable, fragment.QUEUE_RETEY_TIME);
+                        break;
 
 
                 }
             } catch (Exception e) {
                 e.printStackTrace();
             }
+        }
+    }
+
+    private Runnable myRunnable = new Runnable() {
+        @Override
+        public void run() {
+            if (!UdeskSDKManager.getInstance().isConnection()) {
+                refreshData();
+                sendXmppIsDisConnect();
+            }
+        }
+    };
+
+    private void sendXmppIsDisConnect() {
+        if (mHandler != null) {
+            mHandler.removeCallbacks(myRunnable);
+            Message msgWaitAgent = mHandler
+                    .obtainMessage(Xmpp_is_disConent);
+            mHandler.sendMessage(msgWaitAgent);
         }
     }
 
@@ -254,7 +278,7 @@ public class ConversationFragment extends BaseFragment implements PullToRefreshS
             }
         });
         refreshData();
-        checkConnect();
+
     }
 
     @Override
@@ -267,9 +291,16 @@ public class ConversationFragment extends BaseFragment implements PullToRefreshS
 
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        checkConnect();
+    }
+
     private void checkConnect() {
         if (UdeskSDKManager.getInstance().getInitMode() != null) {
             if (!UdeskSDKManager.getInstance().isConnection()) {
+                sendXmppIsDisConnect();
                 UdeskSDKManager.getInstance().connectXmpp(UdeskSDKManager.getInstance().getInitMode());
             }
         }
@@ -324,7 +355,7 @@ public class ConversationFragment extends BaseFragment implements PullToRefreshS
                 public void onMenuItemClick(int position,
                                             SwipeMenu menu, int index) {
                     Merchant deleteMerchant = mAdapter.getItem(position);
-                    if (deleteMerchant == null){
+                    if (deleteMerchant == null) {
                         return;
                     }
                     switch (index) {
@@ -397,7 +428,7 @@ public class ConversationFragment extends BaseFragment implements PullToRefreshS
     @Override
     public void onItemClick(AdapterView<?> adapterView, View view, int i, long id) {
         Merchant merchant = mAdapter.getItem((int) id);
-        if (merchant != null){
+        if (merchant != null) {
             Intent intent = new Intent(ConversationFragment.this.getContext(), UdeskChatActivity.class);
             intent.putExtra(UdeskConst.Euid, UdeskUtil.objectToString(merchant.getEuid()));
             startActivityForResult(intent, REQUEST_CODE);
@@ -479,6 +510,9 @@ public class ConversationFragment extends BaseFragment implements PullToRefreshS
     @Override
     public void onDestroyView() {
         EventBus.getDefault().unregister(this);
+        if (mHandler != null) {
+            mHandler.removeCallbacks(myRunnable);
+        }
         super.onDestroyView();
     }
 }

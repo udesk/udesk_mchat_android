@@ -14,6 +14,7 @@ import android.text.method.LinkMovementMethod;
 import android.text.style.ClickableSpan;
 import android.text.style.URLSpan;
 import android.text.util.Linkify;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -222,12 +223,21 @@ public class MessageAdatper extends BaseAdapter {
 
     public void listAddItems(List<ReceiveMessage> messages, boolean isMore) {
         try {
-            if (messages == null) {
+            if (messages == null || messages.isEmpty()) {
                 return;
             }
             if (isMore) {
                 list.addAll(0, messages);
             } else {
+                if (list.size() > 0 ){
+                    ReceiveMessage temp = list.get(list.size()-1);
+                    String createtime = UdeskUtil.objectToString(temp.getCreated_at());
+                    ReceiveMessage temp2  = messages.get(messages.size()-1);
+                    String createtime2 = UdeskUtil.objectToString(temp2.getCreated_at());
+                    if (createtime.equals(createtime2)){
+                        return;
+                    }
+                }
                 list.clear();
                 list.addAll(messages);
             }
