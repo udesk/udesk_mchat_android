@@ -24,8 +24,7 @@
             android:hint="输入客户id"
             android:paddingLeft="12dp"
             android:singleLine="true"
-
-            android:textColorHint="@color/android:dim_foreground_dark"
+            android:textColorHint="#bebebe"
             android:textSize="16sp" />
     </LinearLayout>
 
@@ -48,7 +47,7 @@
             android:hint="输入客户的名字"
             android:paddingLeft="12dp"
             android:singleLine="true"
-            android:textColorHint="@color/android:dim_foreground_dark"
+            android:textColorHint="#bebebe"
             android:textSize="16sp" />
     </LinearLayout>
 
@@ -62,7 +61,7 @@
         android:background="@drawable/udesk_btn_bg"
         android:gravity="center"
         android:text="设置好客户信息在   点开启"
-        android:textColor="@color/android:white"
+        android:textColor="#ffffffff"
         android:textSize="17sp" />
 
 

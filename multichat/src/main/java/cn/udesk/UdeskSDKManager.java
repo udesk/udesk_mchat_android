@@ -2,13 +2,11 @@ package cn.udesk;
 
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.os.Handler;
 import android.os.Looper;
 import android.text.TextUtils;
 import android.util.Log;
 import android.widget.Toast;
-
 
 import com.tencent.bugly.crashreport.CrashReport;
 
@@ -24,13 +22,13 @@ import cn.udesk.callback.IMessageArrived;
 import cn.udesk.callback.ItotalUnreadMsgCnt;
 import cn.udesk.config.UdeskConfig;
 import cn.udesk.db.UdeskDBManager;
-import cn.udesk.xmpp.Concurrents;
-import cn.udesk.xmpp.ConnectManager;
 import cn.udesk.model.InitMode;
 import cn.udesk.muchat.HttpCallBack;
 import cn.udesk.muchat.HttpFacade;
 import cn.udesk.muchat.UdeskLibConst;
 import cn.udesk.muchat.bean.Products;
+import cn.udesk.xmpp.Concurrents;
+import cn.udesk.xmpp.UdeskXmppManager;
 import udesk.core.utils.Cockroach;
 
 
@@ -38,7 +36,8 @@ public class UdeskSDKManager {
 
     private static UdeskSDKManager instance = new UdeskSDKManager();
 
-    private ExecutorService messageExecutor;
+    private UdeskXmppManager mUdeskXmppManager = new UdeskXmppManager();
+
 
     private InitMode initMode;
 
@@ -56,6 +55,15 @@ public class UdeskSDKManager {
 
     private static String customerEuid;
     private static String customerName;
+
+    private ExecutorService scaleExecutor;
+
+    private void ensureMessageExecutor() {
+        if (scaleExecutor == null) {
+            scaleExecutor = Concurrents
+                    .newSingleThreadExecutor("xmppconnectExecutor");
+        }
+    }
 
 
     private UdeskSDKManager() {
@@ -93,22 +101,11 @@ public class UdeskSDKManager {
         return itotalCount;
     }
 
-    private void ensureMessageExecutor() {
-        if (messageExecutor == null) {
-            messageExecutor = Concurrents
-                    .newSingleThreadExecutor("managerExecutor");
-        }
-    }
-
     public InitMode getInitMode() {
         if (initMode == null) {
             initMode(customerEuid, customerName);
         }
         return initMode;
-    }
-
-    public void setInitMode(InitMode initMode) {
-        this.initMode = initMode;
     }
 
     public Products getProducts() {
@@ -178,32 +175,26 @@ public class UdeskSDKManager {
     }
 
     private void initMode(final String customer_euid, final String customer_name) {
-        ensureMessageExecutor();
-        messageExecutor.submit(new Runnable() {
+        HttpFacade.getInstance().init(customer_euid, customer_name, new HttpCallBack() {
             @Override
-            public void run() {
-                HttpFacade.getInstance().init(customer_euid, customer_name, new HttpCallBack() {
-                    @Override
-                    public void onSuccess(String message) {
-                        initMode = JsonUtils.parserInitMessage(message);
-                        if (initMode != null) {
-                            UdeskDBManager.getInstance().addInitInfo(initMode);
-                            connectXmpp(initMode);
-                            getUnReadMessages();
+            public void onSuccess(String message) {
+                initMode = JsonUtils.parserInitMessage(message);
+                if (initMode != null) {
+                    connectXmpp(initMode);
+                    UdeskDBManager.getInstance().addInitInfo(initMode);
+                    getUnReadMessages();
 
-                        }
-                    }
+                }
+            }
 
-                    @Override
-                    public void onFail(Throwable message) {
+            @Override
+            public void onFail(Throwable message) {
 
-                    }
+            }
 
-                    @Override
-                    public void onSuccessFail(String message) {
+            @Override
+            public void onSuccessFail(String message) {
 
-                    }
-                });
             }
         });
     }
@@ -232,13 +223,57 @@ public class UdeskSDKManager {
     }
 
 
-    public void connectXmpp(InitMode initMode) {
+    public synchronized void connectXmpp(InitMode initMode) {
 
-        ConnectManager.getInstance().connection(UdeskUtil.objectToString(initMode.getIm_username()),
+        connection(UdeskUtil.objectToString(initMode.getIm_username()),
                 UdeskUtil.objectToString(initMode.getIm_password()),
                 UdeskUtil.objectToString(initMode.getTcp_server()),
                 UdeskUtil.objectToInt(initMode.getTcp_port())
         );
+    }
+
+    public void connection(final String loginName,
+                           final String loginPassword, final String loginServer, final int loginPort) {
+        try {
+
+            if (isConnection()) {
+                return;
+            }
+            ensureMessageExecutor();
+            scaleExecutor.submit(new Runnable() {
+                @Override
+                public void run() {
+                    if (mUdeskXmppManager != null) {
+                        mUdeskXmppManager.startLoginXmpp(loginName, loginPassword, loginServer, loginPort);
+                    }
+                }
+            });
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void cancleXmpp() {
+        try {
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    if (mUdeskXmppManager != null) {
+                        mUdeskXmppManager.cancel();
+                    }
+                }
+            }).start();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public boolean isConnection() {
+        if (mUdeskXmppManager != null) {
+            return mUdeskXmppManager.isConnection();
+        }
+        return false;
     }
 
     /**
@@ -292,8 +327,8 @@ public class UdeskSDKManager {
     /**
      * 断开xmpp链接
      */
-    public void logout(){
-        ConnectManager.getInstance().cancleXmpp();
+    public void logout() {
+        cancleXmpp();
     }
 
 
@@ -317,7 +352,6 @@ public class UdeskSDKManager {
             e.printStackTrace();
         }
     }
-
 
 
     /**

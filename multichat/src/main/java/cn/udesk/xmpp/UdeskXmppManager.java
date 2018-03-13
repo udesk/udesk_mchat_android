@@ -2,12 +2,12 @@ package cn.udesk.xmpp;
 
 import android.os.Handler;
 import android.text.TextUtils;
-import android.util.Log;
 
 import org.greenrobot.eventbus.EventBus;
 import org.jivesoftware.smack.AbstractXMPPConnection;
 import org.jivesoftware.smack.ConnectionConfiguration;
 import org.jivesoftware.smack.ConnectionListener;
+import org.jivesoftware.smack.SASLAuthentication;
 import org.jivesoftware.smack.SmackException;
 import org.jivesoftware.smack.StanzaListener;
 import org.jivesoftware.smack.XMPPConnection;
@@ -17,6 +17,7 @@ import org.jivesoftware.smack.filter.StanzaTypeFilter;
 import org.jivesoftware.smack.packet.Message;
 import org.jivesoftware.smack.packet.Presence;
 import org.jivesoftware.smack.packet.Stanza;
+import org.jivesoftware.smack.sasl.SASLMechanism;
 import org.jivesoftware.smack.tcp.XMPPTCPConnection;
 import org.jivesoftware.smack.tcp.XMPPTCPConnectionConfiguration;
 import org.json.JSONException;
@@ -44,6 +45,7 @@ public class UdeskXmppManager implements ConnectionListener, StanzaListener {
 
     volatile boolean isConnecting = false;
 
+    private static long heartSpaceTime = 0;
 
     String loginName;
     String loginPassword;
@@ -65,10 +67,10 @@ public class UdeskXmppManager implements ConnectionListener, StanzaListener {
      */
     public synchronized boolean startLoginXmpp(String loginName,
                                                String loginPassword, String loginServer, int loginPort) {
-
         if (TextUtils.isEmpty(loginName) || TextUtils.isEmpty(loginPassword) || TextUtils.isEmpty(loginServer)) {
             return false;
         }
+
         if (loginName.contains("@" + loginServer)) {
             int index = loginName.indexOf("@");
             loginName = loginName.substring(0, index);
@@ -132,6 +134,7 @@ public class UdeskXmppManager implements ConnectionListener, StanzaListener {
                 }
             }
         } catch (Exception e) {
+
             return false;
         }
         return true;
@@ -140,6 +143,7 @@ public class UdeskXmppManager implements ConnectionListener, StanzaListener {
     Runnable runnable = new Runnable() {
         @Override
         public void run() {
+
             sendSelfStatus();
             if (handler != null) {
                 handler.postDelayed(this, 10000);
@@ -217,7 +221,6 @@ public class UdeskXmppManager implements ConnectionListener, StanzaListener {
             public void run() {
                 try {
                     time++;
-                    cancel();
                     startLoginXmpp(loginName,
                             loginPassword, loginServer, loginPort);
                 } catch (Exception e) {
@@ -235,7 +238,6 @@ public class UdeskXmppManager implements ConnectionListener, StanzaListener {
      */
     public boolean cancel() {
         try {
-            Log.i("xxx", "cancel xmpp");
             if (xmppConnection != null) {
                 xmppConnection.removeAsyncStanzaListener(UdeskXmppManager.this);
                 xmppConnection.removeConnectionListener(UdeskXmppManager.this);
@@ -298,7 +300,7 @@ public class UdeskXmppManager implements ConnectionListener, StanzaListener {
      * @return
      */
     public boolean isConnection() {
-        if (xmppConnection != null) {
+        if (xmppConnection != null && System.currentTimeMillis() - heartSpaceTime < 25000 ) {
             return (xmppConnection.isConnected() && xmppConnection.isAuthenticated());
         }
         return false;
@@ -307,6 +309,7 @@ public class UdeskXmppManager implements ConnectionListener, StanzaListener {
 
     @Override
     public void processStanza(Stanza stanza) throws SmackException.NotConnectedException, InterruptedException {
+        heartSpaceTime = System.currentTimeMillis();
         if (stanza instanceof Message) {
             Message message = (Message) stanza;
             processMessage(message);
@@ -316,7 +319,6 @@ public class UdeskXmppManager implements ConnectionListener, StanzaListener {
             processPresence(pre);
         }
     }
-
 
 
 //    @Override

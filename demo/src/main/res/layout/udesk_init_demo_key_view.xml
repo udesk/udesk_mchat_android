@@ -23,7 +23,7 @@
             android:hint="输入租户的UUID"
             android:paddingLeft="12dp"
             android:singleLine="true"
-            android:textColorHint="@color/android:dim_foreground_light_inverse_disabled"
+            android:textColorHint="#80bebebe"
             android:textSize="16sp" />
     </LinearLayout>
 
@@ -45,7 +45,7 @@
             android:hint="请点击获取租户的签名"
             android:paddingLeft="12dp"
             android:singleLine="true"
-            android:textColorHint="@color/android:dim_foreground_dark"
+            android:textColorHint="#bebebe"
             android:textSize="16sp" />
     </LinearLayout>
 
@@ -59,7 +59,7 @@
         android:background="@drawable/udesk_btn_bg"
         android:gravity="center"
         android:text="获取租户的签名"
-        android:textColor="@color/android:white"
+        android:textColor="#ffffffff"
         android:textSize="17sp" />
 
     <Button
@@ -72,7 +72,7 @@
         android:background="@drawable/udesk_btn_bg"
         android:gravity="center"
         android:text="下一步"
-        android:textColor="@color/android:white"
+        android:textColor="#ffffffff"
         android:textSize="17sp" />
 </LinearLayout>
 

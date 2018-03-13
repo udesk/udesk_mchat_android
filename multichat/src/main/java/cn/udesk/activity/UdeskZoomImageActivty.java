@@ -91,9 +91,8 @@ public class UdeskZoomImageActivty extends Activity implements
                 double heightRatio = (double) imageHeight / imgHight;
 
                 ViewGroup.LayoutParams layoutParams = imageView.getLayoutParams();
-                Log.i("xxxxxxx", "screenWidth = " + screenWidth + "screenHeight = " + UdeskUtil.getScreenHeight(context) +"; imageWidth=" + imageWidth + "   ;imageHeight=" + imageHeight + ";imgWidth=" + imgWidth + ";=imgHight" + imgHight + "; bitScalew= ");
 
-                if (heightRatio>1){
+                if (heightRatio>=1){
                     layoutParams.height = (int) (imageHeight / heightRatio);
                 }else {
                     layoutParams.height = imgHight/2;

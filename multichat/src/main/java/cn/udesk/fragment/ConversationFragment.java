@@ -3,7 +3,6 @@ package cn.udesk.fragment;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
-import android.net.Uri;
 import android.os.Handler;
 import android.os.Message;
 import android.text.Editable;
@@ -47,7 +46,6 @@ import cn.udesk.widget.swipelistview.PullToRefreshSwipeMenuListView;
 import cn.udesk.widget.swipelistview.SwipeMenu;
 import cn.udesk.widget.swipelistview.SwipeMenuCreator;
 import cn.udesk.widget.swipelistview.SwipeMenuItem;
-import cn.udesk.xmpp.ConnectManager;
 import udesk.core.utils.BaseUtils;
 
 /**
@@ -271,7 +269,7 @@ public class ConversationFragment extends BaseFragment implements PullToRefreshS
 
     private void checkConnect() {
         if (UdeskSDKManager.getInstance().getInitMode() != null) {
-            if (!ConnectManager.getInstance().isConnection()) {
+            if (!UdeskSDKManager.getInstance().isConnection()) {
                 UdeskSDKManager.getInstance().connectXmpp(UdeskSDKManager.getInstance().getInitMode());
             }
         }

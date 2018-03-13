@@ -19,7 +19,6 @@ import android.os.Message;
 import android.provider.MediaStore;
 import android.support.v4.app.ActivityCompat;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -74,7 +73,6 @@ import cn.udesk.widget.UDPullGetMoreListView;
 import cn.udesk.widget.UdeskMultiMenuHorizontalWindow;
 import cn.udesk.widget.UdeskMultiMenuHorizontalWindow.OnPopMultiMenuClick;
 import cn.udesk.widget.UdeskTitleBar;
-import cn.udesk.xmpp.ConnectManager;
 import udesk.core.utils.UdeskUtils;
 
 public class UdeskChatActivity extends Activity implements IChatActivityView,
@@ -207,7 +205,7 @@ public class UdeskChatActivity extends Activity implements IChatActivityView,
                         break;
                     case MessageWhat.onNewMessage:
                         ReceiveMessage msgInfo = (ReceiveMessage) msg.obj;
-                        if (activity.mChatAdapter != null) {
+                        if (msgInfo != null && UdeskUtil.objectToString(msgInfo.getMerchant_euid()).equals(activity.euid) && activity.mChatAdapter != null) {
                             activity.mChatAdapter.addItem(msgInfo);
                             activity.mListView.smoothScrollToPosition(activity.mChatAdapter.getCount());
                         }
@@ -251,7 +249,7 @@ public class UdeskChatActivity extends Activity implements IChatActivityView,
             mPresenter.getMessages("");
             mPresenter.getMerchantInfo();
             mPresenter.setMessageRead();
-            checkConnect();
+            UdeskSDKManager.getInstance().setCustomerOffline(true);
         } catch (Exception e) {
             e.printStackTrace();
         } catch (OutOfMemoryError error) {
@@ -263,7 +261,8 @@ public class UdeskChatActivity extends Activity implements IChatActivityView,
     @Override
     public synchronized void checkConnect() {
         if (UdeskSDKManager.getInstance().getInitMode() != null) {
-            if (!ConnectManager.getInstance().isConnection()) {
+            if (!UdeskSDKManager.getInstance().isConnection()) {
+                mPresenter.getMessages("");
                 UdeskSDKManager.getInstance().connectXmpp(UdeskSDKManager.getInstance().getInitMode());
             }
         }
@@ -431,6 +430,9 @@ public class UdeskChatActivity extends Activity implements IChatActivityView,
         super.onResume();
         try {
             Glide.with(this).resumeRequests();
+            if (!UdeskSDKManager.getInstance().isConnection()) {
+                UdeskSDKManager.getInstance().connectXmpp(UdeskSDKManager.getInstance().getInitMode());
+            }
             registerNetWorkReceiver();
         } catch (Exception e) {
             e.printStackTrace();
@@ -563,6 +565,7 @@ public class UdeskChatActivity extends Activity implements IChatActivityView,
     }
 
     //电话呼叫
+    @SuppressLint("MissingPermission")
     public void callphone(final String mobile) {
         try {
             if (Build.VERSION.SDK_INT < 23) {
@@ -1364,7 +1367,7 @@ public class UdeskChatActivity extends Activity implements IChatActivityView,
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onReceiveMessage(ReceiveMessage msgInfo) {
         try {
-            if (mChatAdapter != null) {
+            if (mChatAdapter != null && UdeskUtil.objectToString(msgInfo.getMerchant_euid()).equals(euid) ) {
                 mChatAdapter.addItem(msgInfo);
                 mListView.smoothScrollToPosition(mChatAdapter.getCount());
             }

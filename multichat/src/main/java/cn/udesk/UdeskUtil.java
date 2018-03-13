@@ -910,7 +910,6 @@ public class UdeskUtil {
 
                 double bitScalew = getRatioSize(imageWidth, imageHeight, imgHight, imgWidth);
                 ViewGroup.LayoutParams layoutParams = imageView.getLayoutParams();
-                Log.i("xxxxxxx", "screenWidth = " + screenWidth + "; imageWidth=" + imageWidth + "   ;imageHeight=" + imageHeight + ";imgWidth=" + imgWidth + ";=imgHight" + imgHight + "; bitScalew= " + bitScalew);
                 layoutParams.height = (int) (imageHeight / bitScalew);
                 layoutParams.width = (int) (imageWidth / bitScalew);
                 imageView.setLayoutParams(layoutParams);
