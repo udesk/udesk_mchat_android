@@ -1,41 +1,20 @@
 package cn.udesk.multimerchant;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
-import android.text.TextUtils;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.Toast;
 
-import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.codec.digest.DigestUtils;
-import org.json.JSONObject;
 
-import java.io.UnsupportedEncodingException;
-import java.security.DigestException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
-import java.util.Map;
-
-import javax.crypto.spec.SecretKeySpec;
 
 import cn.udesk.UdeskSDKManager;
-import cn.udesk.muchat.bean.Products;
-import cn.udesk.muchat.net.SdkRetrofitClient;
 import cn.udesk.widget.UdeskLodingDialog;
-import okhttp3.ResponseBody;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
-public class InitActivity extends AppCompatActivity implements View.OnClickListener {
+public class InitActivity extends Activity implements View.OnClickListener {
 
     private final static String TAG = InitActivity.class.getSimpleName();
 
@@ -57,22 +36,16 @@ public class InitActivity extends AppCompatActivity implements View.OnClickListe
         udesk_sign.setText(key);
         udesk_next = (Button) findViewById(R.id.udesk_next);
         udesk_next.setOnClickListener(this);
-
+        testSign();
 
     }
 
     @Override
     public void onClick(View view) {
         if (view.getId() == R.id.udesk_next) {
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    testSign();
-                    Intent intent = new Intent();
-                    intent.setClass(InitActivity.this, MainActivity.class);
-                    startActivity(intent);
-                }
-            });
+            Intent intent = new Intent();
+            intent.setClass(InitActivity.this, MainActivity.class);
+            startActivity(intent);
         }
     }
 

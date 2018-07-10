@@ -95,7 +95,7 @@ public class UDEmojiAdapter extends BaseAdapter {
 
     @Override
     public int getCount() {
-        return 29;
+        return 28;
     }
 
     @Override

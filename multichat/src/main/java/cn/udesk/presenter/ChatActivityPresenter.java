@@ -17,6 +17,7 @@ import com.lzy.okgo.model.Response;
 import com.lzy.okgo.request.base.Request;
 
 import org.apache.http.conn.ConnectTimeoutException;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -40,6 +41,7 @@ import cn.udesk.adapter.UDEmojiAdapter;
 import cn.udesk.config.UdeskConfig;
 import cn.udesk.model.InitMode;
 import cn.udesk.model.Merchant;
+import cn.udesk.model.ProductMessage;
 import cn.udesk.model.SendMsgResult;
 import cn.udesk.muchat.HttpCallBack;
 import cn.udesk.muchat.HttpFacade;
@@ -153,6 +155,49 @@ public class ChatActivityPresenter {
         }
     }
 
+    //封装商品消息
+    public void sendProductMessage(ProductMessage mProduct) {
+
+        if (mProduct == null) {
+            return;
+        }
+
+        JSONObject jsonObject = new JSONObject();
+        try {
+            if (!TextUtils.isEmpty(mProduct.getName())) {
+                jsonObject.put("name", mProduct.getName());
+            }
+            if (!TextUtils.isEmpty(mProduct.getUrl())) {
+                jsonObject.put("url", mProduct.getUrl());
+            }
+            if (!TextUtils.isEmpty(mProduct.getImgUrl())) {
+                jsonObject.put("imgUrl", mProduct.getImgUrl());
+            }
+
+            List<ProductMessage.ParamsBean> params = mProduct.getParams();
+            if (params != null && params.size() > 0) {
+                JSONArray jsonsArray = new JSONArray();
+                for (ProductMessage.ParamsBean paramsBean : params) {
+                    JSONObject param = new JSONObject();
+                    param.put("text", paramsBean.getText());
+                    param.put("color", paramsBean.getColor());
+                    param.put("fold", paramsBean.isFold());
+                    param.put("break", paramsBean.isBreakX());
+                    param.put("size", paramsBean.getSize());
+                    jsonsArray.put(param);
+                }
+
+                jsonObject.put("params", jsonsArray);
+            }
+
+            ReceiveMessage receiveMessage = buildSendMessage(UdeskConst.ChatMsgTypeString.TYPE_PRODUCT, jsonObject.toString());
+            onNewMessage(receiveMessage);
+            createMessage(UdeskUtil.objectToString(receiveMessage.getId()), mProduct,
+                    UdeskConst.ChatMsgTypeString.TYPE_PRODUCT, receiveMessage.getExtras());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
     // 发送录音信息
     public void sendRecordAudioMsg(String audiopath, long duration) {
@@ -381,12 +426,12 @@ public class ChatActivityPresenter {
                         File file = new File(filePath);
                         String fileName = file.getName();
                         final AliBean aliBean = JsonUtils.parseAlInfo(message);
-                        final String alikey =UdeskUtil.objectToString(aliBean.getPrefix())+"/"+fileName;
+                        final String alikey = UdeskUtil.objectToString(aliBean.getPrefix()) + "/" + fileName;
                         String endpoint = UdeskUtil.objectToString(aliBean.getEndpoint());
-                        if (!endpoint.contains("http")){
-                            endpoint = "https://"+ UdeskUtil.objectToString(aliBean.getBucket())+"."+endpoint;
+                        if (!endpoint.contains("http")) {
+                            endpoint = "https://" + UdeskUtil.objectToString(aliBean.getBucket()) + "." + endpoint;
                         }
-                        final String uploadurl = endpoint+"/"+alikey;
+                        final String uploadurl = endpoint + "/" + alikey;
                         OkGo.<String>post(endpoint).isMultipart(true).params("file", new File(filePath))
                                 .execute(new Callback<String>() {
                                     @Override
@@ -395,7 +440,7 @@ public class ChatActivityPresenter {
                                         HttpParams params = new HttpParams();
                                         try {
                                             params.put("OSSAccessKeyId", UdeskUtil.objectToString(aliBean.getAccess_id()));
-                                            params.put("bucket",  UdeskUtil.objectToString(aliBean.getBucket()));
+                                            params.put("bucket", UdeskUtil.objectToString(aliBean.getBucket()));
                                             params.put("policy", UdeskUtil.objectToString(aliBean.getPolicy_Base64()));
                                             params.put("Signature", UdeskUtil.objectToString(aliBean.getSignature()));
                                             params.put("key", alikey);
@@ -468,14 +513,13 @@ public class ChatActivityPresenter {
     }
 
 
-
     //点击失败按钮 重试发送消息
     public void startRetryMsg(ReceiveMessage message) {
         try {
             if (UdeskUtil.objectToString(message.getContent_type()).equals(UdeskConst.ChatMsgTypeString.TYPE_TEXT)) {
                 createMessage(UdeskUtil.objectToString(message.getId()), UdeskUtil.objectToString(message.getContent()), UdeskUtil.objectToString(message.getContent_type()), message.getExtras());
             } else if (UdeskUtil.objectToString(message.getContent_type()).equals(UdeskConst.ChatMsgTypeString.TYPE_AUDIO)
-                    || UdeskUtil.objectToString(message.getContent_type()).equals(UdeskConst.ChatMsgTypeString.TYPE_IMAGE) ) {
+                    || UdeskUtil.objectToString(message.getContent_type()).equals(UdeskConst.ChatMsgTypeString.TYPE_IMAGE)) {
 
                 if (!UdeskUtil.objectToString(message.getLocalPath()).isEmpty()) {
                     upLoadFile(UdeskUtil.objectToString(message.getLocalPath()), message);
@@ -536,7 +580,7 @@ public class ChatActivityPresenter {
 
 
     //创建消息
-    public void createMessage(final String id, final String messa, String type, ExtrasInfo info) {
+    public void createMessage(final String id, final Object messa, String type, ExtrasInfo info) {
         InitMode initMode = UdeskSDKManager.getInstance().getInitMode();
         if (initMode != null) {
             final SendMessage sendMessage = new SendMessage();

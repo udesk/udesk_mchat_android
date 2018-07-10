@@ -1,5 +1,6 @@
 ### 1.导入multichat
-    ```java
+
+```java
 	Add this in your root build.gradle file (not your module build.gradle file):
 
     allprojects {
@@ -11,8 +12,7 @@
 
 ### 2.快速使用
 
-```java
-  
+
   
   1初始化
   
@@ -128,6 +128,106 @@
                 }
             });
 ```
+
+
+### 8.设置商品信息
+
+商品信息属性 存放在ProductMessage类中;
+
+```java
+
+public class ProductMessage implements Serializable {
+
+
+    /**
+     * name :  Apple iPhone X (A1903) 64GB 深空灰色 移动联通4G手机
+     * url : https://item.jd.com/6748052.html
+     * imgUrl : http://img12.360buyimg.com/n1/s450x450_jfs/t10675/253/1344769770/66891/92d54ca4/59df2e7fN86c99a27.jpg
+     * params : [{"text":"￥6999.00","color":"#FF0000","fold":false,"break":false,"size":12},{"text":"满1999元另加30元"}]
+     */
+
+    /**
+     * 商品名称
+     */
+    private String name;
+    /**
+     * 商品跳转链接(新页显示)，如果值为空，则不能点击
+     */
+    private String url;
+    /**
+     * 商品显示图片的url
+     */
+    private String imgUrl;
+
+    /**
+     * 参数列表
+     */
+    private List<ParamsBean> params;
+	
+	
+	public static class ParamsBean {
+        /**
+         * text : ￥6999.00
+         * color : #FF0000
+         * fold : false
+         * break : false
+         * size : 12
+         */
+
+        /**
+         * 参数文本
+         */
+        private String text;
+        /**
+         * 参数颜色值，规定为十六进制值的颜色
+         */
+        private String color;
+
+        /**
+         * 是否粗体
+         */
+        private boolean fold;
+        /**
+         * 是否换行
+         */
+        @SerializedName("break")
+        private boolean breakX;
+        /**
+         * 字体大小
+         */
+        private int size;
+		
+		
+ 
+		使用方式 可以参考demo :
+		1 直接进入会话界面后 设置传入商品信息 :
+		 // 直接进入会话界面后 设置传入商品信息 
+         UdeskSDKManager.getInstance().setProducts(products);
+		 
+		
+		2 通过导航栏的方式 发送商品消息:
+		  UdeskConfig.isUseNavigationView = true;
+            UdeskSDKManager.getInstance().setNavigationModes(getNavigations());
+            UdeskSDKManager.getInstance().setNavigationItemClickCallBack(new INavigationItemClickCallBack() {
+                @Override
+                public void callBack(Context context, ChatActivityPresenter mPresenter, NavigationMode navigationMode) {
+                    if (navigationMode.getId() == 1) {
+                        mPresenter.sendProductMessage(createProduct());
+                    }
+                }
+            });
+		
+		private List<NavigationMode> getNavigations() {
+			List<NavigationMode> modes = new ArrayList<>();
+			NavigationMode navigationMode1 = new NavigationMode("发送商品消息发送商", 1);
+			modes.add(navigationMode1);
+			return modes;
+    }
+
+```
+
+
+
 
 ### 8.离线推送
 ```java

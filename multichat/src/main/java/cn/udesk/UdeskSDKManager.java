@@ -13,16 +13,21 @@ import com.tencent.bugly.crashreport.CrashReport;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 
 import cn.udesk.activity.UdeskChatActivity;
 import cn.udesk.callback.ICommodityCallBack;
 import cn.udesk.callback.IMerchantUnreadMsgCnt;
 import cn.udesk.callback.IMessageArrived;
+import cn.udesk.callback.INavigationItemClickCallBack;
+import cn.udesk.callback.IProductMessageWebonCliclk;
 import cn.udesk.callback.ItotalUnreadMsgCnt;
 import cn.udesk.config.UdeskConfig;
 import cn.udesk.db.UdeskDBManager;
 import cn.udesk.model.InitMode;
+import cn.udesk.model.NavigationMode;
+import cn.udesk.model.ProductMessage;
 import cn.udesk.muchat.HttpCallBack;
 import cn.udesk.muchat.HttpFacade;
 import cn.udesk.muchat.UdeskLibConst;
@@ -53,10 +58,22 @@ public class UdeskSDKManager {
      */
     private Products products;
 
+    /**
+     * 设置商品消息
+     */
+    private ProductMessage productMessage;
+
     private static String customerEuid;
     private static String customerName;
 
     private ExecutorService scaleExecutor;
+
+    private IProductMessageWebonCliclk productMessageWebonCliclk;
+
+    //约定传递的自定义按钮集合
+    public List<NavigationMode> navigationModes;
+
+    private INavigationItemClickCallBack navigationItemClickCallBack;
 
     private void ensureMessageExecutor() {
         if (scaleExecutor == null) {
@@ -67,6 +84,22 @@ public class UdeskSDKManager {
 
 
     private UdeskSDKManager() {
+    }
+
+    public List<NavigationMode> getNavigationModes() {
+        return navigationModes;
+    }
+
+    public void setNavigationModes(List<NavigationMode> navigationModes) {
+        this.navigationModes = navigationModes;
+    }
+
+    public INavigationItemClickCallBack getNavigationItemClickCallBack() {
+        return navigationItemClickCallBack;
+    }
+
+    public void setNavigationItemClickCallBack(INavigationItemClickCallBack navigationItemClickCallBack) {
+        this.navigationItemClickCallBack = navigationItemClickCallBack;
     }
 
     public static UdeskSDKManager getInstance() {
@@ -114,6 +147,15 @@ public class UdeskSDKManager {
 
     public void setProducts(Products products) {
         this.products = products;
+    }
+
+
+    public ProductMessage getProductMessage() {
+        return productMessage;
+    }
+
+    public void setProductMessage(ProductMessage productMessage) {
+        this.productMessage = productMessage;
     }
 
     /**
@@ -439,5 +481,13 @@ public class UdeskSDKManager {
             HttpFacade.getInstance().getMerchants(UdeskUtil.getAuthToken(UdeskUtil.objectToString(initMode.getIm_username()),
                     UdeskUtil.objectToString(initMode.getIm_password())), httpCallBack);
         }
+    }
+
+    public IProductMessageWebonCliclk getProductMessageWebonCliclk() {
+        return productMessageWebonCliclk;
+    }
+
+    public void setProductMessageWebonCliclk(IProductMessageWebonCliclk productMessageWebonCliclk) {
+        this.productMessageWebonCliclk = productMessageWebonCliclk;
     }
 }

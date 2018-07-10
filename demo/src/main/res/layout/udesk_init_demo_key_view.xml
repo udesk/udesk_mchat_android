@@ -23,7 +23,7 @@
             android:hint="输入租户的UUID"
             android:paddingLeft="12dp"
             android:singleLine="true"
-            android:textColorHint="#80bebebe"
+            android:textColorHint="#bebebe"
             android:textSize="16sp" />
     </LinearLayout>
 

@@ -49,6 +49,7 @@ public class UdeskConst {
         public static final int TYPE_RICH = 4;
         public static final int TYPE_LEAVEMSG = 6;
         public static final int TYPE_EVENT = 7;
+        public static final int TYPE_PRODUCT = 8;
 
     }
 
@@ -63,6 +64,8 @@ public class UdeskConst {
             return ChatMsgTypeInt.TYPE_REDIRECT;
         } else if ("rich".equalsIgnoreCase(type)) {
             return ChatMsgTypeInt.TYPE_RICH;
+        }else if ("product".equals(type)){
+            return ChatMsgTypeInt.TYPE_PRODUCT;
         }
         return ChatMsgTypeInt.TYPE_TEXT;
     }
@@ -73,8 +76,7 @@ public class UdeskConst {
         public static final String TYPE_AUDIO = "audio";
         public static final String TYPE_TEXT = "text";
         public static final String TYPE_EVENT = "event";
-
-
+        public static final String TYPE_PRODUCT = "product";
     }
 
 

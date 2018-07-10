@@ -1,6 +1,7 @@
 package cn.udesk.multimerchant;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
@@ -15,12 +16,17 @@ import java.util.List;
 import cn.jpush.android.api.JPushInterface;
 import cn.udesk.callback.ICommodityCallBack;
 import cn.udesk.callback.IMessageArrived;
+import cn.udesk.callback.INavigationItemClickCallBack;
 import cn.udesk.callback.ItotalUnreadMsgCnt;
 import cn.udesk.UdeskSDKManager;
 import cn.udesk.callback.IMerchantUnreadMsgCnt;
 import cn.udesk.UdeskUtil;
+import cn.udesk.config.UdeskConfig;
+import cn.udesk.model.NavigationMode;
+import cn.udesk.model.ProductMessage;
 import cn.udesk.muchat.bean.Products;
 import cn.udesk.muchat.bean.ReceiveMessage;
+import cn.udesk.presenter.ChatActivityPresenter;
 
 public class UdeskUseGuideActivity extends Activity implements View.OnClickListener {
 
@@ -35,9 +41,8 @@ public class UdeskUseGuideActivity extends Activity implements View.OnClickListe
         findViewById(R.id.merchant_unread_msg).setOnClickListener(this);
         findViewById(R.id.msg_callback).setOnClickListener(this);
         findViewById(R.id.commity_callback).setOnClickListener(this);
-        findViewById(R.id.commity_set_null).setOnClickListener(this);
-        findViewById(R.id.commity_show).setOnClickListener(this);
         findViewById(R.id.all_unread_msg).setOnClickListener(this);
+        findViewById(R.id.add_navigation).setOnClickListener(this);
         merchant_unread_count = (TextView) findViewById(R.id.merchant_unread_count);
         all_unread_count = (TextView) findViewById(R.id.all_unread_count);
         receive_msg = (TextView) findViewById(R.id.receive_msg);
@@ -165,38 +170,85 @@ public class UdeskUseGuideActivity extends Activity implements View.OnClickListe
                 }
             });
             Toast.makeText(UdeskUseGuideActivity.this, "设置成功", Toast.LENGTH_SHORT).show();
-        } else if (v.getId() == R.id.commity_set_null) {
-            UdeskSDKManager.getInstance().setProducts(null);
-            Toast.makeText(UdeskUseGuideActivity.this, "设置成功", Toast.LENGTH_SHORT).show();
-        }else if (v.getId() == R.id.commity_show) {
-            createProducts();
+        } else if (v.getId() == R.id.add_navigation) {
+
+            UdeskConfig.isUseNavigationView = true;
+            UdeskSDKManager.getInstance().setNavigationModes(getNavigations());
+            UdeskSDKManager.getInstance().setNavigationItemClickCallBack(new INavigationItemClickCallBack() {
+                @Override
+                public void callBack(Context context, ChatActivityPresenter mPresenter, NavigationMode navigationMode) {
+                    if (navigationMode.getId() == 1) {
+                        mPresenter.sendProductMessage(createProduct());
+                    }
+                }
+            });
             Toast.makeText(UdeskUseGuideActivity.this, "设置成功", Toast.LENGTH_SHORT).show();
         }
     }
 
-
-
-
-
-    //设置咨询的商品
-    private void createProducts() {
-        Products products = new Products();
-        Products.ProductBean productBean = new Products.ProductBean();
-        productBean.setImage("http://img14.360buyimg.com/n1/s450x450_jfs/t3157/63/1645131029/112074/f4f79169/57d0d44dN8cddf5c5.jpg?v=1483595726320");
-        productBean.setTitle("Apple iPhone 7");
-        productBean.setUrl("http://item.jd.com/3133829.html?cu=true&amp;utm_source…erm=9457752645_0_11333d2bdbd545f1839f020ae9b27f14");
-        List<Products.ProductBean.ExtrasBean> extras = new ArrayList<>();
-
-        Products.ProductBean.ExtrasBean extrasBean = new Products.ProductBean.ExtrasBean();
-        extrasBean.setTitle("价格");
-        extrasBean.setContent("￥6189.00");
-
-        extras.add(extrasBean);
-        productBean.setExtras(extras);
-        products.setProduct(productBean);
-
-        UdeskSDKManager.getInstance().setProducts(products);
-
+    private List<NavigationMode> getNavigations() {
+        List<NavigationMode> modes = new ArrayList<>();
+        NavigationMode navigationMode1 = new NavigationMode("发送商品消息发送商", 1);
+        modes.add(navigationMode1);
+        return modes;
     }
 
+    private ProductMessage createProduct() {
+        ProductMessage product = new ProductMessage();
+        product.setImgUrl("http://img12.360buyimg.com/n1/s450x450_jfs/t10675/253/1344769770/66891/92d54ca4/59df2e7fN86c99a27.jpg");
+        product.setName(" Apple iPhone X (A1903) 64GB 深空灰色 移动联通4G手机");
+        product.setUrl("https://item.jd.com/6748052.html");
+
+        List<ProductMessage.ParamsBean> paramsBeans = new ArrayList<>();
+
+        ProductMessage.ParamsBean paramsBean0 = new ProductMessage.ParamsBean();
+        paramsBean0.setText("京 东 价  ");
+        paramsBean0.setColor("#C1B6B6");
+        paramsBean0.setFold(false);
+        paramsBean0.setBreakX(false);
+        paramsBean0.setSize(12);
+
+        ProductMessage.ParamsBean paramsBean1 = new ProductMessage.ParamsBean();
+        paramsBean1.setText("￥6999.00");
+        paramsBean1.setColor("#E6321A");
+        paramsBean1.setFold(true);
+        paramsBean1.setBreakX(true);
+        paramsBean1.setSize(16);
+
+        ProductMessage.ParamsBean paramsBean2 = new ProductMessage.ParamsBean();
+        paramsBean2.setText("促　销  ");
+        paramsBean2.setColor("#C1B6B6");
+        paramsBean2.setFold(false);
+        paramsBean2.setBreakX(false);
+        paramsBean2.setSize(12);
+
+        ProductMessage.ParamsBean paramsBean3 = new ProductMessage.ParamsBean();
+        paramsBean3.setText("满1999元另加30元，或满2999元另加50元，即可在购物车换购热销商品 " +
+                "满1999元另加30元，或满2999元另加50元，即可在购物车换购热销商品 满1999元另加30元，" +
+                "或满2999元另加50元，即可在购物车换购热销商品满1999元另加30元，" +
+                "或满2999元另加50元，即可在购物车换购热销商品满1999元另加30元，或满2999元另加50元，" +
+                "即可在购物车换购热销商品满1999元另加30元，或满2999元另加50元，即可在购物车换购热销商品满1999元另加30元，" +
+                "或满2999元另加50元，即可在购物车换购热销商品满1999元另加30元，" +
+                "或满2999元另加50元，即可在购物车换购热销商品满1999元另加30元，" +
+                "或满2999元另加50元，即可在购物车换购热销商品满1999元另加30元，" +
+                "或满2999元另加50元，即可在购物车换购热销商品满1999元另加30元，或满2999元另加50元，即可在购物车换购热销商品满1999元另加30元，" +
+                "或满2999元另加50元，即可在购物车换购热销商品满1999元另加30元，" +
+                "或满2999元另加50元，即可在购物车换购热销商品满1999元另加30元，" +
+                "或满2999元另加50元，即可在购物车换购热销商品满1999元另加30元，或满2999元另加50元，即可在购物车换购热销商品满1999元另加30元，" +
+                "或满2999元另加50元，即可在购物车换购热销商品满1999元另加30元，" +
+                "或满2999元另加50元，即可在购物车换购热销商品满1999元另加30元，或满2999元另加50元，" +
+                "即可在购物车换购热销商品满1999元另加30元，或满2999元另加50元，即可在购物车换购热销商品");
+        paramsBean3.setColor("#E6321A");
+        paramsBean3.setFold(true);
+        paramsBean3.setBreakX(false);
+        paramsBean3.setSize(16);
+        paramsBeans.add(paramsBean0);
+        paramsBeans.add(paramsBean1);
+        paramsBeans.add(paramsBean2);
+        paramsBeans.add(paramsBean3);
+
+        product.setParams(paramsBeans);
+
+        return product;
+    }
 }

@@ -9,12 +9,12 @@ import android.net.Uri;
 import android.text.Html;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
+import android.text.Spanned;
 import android.text.TextUtils;
 import android.text.method.LinkMovementMethod;
 import android.text.style.ClickableSpan;
 import android.text.style.URLSpan;
 import android.text.util.Linkify;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -26,12 +26,16 @@ import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-
 import com.bumptech.glide.Glide;
+import com.google.gson.Gson;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import cn.udesk.R;
 import cn.udesk.UdeskConst;
@@ -41,10 +45,12 @@ import cn.udesk.adapter.UDEmojiAdapter;
 import cn.udesk.config.UdekConfigUtil;
 import cn.udesk.config.UdeskConfig;
 import cn.udesk.model.Merchant;
+import cn.udesk.model.ProductMessage;
+import cn.udesk.model.SendMsgResult;
 import cn.udesk.muchat.bean.ExtrasInfo;
 import cn.udesk.muchat.bean.Products;
 import cn.udesk.muchat.bean.ReceiveMessage;
-import cn.udesk.model.SendMsgResult;
+import cn.udesk.widget.HtmlTagHandler;
 
 import static android.util.Patterns.PHONE;
 import static android.util.Patterns.WEB_URL;
@@ -58,10 +64,11 @@ public class MessageAdatper extends BaseAdapter {
             R.layout.udesk_chat_msg_item_imgt_l,//图片消息左边的UI布局文件
             R.layout.udesk_chat_msg_item_imgt_r,//图片消息右边的UI布局文件
             R.layout.udesk_chat_rich_item_txt,//富文本消息UI布局文件
-            R.layout.udesk_im_commodity_item,  //显示商品信息的UI布局文件
+            R.layout.udesk_im_commodity_item,  //显示推广链接信息的UI布局文件
             R.layout.udesk_chat_leavemsg_item_txt_l,//显示留言发送消息
             R.layout.udesk_chat_leavemsg_item_txt_r, // 显示收到留言消息的回复
             R.layout.udesk_chat_event_item, // 显示收到留言消息的回复
+            R.layout.udesk_chat_msg_item_product_r, // 显示客户定义的商品消息
     };
 
     /**
@@ -106,6 +113,7 @@ public class MessageAdatper extends BaseAdapter {
     private static final int LEAVEMSG_TXT_L = 8;
     private static final int LEAVEMSG_TXT_R = 9;
     private static final int Udesk_Event = 10;
+    private static final int MSG_PRODUCT_R = 11;
 
     private Activity mContext;
     private List<ReceiveMessage> list = new ArrayList<ReceiveMessage>();
@@ -169,6 +177,9 @@ public class MessageAdatper extends BaseAdapter {
                     } else {
                         return LEAVEMSG_TXT_R;
                     }
+                case UdeskConst.ChatMsgTypeInt.TYPE_PRODUCT:
+                    return MSG_PRODUCT_R;
+
                 default:
                     return ILLEGAL;
             }
@@ -229,12 +240,12 @@ public class MessageAdatper extends BaseAdapter {
             if (isMore) {
                 list.addAll(0, messages);
             } else {
-                if (list.size() > 0 ){
-                    ReceiveMessage temp = list.get(list.size()-1);
+                if (list.size() > 0) {
+                    ReceiveMessage temp = list.get(list.size() - 1);
                     String createtime = UdeskUtil.objectToString(temp.getCreated_at());
-                    ReceiveMessage temp2  = messages.get(messages.size()-1);
+                    ReceiveMessage temp2 = messages.get(messages.size() - 1);
                     String createtime2 = UdeskUtil.objectToString(temp2.getCreated_at());
-                    if (createtime.equals(createtime2)){
+                    if (createtime.equals(createtime2)) {
                         return;
                     }
                 }
@@ -369,6 +380,15 @@ public class MessageAdatper extends BaseAdapter {
                         eventViewHolder.events = (TextView) convertView.findViewById(R.id.udesk_event);
                         convertView.setTag(eventViewHolder);
                         break;
+                    case MSG_PRODUCT_R:
+                        ProductViewHolder productViewHolder = new ProductViewHolder();
+                        initItemNormalView(convertView, productViewHolder);
+                        productViewHolder.tvMsg = (TextView) convertView.findViewById(R.id.udesk_tv_msg);
+                        productViewHolder.product_name = (TextView) convertView.findViewById(R.id.product_name);
+                        productViewHolder.productView = convertView.findViewById(R.id.product_view);
+                        productViewHolder.imgView = (ImageView) convertView.findViewById(R.id.udesk_product_icon);
+                        convertView.setTag(productViewHolder);
+                        break;
 
                 }
             } catch (Exception e) {
@@ -416,10 +436,6 @@ public class MessageAdatper extends BaseAdapter {
                     case LEAVEMSG_TXT_R:
                     case COMMODITY:
                         this.isLeft = false;
-                        if (!TextUtils.isEmpty(UdeskConfig.customerUrl)) {
-//                            UdeskUtil.loadHeadView(mContext, ivHeader, Uri.parse(UdeskConfig.customerUrl));
-
-                        }
                         Glide.with(mContext).load(UdeskConfig.customerUrl).error(R.drawable.udesk_im_default_user_avatar).placeholder(R.drawable.udesk_im_default_user_avatar).into(ivHeader);
                         break;
                     case MSG_TXT_L:
@@ -957,6 +973,97 @@ public class MessageAdatper extends BaseAdapter {
 
         }
     }
+
+
+    /**
+     * 展示商品消息
+     */
+    public class ProductViewHolder extends BaseViewHolder {
+        TextView tvMsg;
+        TextView product_name;
+        View productView;
+        ImageView imgView;
+        String productUrl;
+
+        @Override
+        void bind(Context context) {
+            try {
+                Object productMessage = message.getContent();
+                JSONObject jsonObject = null;
+                if (productMessage instanceof String) {
+                    jsonObject = new JSONObject(UdeskUtil.objectToString(productMessage));
+                } else if (productMessage instanceof JSONObject) {
+                    jsonObject = (JSONObject) productMessage;
+                }else {
+                    Gson gson = new Gson();
+                    jsonObject = new JSONObject(gson.toJson(productMessage));
+                }
+                if (TextUtils.isEmpty(jsonObject.optString("imgUrl"))) {
+                    imgView.setVisibility(View.GONE);
+                } else {
+                    UdeskUtil.loadInto(context, jsonObject.optString("imgUrl"), R.drawable.udesk_defualt_failure,
+                            R.drawable.udesk_defalut_image_loading, imgView);
+                }
+                productUrl = jsonObject.optString("url");
+                product_name.setText(jsonObject.optString("name"));
+                if (!TextUtils.isEmpty(productUrl)) {
+                    product_name.setTextColor(mContext.getResources().getColor(UdeskConfig.udeskProductNameLinkColorResId));
+                    product_name.setOnClickListener(new OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            if (UdeskSDKManager.getInstance().getProductMessageWebonCliclk() != null) {
+                                UdeskSDKManager.getInstance().getProductMessageWebonCliclk().txtMsgOnclick(productUrl);
+                            } else {
+                                Intent intent = new Intent(mContext, UdeskWebViewUrlAcivity.class);
+                                intent.putExtra(UdeskConst.WELCOME_URL, productUrl);
+                                mContext.startActivity(intent);
+                            }
+                        }
+                    });
+                }
+
+                StringBuilder builder = new StringBuilder();
+                builder.append("<font></font>");
+                JSONArray jsonArray = jsonObject.getJSONArray("params");
+                if (jsonArray != null && jsonArray.length() > 0) {
+                    for (int i = 0; i < jsonArray.length(); i++) {
+                        JSONObject data = jsonArray.optJSONObject(i);
+                        if (TextUtils.isEmpty(data.optString("text"))) {
+                            continue;
+                        }
+                        String textStr = "<font color=" + data.optString("color") +
+                                "  size=" + 2 * data.optInt("size") + ">" + data.optString("text") + "</font>";
+                        if (data.optBoolean("fold")) {
+                            textStr = "<b>" + textStr + "</b>";
+                        }
+                        if (data.optBoolean("break")) {
+                            textStr = textStr + "<br>";
+                        }
+                        builder.append(textStr);
+                    }
+                }
+                String htmlString = builder.toString().replaceAll("font", HtmlTagHandler.TAG_FONT);
+                Spanned fromHtml = Html.fromHtml(htmlString, null, new HtmlTagHandler());
+                tvMsg.setText(fromHtml);
+
+                //重发按钮点击事件
+                ivStatus.setOnClickListener(new OnClickListener() {
+
+                    @Override
+                    public void onClick(View v) {
+                        ((UdeskChatActivity) mContext).retrySendMsg(message);
+                    }
+                });
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            } catch (OutOfMemoryError error) {
+                error.printStackTrace();
+            }
+
+        }
+    }
+
 
     private void initItemNormalView(View convertView, BaseViewHolder holder) {
         try {

@@ -1,6 +1,8 @@
 package cn.udesk.config;
 
 
+import cn.udesk.R;
+
 /**
  * Created by user on 2016/8/12.
  */
@@ -53,6 +55,11 @@ public class UdeskConfig {
     //    商品咨询页面中，发送链接的字样颜色
     public static int udeskCommityLinkColorResId = DEFAULT;
 
+    // 商品消息 含有链接时的标题的颜色
+    public static int udeskProductNameLinkColorResId = R.color.color_1850cc;
+
+    //设置是否使用导航UI rue表示使用 false表示不使用
+    public static boolean isUseNavigationView = true;
 
     //配置是否把domain 和 appid 和 appkey 和 sdktoken 存在sharePrefence中， true保存，false 不存
     public static boolean isUseShare = true;

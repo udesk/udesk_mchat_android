@@ -26,6 +26,17 @@
         android:divider="@android:color/transparent"
         android:listSelector="@android:color/transparent" />
 
+    <LinearLayout
+        android:visibility="gone"
+        android:id="@+id/navigation_fragment_view"
+        android:layout_width="fill_parent"
+        android:layout_height="@dimen/udesk_45"
+        android:background="@drawable/udesk_gray_bg"
+        android:orientation="horizontal">
+
+
+    </LinearLayout>
+
     <include layout="@layout/udesk_line_horizontal" />
 
     <include layout="@layout/udesk_im_bottom_panel" />

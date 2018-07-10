@@ -18,6 +18,8 @@ import android.os.Handler;
 import android.os.Message;
 import android.provider.MediaStore;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.FragmentTransaction;
+import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -32,6 +34,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.GridView;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -76,7 +79,7 @@ import cn.udesk.widget.UdeskMultiMenuHorizontalWindow.OnPopMultiMenuClick;
 import cn.udesk.widget.UdeskTitleBar;
 import udesk.core.utils.UdeskUtils;
 
-public class UdeskChatActivity extends Activity implements IChatActivityView,
+public class UdeskChatActivity extends AppCompatActivity implements IChatActivityView,
         OnClickListener, OnTouchListener, OnLongClickListener,
         OnItemClickListener, RecordStateCallback, HorVoiceView.UdeskTimeCallback {
 
@@ -124,6 +127,8 @@ public class UdeskChatActivity extends Activity implements IChatActivityView,
 
     private boolean isDestroyed = false;
     private long QUEUE_RETEY_TIME = 5 * 1000;
+
+    private LinearLayout  addNavigationFragmentView;
 
     public static class MessageWhat {
 
@@ -189,6 +194,7 @@ public class UdeskChatActivity extends Activity implements IChatActivityView,
                                 activity.hasAddCommodity = true;
                                 activity.showCommityThunbnail(UdeskSDKManager.getInstance().getProducts());
                                 activity.mPresenter.sendCommodity(UdeskSDKManager.getInstance().getProducts());
+                                activity.mPresenter.sendProductMessage(UdeskSDKManager.getInstance().getProductMessage());
                             }
                             if (messages != null) {
                                 int index = messages.size();
@@ -314,6 +320,10 @@ public class UdeskChatActivity extends Activity implements IChatActivityView,
         }
     }
 
+    public ChatActivityPresenter getPresenter() {
+        return mPresenter;
+    }
+
     private void showCommityThunbnail(final Products products) {
 
         commodity_rl.setVisibility(View.VISIBLE);
@@ -398,10 +408,31 @@ public class UdeskChatActivity extends Activity implements IChatActivityView,
                     emjoGridView.setVisibility(View.GONE);
                 }
             });
+
+            addNavigationFragmentView = findViewById(R.id.navigation_fragment_view);
+            if (UdeskConfig.isUseNavigationView){
+                addNavigationFragmentView.setVisibility(View.VISIBLE);
+            }else {
+                addNavigationFragmentView.setVisibility(View.GONE);
+            }
+
+            if (UdeskSDKManager.getInstance().getNavigationModes() != null
+                    && UdeskSDKManager.getInstance().getNavigationModes().size() > 0) {
+                addNavigationFragment();
+            }else {
+                addNavigationFragmentView.setVisibility(View.GONE);
+            }
+
         } catch (Exception e) {
             e.printStackTrace();
         }
 
+    }
+
+    private void addNavigationFragment() {
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        transaction.replace(R.id.navigation_fragment_view, new NavigationFragment());
+        transaction.commit();
     }
 
     private void setListView() {
@@ -466,6 +497,8 @@ public class UdeskChatActivity extends Activity implements IChatActivityView,
             }
         }
     };
+
+
 
     @Override
     public boolean onTouch(View v, MotionEvent event) {

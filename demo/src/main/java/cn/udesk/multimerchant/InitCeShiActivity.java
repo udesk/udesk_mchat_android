@@ -1,8 +1,8 @@
 package cn.udesk.multimerchant;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
@@ -11,11 +11,7 @@ import android.widget.Toast;
 
 import org.json.JSONObject;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import cn.udesk.UdeskSDKManager;
-import cn.udesk.muchat.bean.Products;
 import cn.udesk.muchat.net.SdkRetrofitClient;
 import cn.udesk.widget.UdeskLodingDialog;
 import okhttp3.ResponseBody;
@@ -23,9 +19,9 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class InitCeShiActivity extends AppCompatActivity implements View.OnClickListener {
+public class InitCeShiActivity extends Activity implements View.OnClickListener {
     private final static String TAG = InitActivity.class.getSimpleName();
-    String uuid = "a04d138d-98fb-4b9d-b2a7-478b7c0c1ce9";
+    String uuid = "199b7bc4-0d04-491e-b323-0fe8bfc22169";
     private EditText uuidEdit, udesk_sign;
     private Button startBtn, udesk_next;
     private UdeskLodingDialog lodingDialog;
@@ -65,7 +61,7 @@ public class InitCeShiActivity extends AppCompatActivity implements View.OnClick
 
     private void testSign() {
         SdkRetrofitClient retrofitClient = SdkRetrofitClient.getInstance();
-        Call<ResponseBody> call = retrofitClient.getSign(uuid);
+        Call<ResponseBody> call = retrofitClient.getSign(uuidEdit.getText().toString());
         call.enqueue(new Callback<ResponseBody>() {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
@@ -82,7 +78,7 @@ public class InitCeShiActivity extends AppCompatActivity implements View.OnClick
                         sign = jsonObject.getString("sign");
                         udesk_sign.setText(sign);
                     }
-                    UdeskSDKManager.getInstance().init(InitCeShiActivity.this, uuid, sign, String.valueOf(timestamp));
+                    UdeskSDKManager.getInstance().init(InitCeShiActivity.this, uuidEdit.getText().toString(), sign, String.valueOf(timestamp));
                 } catch (Exception e) {
                     e.printStackTrace();
                 }

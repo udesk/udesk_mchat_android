@@ -1,29 +1,22 @@
 package cn.udesk.multimerchant;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.TextView;
 import android.widget.Toast;
-
-import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import cn.udesk.UdeskSDKManager;
+import cn.udesk.model.ProductMessage;
 import cn.udesk.muchat.bean.Products;
-import cn.udesk.muchat.net.SdkRetrofitClient;
-import okhttp3.ResponseBody;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener {
+public class MainActivity extends Activity implements View.OnClickListener {
 
     private final static String TAG = MainActivity.class.getSimpleName();
 
@@ -44,6 +37,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         startBtn.setOnClickListener(this);
         //设置咨询对象
         createProducts();
+        UdeskSDKManager.getInstance().setProductMessage(createProduct());
 
     }
 
@@ -84,5 +78,52 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         UdeskSDKManager.getInstance().setProducts(products);
 
     }
+
+
+    private ProductMessage createProduct() {
+        ProductMessage product = new ProductMessage();
+        product.setImgUrl("http://img12.360buyimg.com/n1/s450x450_jfs/t10675/253/1344769770/66891/92d54ca4/59df2e7fN86c99a27.jpg");
+        product.setName(" Apple iPhone X (A1903) 64GB 深空灰色 移动联通4G手机");
+        product.setUrl("https://item.jd.com/6748052.html");
+
+        List<ProductMessage.ParamsBean> paramsBeans = new ArrayList<>();
+
+        ProductMessage.ParamsBean paramsBean0 = new ProductMessage.ParamsBean();
+        paramsBean0.setText("京 东 价  ");
+        paramsBean0.setColor("#C1B6B6");
+        paramsBean0.setFold(false);
+        paramsBean0.setBreakX(false);
+        paramsBean0.setSize(12);
+
+        ProductMessage.ParamsBean paramsBean1 = new ProductMessage.ParamsBean();
+        paramsBean1.setText("￥6999.00");
+        paramsBean1.setColor("#E6321A");
+        paramsBean1.setFold(true);
+        paramsBean1.setBreakX(true);
+        paramsBean1.setSize(16);
+
+        ProductMessage.ParamsBean paramsBean2 = new ProductMessage.ParamsBean();
+        paramsBean2.setText("促　销  ");
+        paramsBean2.setColor("#C1B6B6");
+        paramsBean2.setFold(false);
+        paramsBean2.setBreakX(false);
+        paramsBean2.setSize(12);
+
+        ProductMessage.ParamsBean paramsBean3 = new ProductMessage.ParamsBean();
+        paramsBean3.setText("满1999元另加30元，或满2999元另加50元，即可在购物车换购热销商品 ");
+        paramsBean3.setColor("#E6321A");
+        paramsBean3.setFold(true);
+        paramsBean3.setBreakX(false);
+        paramsBean3.setSize(16);
+        paramsBeans.add(paramsBean0);
+        paramsBeans.add(paramsBean1);
+        paramsBeans.add(paramsBean2);
+        paramsBeans.add(paramsBean3);
+
+        product.setParams(paramsBeans);
+
+        return product;
+    }
+
 
 }
