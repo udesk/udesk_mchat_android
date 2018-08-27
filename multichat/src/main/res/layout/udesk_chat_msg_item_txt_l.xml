@@ -58,7 +58,7 @@
         android:layout_marginRight="@dimen/udesk_chat_context_margin_other_derction"
         android:layout_toRightOf="@id/udesk_iv_head">
 
-        <TextView
+        <org.sufficientlysecure.htmltextview.HtmlTextView
             android:id="@+id/udesk_tv_msg"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -66,13 +66,23 @@
             android:layout_marginLeft="6dp"
             android:layout_marginRight="@dimen/udesk_chat_head_margin"
             android:layout_marginTop="@dimen/udesk_chat_head_margin"
-            android:autoLink="phone|web"
             android:background="@drawable/udesk_im_item_bg_left"
             android:gravity="left|center_vertical"
-            android:lineSpacingExtra="3dip"
             android:textColor="@color/udesk_color_im_text_left1"
             android:textColorLink="@color/udesk_color_im_text_left1"
             android:textSize="@dimen/udesk_sp16" />
+
+        <!--<org.sufficientlysecure.htmltextview.HtmlTextView-->
+            <!--android:id="@+id/udesk_tv_msg"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_marginBottom="@dimen/udesk_chat_head_margin"-->
+            <!--android:layout_marginLeft="6dp"-->
+            <!--android:layout_marginRight="@dimen/udesk_chat_head_margin"-->
+            <!--android:layout_marginTop="@dimen/udesk_chat_head_margin"-->
+            <!--android:background="@drawable/udesk_im_item_bg_left"-->
+            <!--android:textSize="@dimen/udesk_sp16"-->
+            <!--/>-->
 
         <ImageView
             android:id="@+id/udesk_iv_status"

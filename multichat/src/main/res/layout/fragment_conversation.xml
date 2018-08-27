@@ -99,7 +99,7 @@
                 android:textColor="@color/color_999999"
                 android:textSize="@dimen/px36tosp"
                 android:gravity="center"
-                android:text="@string/udesk_label_search_fail"
+                android:text="@string/no_conversation"
                 android:layout_width="fill_parent"
                 android:layout_height="@dimen/udesk_240" />
 

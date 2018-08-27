@@ -67,7 +67,7 @@
 
     <string name="udesk_has_survey">Thank you, you have already done!</string>
 
-    <string name="udesk_no_set_survey">Not set, temporarily unable to use!</string>
+    <string name="udesk_no_set_survey">temporarily unable to use!</string>
     <string name="udesk_survey_error"> Sorry, temporarily unable to use!</string>
     <string name="udesk_service_line"> Customer service line</string>
     <string name="udesk_service_offline"> Customer service offline</string>

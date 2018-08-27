@@ -6,6 +6,7 @@ import android.os.Handler;
 import java.util.List;
 
 import cn.udesk.model.Merchant;
+import cn.udesk.model.SurveyOptionsModel;
 import cn.udesk.muchat.bean.ReceiveMessage;
 
 public interface IChatActivityView {
@@ -31,5 +32,11 @@ public interface IChatActivityView {
 	void setMerchant(Merchant merchant);
 
 	void checkConnect();
+
+	void setIsPermmitSurvy(boolean isPermmitSurvy);
+
+	void setSurvyOption(SurveyOptionsModel model);
+
+	SurveyOptionsModel getSurvyOption();
 
 }

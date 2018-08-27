@@ -56,7 +56,7 @@
     <string name="udesk_nonexistent_groupId"> 客服组不存在，请核对输入的客服组ID是否正确</string>
 
     <string name="udesk_has_survey"> 谢谢，您已对本次服务做出过评价了!</string>
-    <string name="udesk_no_set_survey"> 未设置，暂时无法使用!</string>
+    <string name="udesk_no_set_survey"> 暂时无法使用!</string>
     <string name="udesk_survey_error"> 抱歉，暂时无法使用!</string>
     <string name="udesk_service_line"> 客服上线了</string>
     <string name="udesk_service_offline"> 客服离线了</string>

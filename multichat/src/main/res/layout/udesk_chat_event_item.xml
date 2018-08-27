@@ -17,7 +17,7 @@
         android:textColor="@color/udesk_color_im_time_text1"
         android:textSize="@dimen/udesk_sp14" />
 
-    <TextView
+    <org.sufficientlysecure.htmltextview.HtmlTextView
         android:id="@+id/udesk_event"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -28,6 +28,7 @@
         android:padding="@dimen/udesk_5"
         android:textColor="#999999"
         android:textSize="@dimen/udesk_sp14" />
+
 
     <ImageView
         android:id="@+id/udesk_iv_head"

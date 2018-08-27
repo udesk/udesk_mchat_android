@@ -102,6 +102,18 @@
                 android:src="@drawable/udesk_selector_image_img" />
         </RelativeLayout>
 
+        <RelativeLayout
+            android:id="@+id/udesk_bottom_option_survy"
+            android:layout_width="50dp"
+            android:layout_height="match_parent">
+
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_centerInParent="true"
+                android:src="@drawable/udesk_selector_survy_img" />
+        </RelativeLayout>
+
 
     </LinearLayout>
 

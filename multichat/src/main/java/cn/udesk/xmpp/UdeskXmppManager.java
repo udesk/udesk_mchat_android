@@ -2,12 +2,12 @@ package cn.udesk.xmpp;
 
 import android.os.Handler;
 import android.text.TextUtils;
+import android.util.Log;
 
 import org.greenrobot.eventbus.EventBus;
 import org.jivesoftware.smack.AbstractXMPPConnection;
 import org.jivesoftware.smack.ConnectionConfiguration;
 import org.jivesoftware.smack.ConnectionListener;
-import org.jivesoftware.smack.SASLAuthentication;
 import org.jivesoftware.smack.SmackException;
 import org.jivesoftware.smack.StanzaListener;
 import org.jivesoftware.smack.XMPPConnection;
@@ -17,7 +17,6 @@ import org.jivesoftware.smack.filter.StanzaTypeFilter;
 import org.jivesoftware.smack.packet.Message;
 import org.jivesoftware.smack.packet.Presence;
 import org.jivesoftware.smack.packet.Stanza;
-import org.jivesoftware.smack.sasl.SASLMechanism;
 import org.jivesoftware.smack.tcp.XMPPTCPConnection;
 import org.jivesoftware.smack.tcp.XMPPTCPConnectionConfiguration;
 import org.json.JSONException;
@@ -70,7 +69,6 @@ public class UdeskXmppManager implements ConnectionListener, StanzaListener {
         if (TextUtils.isEmpty(loginName) || TextUtils.isEmpty(loginPassword) || TextUtils.isEmpty(loginServer)) {
             return false;
         }
-
         if (loginName.contains("@" + loginServer)) {
             int index = loginName.indexOf("@");
             loginName = loginName.substring(0, index);
@@ -88,12 +86,13 @@ public class UdeskXmppManager implements ConnectionListener, StanzaListener {
                 }
                 if (mConfiguration == null) {
                     mConfiguration = XMPPTCPConnectionConfiguration.builder();
+                }
+                if (mConfiguration != null) {
                     mConfiguration.setUsernameAndPassword(loginName, loginPassword);
                     mConfiguration.setSecurityMode(ConnectionConfiguration.SecurityMode.disabled).setCompressionEnabled(false);
                     mConfiguration.setResource(UUID.randomUUID().toString());
                     mConfiguration.setDebuggerEnabled(UdeskLibConst.xmppDebug);
                     mConfiguration.setXmppDomain(loginServer);
-//                    mConfiguration.setServiceName(loginServer);
                     mConfiguration.setHost(loginServer);
                     mConfiguration.setPort(loginPort);
                 }
@@ -125,6 +124,7 @@ public class UdeskXmppManager implements ConnectionListener, StanzaListener {
      */
     private synchronized boolean connectXMPPServer(String name, String password) {
         try {
+
             if (xmppConnection != null) {
                 xmppConnection.connect();
                 xmppConnection.login(name, password);
@@ -134,7 +134,8 @@ public class UdeskXmppManager implements ConnectionListener, StanzaListener {
                 }
             }
         } catch (Exception e) {
-
+            Log.i("xxxxx", "Exception =");
+            e.printStackTrace();
             return false;
         }
         return true;
@@ -300,7 +301,7 @@ public class UdeskXmppManager implements ConnectionListener, StanzaListener {
      * @return
      */
     public boolean isConnection() {
-        if (xmppConnection != null && System.currentTimeMillis() - heartSpaceTime < 25000 ) {
+        if (xmppConnection != null && System.currentTimeMillis() - heartSpaceTime < 25000) {
             return (xmppConnection.isConnected() && xmppConnection.isAuthenticated());
         }
         return false;

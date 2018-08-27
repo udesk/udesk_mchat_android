@@ -10,6 +10,7 @@ import android.text.Html;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
+import android.text.SpannedString;
 import android.text.TextUtils;
 import android.text.method.LinkMovementMethod;
 import android.text.style.ClickableSpan;
@@ -31,6 +32,7 @@ import com.google.gson.Gson;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.sufficientlysecure.htmltextview.HtmlTextView;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -317,7 +319,7 @@ public class MessageAdatper extends BaseAdapter {
                     case MSG_TXT_R: {
                         TxtViewHolder holder = new TxtViewHolder();
                         initItemNormalView(convertView, holder);
-                        holder.tvMsg = (TextView) convertView.findViewById(R.id.udesk_tv_msg);
+                        holder.tvMsg = (HtmlTextView) convertView.findViewById(R.id.udesk_tv_msg);
                         if (itemType == MSG_TXT_L) {
                             UdekConfigUtil.setUITextColor(UdeskConfig.udeskIMLeftTextColorResId, holder.tvMsg);
                         } else if (itemType == MSG_TXT_R) {
@@ -377,7 +379,7 @@ public class MessageAdatper extends BaseAdapter {
                     case Udesk_Event:
                         UdeskEventViewHolder eventViewHolder = new UdeskEventViewHolder();
                         initItemNormalView(convertView, eventViewHolder);
-                        eventViewHolder.events = (TextView) convertView.findViewById(R.id.udesk_event);
+                        eventViewHolder.events = (HtmlTextView) convertView.findViewById(R.id.udesk_event);
                         convertView.setTag(eventViewHolder);
                         break;
                     case MSG_PRODUCT_R:
@@ -519,6 +521,50 @@ public class MessageAdatper extends BaseAdapter {
 
     }
 
+    private void dealRichText(TextView textView) {
+
+        try {
+
+            Linkify.addLinks(textView, WEB_URL, null);
+            Linkify.addLinks(textView, PHONE, null);
+            CharSequence text = textView.getText();
+            if (text instanceof Spannable) {
+                int end = text.length();
+                Spannable sp = (Spannable) textView.getText();
+                URLSpan[] urls = sp.getSpans(0, end, URLSpan.class);
+                SpannableStringBuilder style = new SpannableStringBuilder(text);
+                style.clearSpans();
+                for (URLSpan url : urls) {
+                    MyURLSpan myURLSpan = new MyURLSpan(url.getURL());
+                    style.setSpan(myURLSpan, sp.getSpanStart(url),
+                            sp.getSpanEnd(url),
+                            Spannable.SPAN_EXCLUSIVE_INCLUSIVE);
+                }
+                textView.setText(style);
+            } else if (text instanceof SpannedString) {
+                SpannableStringBuilder spannableStringBuilder = new SpannableStringBuilder(text);
+                URLSpan[] urls = spannableStringBuilder.getSpans(0, text.length(), URLSpan.class);
+                spannableStringBuilder.clearSpans();
+                SpannedString sp = (SpannedString) textView.getText();
+                for (URLSpan url : urls) {
+                    MyURLSpan myURLSpan = new MyURLSpan(url.getURL());
+                    int statr = sp.getSpanStart(url);
+                    int end = sp.getSpanEnd(url);
+                    spannableStringBuilder.setSpan(myURLSpan, statr,
+                            end,
+                            Spannable.SPAN_EXCLUSIVE_INCLUSIVE);
+                }
+                textView.setText(spannableStringBuilder);
+                textView.setMovementMethod(LinkMovementMethod.getInstance());
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } catch (OutOfMemoryError error) {
+            error.printStackTrace();
+        }
+    }
+
     /**
      * 展示富文本消息
      */
@@ -624,7 +670,7 @@ public class MessageAdatper extends BaseAdapter {
      * 展示文本消息
      */
     class TxtViewHolder extends BaseViewHolder {
-        public TextView tvMsg;
+        public HtmlTextView tvMsg;
 
         @Override
         void bind(Context context) {
@@ -635,7 +681,8 @@ public class MessageAdatper extends BaseAdapter {
                     tvMsg.setText(UDEmojiAdapter.replaceEmoji(context, UdeskUtil.objectToString(message.getContent()),
                             (int) tvMsg.getTextSize()));
                 } else {
-                    tvMsg.setText(UdeskUtil.objectToString(message.getContent()));
+                    tvMsg.setHtml(UdeskUtil.objectToString(message.getContent()));
+                    dealRichText(tvMsg);
                 }
 
 
@@ -901,7 +948,7 @@ public class MessageAdatper extends BaseAdapter {
 
     public class UdeskEventViewHolder extends BaseViewHolder {
 
-        public TextView events;
+        public HtmlTextView events;
 
         @Override
         void bind(Context context) {
@@ -910,7 +957,8 @@ public class MessageAdatper extends BaseAdapter {
                 if (!UdeskUtil.objectToString(message.getCreated_at()).isEmpty()) {
                     tvTime.setText("----" + UdeskUtil.parseEventTime(UdeskUtil.objectToString(message.getCreated_at())) + "----");
                 }
-                events.setText(UdeskUtil.objectToString(message.getContent()));
+                events.setHtml(UdeskUtil.objectToString(message.getContent()));
+                dealRichText(events);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -994,7 +1042,7 @@ public class MessageAdatper extends BaseAdapter {
                     jsonObject = new JSONObject(UdeskUtil.objectToString(productMessage));
                 } else if (productMessage instanceof JSONObject) {
                     jsonObject = (JSONObject) productMessage;
-                }else {
+                } else {
                     Gson gson = new Gson();
                     jsonObject = new JSONObject(gson.toJson(productMessage));
                 }

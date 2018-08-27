@@ -81,7 +81,7 @@
             android:scaleType="centerInside"
             android:visibility="gone" />
 
-        <TextView
+        <org.sufficientlysecure.htmltextview.HtmlTextView
             android:id="@+id/udesk_tv_msg"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -89,13 +89,15 @@
             android:layout_marginLeft="@dimen/udesk_chat_head_margin"
             android:layout_marginRight="6dp"
             android:layout_marginTop="@dimen/udesk_chat_head_margin"
-            android:autoLink="phone|web"
             android:background="@drawable/udesk_im_item_bg_right"
             android:gravity="center_vertical"
             android:lineSpacingExtra="3dip"
             android:textColor="@color/udesk_color_im_text_right1"
             android:textColorLink="@color/udesk_color_im_text_right1"
             android:textSize="@dimen/udesk_sp16" />
+
+
+
     </TableRow>
 
 </RelativeLayout>

@@ -58,7 +58,7 @@
 
     <string name="udesk_has_survey"> 谢谢，您已对本次服务做出过评价了!</string>
 
-    <string name="udesk_no_set_survey"> 未设置，暂时无法使用!</string>
+    <string name="udesk_no_set_survey"> 暂时无法使用!</string>
 
     <string name="udesk_survey_error"> 抱歉，暂时无法使用!</string>
     <string name="udesk_service_line"> 客服上线了</string>
@@ -90,6 +90,12 @@
     <string name="msg_type_audio">[语音]</string>
     <string name="close_conversation">删除会话</string>
     <string name="time_out">请求超时 请检查网络</string>
-
+    <string name="no_conversation">无历史对话</string>
+    <string name="udesk_statify">满意</string>
+    <string name="udesk_unstatify">不满意</string>
+    <string name="udesk_common">一般</string>
+    <string name="udesk_remark_must">* 评价备注为必填项</string>
+    <string name="summit_remark">提交评价</string>
+    <string name="summit_must_remark">评价备注必需填写</string>
 
 </resources>

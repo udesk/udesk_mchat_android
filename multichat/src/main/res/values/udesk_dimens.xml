@@ -19,17 +19,20 @@
     <dimen name="udesk_4">4dip</dimen>
     <dimen name="udesk_5">5dip</dimen>
     <dimen name="udesk_6">6dip</dimen>
+    <dimen name="udesk_7">7dip</dimen>
     <dimen name="udesk_8">8dip</dimen>
     <dimen name="udesk_10">10dip</dimen>
     <dimen name="udesk_11">11dip</dimen>
     <dimen name="udesk_12">12dip</dimen>
     <dimen name="udesk_13">13dip</dimen>
+    <dimen name="udesk_14">14dip</dimen>
     <dimen name="udesk_15">15dip</dimen>
     <dimen name="udesk_16">16dip</dimen>
     <dimen name="udesk_20">20dip</dimen>
     <dimen name="udesk_22">22dip</dimen>
     <dimen name="udesk_23">23dip</dimen>
     <dimen name="udesk_25">25dip</dimen>
+    <dimen name="udesk_28">28dip</dimen>
     <dimen name="udesk_30">30dip</dimen>
     <dimen name="udesk_32">32dip</dimen>
     <dimen name="udesk_34">34dip</dimen>
@@ -44,6 +47,7 @@
     <dimen name="udesk_70">70dip</dimen>
     <dimen name="udesk_72">72dip</dimen>
     <dimen name="udesk_80">80dip</dimen>
+    <dimen name="udesk_90">90dip</dimen>
     <dimen name="udesk_95">95dip</dimen>
     <dimen name="udesk_100">100dip</dimen>
     <dimen name="udesk_105">105dip</dimen>
@@ -57,6 +61,7 @@
     <dimen name="udesk_278">278dip</dimen>
     <dimen name="udesk_300">300dip</dimen>
 
+    <dimen name="udesk_sp10">10sp</dimen>
     <dimen name="udesk_sp12">12sp</dimen>
     <dimen name="udesk_sp14">14sp</dimen>
     <dimen name="udesk_sp15">15sp</dimen>

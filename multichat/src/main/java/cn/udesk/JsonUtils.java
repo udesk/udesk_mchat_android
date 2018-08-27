@@ -1,5 +1,7 @@
 package cn.udesk;
 
+import android.text.TextUtils;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -9,10 +11,14 @@ import java.util.List;
 
 import cn.udesk.model.InitMode;
 import cn.udesk.model.Merchant;
+import cn.udesk.model.OptionsModel;
+import cn.udesk.model.SurveyOptionsModel;
+import cn.udesk.model.Tag;
 import cn.udesk.muchat.bean.AliBean;
 import cn.udesk.muchat.bean.ExtrasInfo;
 import cn.udesk.muchat.bean.ReceiveMessage;
 import cn.udesk.model.SendMsgResult;
+import udesk.core.utils.BaseUtils;
 
 public class JsonUtils {
 
@@ -28,6 +34,10 @@ public class JsonUtils {
 
                         ReceiveMessage receiveMessage = parserReceiveMessage(jsonArray.getString(i));
                         receiveMessage.setSendFlag(UdeskConst.SendFlag.RESULT_SUCCESS);
+                        if (UdeskUtil.objectToString(receiveMessage.getCategory()).equals("event")
+                                && UdeskUtil.objectToString(receiveMessage.getContent()).equals("客服发送满意度调查")) {
+                            continue;
+                        }
                         receiveMessagess.add(receiveMessage);
                     }
                 }
@@ -48,6 +58,7 @@ public class JsonUtils {
             receiveMessage.setUuid(content.opt("uuid"));
             receiveMessage.setMerchant_id(content.opt("merchant_id"));
             receiveMessage.setCategory(content.opt("category"));
+            receiveMessage.setEvent_name(content.opt("event_name"));
             receiveMessage.setDirection(content.opt("direction"));
             receiveMessage.setContent_type(content.opt("content_type"));
             receiveMessage.setContent(content.opt("content"));
@@ -91,6 +102,9 @@ public class JsonUtils {
                 initMode.setAccess_id(ossJson.opt("access_id"));
                 initMode.setPrefix(ossJson.opt("prefix"));
             }
+//            if (initObject.has("is_open_survey")) {
+//                initMode.setIs_open_survey(initObject.opt("is_open_survey"));
+//            }
 
         } catch (JSONException e) {
             e.printStackTrace();
@@ -268,5 +282,112 @@ public class JsonUtils {
             e.printStackTrace();
         }
         return aliBean;
+    }
+
+    //解析设置的满意度调查选项
+    public static SurveyOptionsModel parseSurveyOptions(String response) {
+
+        SurveyOptionsModel optionsMode = new SurveyOptionsModel();
+        if (TextUtils.isEmpty(response)) {
+            return optionsMode;
+        }
+        try {
+            JSONObject json = new JSONObject(response);
+            JSONObject result = json.getJSONObject("im_survey");
+            if (result.has("enabled")) {
+                optionsMode.setEnabled(result.opt("enabled"));
+            }
+            if (result.has("remark_enabled")) {
+                optionsMode.setRemark_enabled(result.opt("remark_enabled"));
+            }
+            if (result.has("remark")) {
+                optionsMode.setRemark(result.opt("remark"));
+            }
+            if (result.has("name")) {
+                optionsMode.setName(result.opt("name"));
+            }
+            if (result.has("title")) {
+                optionsMode.setTitle(result.opt("title"));
+            }
+            if (result.has("desc")) {
+                optionsMode.setDesc(result.opt("desc"));
+            }
+            if (result.has("show_type")) {
+                optionsMode.setType(result.opt("show_type"));
+            }
+
+            if (result.has("methods")) {
+                JSONArray methodsArray = result.optJSONArray("methods");
+                if (methodsArray != null && methodsArray.length() > 0) {
+                    for (int i = 0; i < methodsArray.length(); i++) {
+                        JSONObject data = methodsArray.optJSONObject(i);
+                        if (data.has("flag")) {
+                            if (BaseUtils.objectToString(data.opt("flag")).equals("after_session")) {
+                                optionsMode.setAfter_session(data.opt("enabled"));
+                            }
+
+                            if (BaseUtils.objectToString(data.opt("flag")).equals("customer_invite")) {
+                                optionsMode.setCustomer_invite(data.opt("enabled"));
+                            }
+                        }
+
+                    }
+                }
+            }
+
+            JSONObject contextObject = null;
+            if (optionsMode.getType().equals("text") && result.has("text")) {
+                contextObject = result.getJSONObject("text");
+            } else if (optionsMode.getType().equals("expression") && result.has("expression")) {
+                contextObject = result.getJSONObject("expression");
+            } else if (optionsMode.getType().equals("star") && result.has("star")) {
+                contextObject = result.getJSONObject("star");
+            }
+
+            if (contextObject != null) {
+
+                if (contextObject.has("default_option_id")) {
+                    optionsMode.setDefault_option_id(contextObject.opt("default_option_id"));
+                }
+                if (contextObject.has("options")) {
+                    List<OptionsModel> options = new ArrayList<OptionsModel>();
+                    JSONArray optionsArray = contextObject.optJSONArray("options");
+                    if (optionsArray != null && optionsArray.length() > 0) {
+                        for (int i = 0; i < optionsArray.length(); i++) {
+                            JSONObject data = optionsArray.optJSONObject(i);
+                            OptionsModel optionItem = new OptionsModel();
+                            optionItem.setId(data.opt("id"));
+                            optionItem.setEnabled(data.opt("enabled"));
+                            if (!optionItem.getEnabled() && optionsMode.getType().equals("text")) {
+                                continue;
+                            }
+                            optionItem.setText(data.opt("text"));
+                            optionItem.setDesc(data.opt("desc"));
+                            optionItem.setRemark_option(data.opt("remark_option"));
+
+                            if (data.has("tags")) {
+                                List<Tag> tags = new ArrayList<Tag>();
+                                String tagStirng = UdeskUtil.objectToString(data.opt("tags"));
+                                if (!TextUtils.isEmpty(tagStirng)) {
+                                    String[] tagsArray = tagStirng.split(",");
+                                    for (int k = 0; k < tagsArray.length; k++) {
+                                        Tag tag = new Tag();
+                                        tag.setText(tagsArray[k]);
+                                        tags.add(tag);
+                                    }
+                                }
+                                optionItem.setTags(tags);
+                            }
+                            options.add(optionItem);
+                        }
+                    }
+                    optionsMode.setOptions(options);
+                }
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return optionsMode;
+
     }
 }

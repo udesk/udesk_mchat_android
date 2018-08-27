@@ -22,7 +22,15 @@ public class UdeskConst {
 
 
 
+    public static class UdeskSurvyShowType {
+        public static final int TEXT = 1;
+        public static final int EXPRESSION = 2;
+        public static final int STAR = 3;
+    }
 
+    public static final String REMARK_OPTION_HIDE = "hide";
+    public static final String REMARK_OPTION_REQUIRED = "required";
+    public static final String REMARK_OPTION_OPTIONAL = "optional";
 
     public static class SendFlag {
         public final static int RESULT_SEND = 0;// 这个是默认值 发送中

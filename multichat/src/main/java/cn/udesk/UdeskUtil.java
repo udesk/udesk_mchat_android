@@ -491,19 +491,25 @@ public class UdeskUtil {
             return "";
         }
         String string = "";
-        if (obj instanceof String) {
-            string = (String) obj;
-        }
         try {
-            string = String.valueOf(obj);
+            if (obj instanceof String) {
+                string = (String) obj;
+            } else if (obj instanceof Double) {
+                string = String.valueOf(Double.valueOf((Double) obj).intValue());
+            } else if (obj instanceof Float) {
+                string = String.valueOf(Float.valueOf((Float) obj).intValue());
+            } else {
+                string = String.valueOf(obj);
+            }
         } catch (Exception e) {
-            e.printStackTrace();
+            string = "";
         }
         if (string.equals("null")) {
             string = "";
         }
         return string;
     }
+
 
     public static boolean objectToBoolean(Object obj) {
         if (obj instanceof Boolean) {

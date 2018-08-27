@@ -106,6 +106,7 @@ public class ConversationFragment extends BaseFragment implements PullToRefreshS
             if (!UdeskSDKManager.getInstance().isConnection()) {
                 refreshData();
                 sendXmppIsDisConnect();
+                UdeskSDKManager.getInstance().connectXmpp(UdeskSDKManager.getInstance().getInitMode());
             }
         }
     };
@@ -508,11 +509,17 @@ public class ConversationFragment extends BaseFragment implements PullToRefreshS
     }
 
     @Override
-    public void onDestroyView() {
-        EventBus.getDefault().unregister(this);
+    public void onStop() {
         if (mHandler != null) {
             mHandler.removeCallbacks(myRunnable);
         }
+        super.onStop();
+    }
+
+    @Override
+    public void onDestroyView() {
+        EventBus.getDefault().unregister(this);
+
         super.onDestroyView();
     }
 }

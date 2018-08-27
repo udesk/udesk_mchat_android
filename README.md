@@ -71,8 +71,7 @@
 	//通过商户ID，咨询商户
      // merchantId  商户ID
     UdeskSDKManager.getInstance().entryChat(content, merchantId);
-  
-  //提供了历史对话商户列表，提供ConversationFragment，可根据你们app加入，参见demo。
+
 }
 ```
 
@@ -229,7 +228,7 @@ public class ProductMessage implements Serializable {
 
 
 
-### 8.离线推送
+### 9.离线推送
 ```java
 
 //App 进入后台时，开启Udesk推送
@@ -240,7 +239,7 @@ public class ProductMessage implements Serializable {
 
 ```
 
-### 9.退出断开xmpp链接
+### 10.退出断开xmpp链接
 
 ```java
 
@@ -250,7 +249,7 @@ UdeskSDKManager.getInstance().logout();
 
 ```
 
-### 10.图片上传压缩配置
+### 11.图片上传压缩配置
 
 ```java
 
@@ -263,7 +262,7 @@ UdeskSDKManager.getInstance().logout();
 
 ```
 
-### 11.混淆配置
+### 12.混淆配置
 
 ``` java
 //udesk
@@ -343,6 +342,7 @@ UdeskSDKManager.getInstance().logout();
 
  //其它
 -keep class com.tencent.bugly.** {*; } 
+-keep class org.sufficientlysecure.htmltextview.** {*; } 
 
 ```
 

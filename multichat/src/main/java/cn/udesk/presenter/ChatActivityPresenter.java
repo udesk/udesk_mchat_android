@@ -43,6 +43,7 @@ import cn.udesk.model.InitMode;
 import cn.udesk.model.Merchant;
 import cn.udesk.model.ProductMessage;
 import cn.udesk.model.SendMsgResult;
+import cn.udesk.model.SurveyOptionsModel;
 import cn.udesk.muchat.HttpCallBack;
 import cn.udesk.muchat.HttpFacade;
 import cn.udesk.muchat.UdeskLibConst;
@@ -51,6 +52,7 @@ import cn.udesk.muchat.bean.ExtrasInfo;
 import cn.udesk.muchat.bean.Products;
 import cn.udesk.muchat.bean.ReceiveMessage;
 import cn.udesk.muchat.bean.SendMessage;
+import cn.udesk.muchat.bean.SurvyOption;
 import cn.udesk.voice.AudioRecordState;
 import cn.udesk.voice.AudioRecordingAacThread;
 import cn.udesk.voice.VoiceRecord;
@@ -157,7 +159,6 @@ public class ChatActivityPresenter {
 
     //封装商品消息
     public void sendProductMessage(ProductMessage mProduct) {
-
         if (mProduct == null) {
             return;
         }
@@ -237,14 +238,18 @@ public class ChatActivityPresenter {
     //构建消息模型
     public ReceiveMessage buildSendMessage(String msgtype, String content, String locationPath) {
         ReceiveMessage msg = new ReceiveMessage();
-        msg.setContent_type(msgtype);
-        msg.setId(UdeskIdBuild.buildMsgId());
-        msg.setMerchant_euid(mChatView.getEuid());
-        msg.setDirection(UdeskConst.ChatMsgDirection.Send);
-        msg.setSendFlag(UdeskConst.SendFlag.RESULT_SEND);
-        msg.setReadFlag(UdeskConst.ChatMsgReadFlag.read);
-        msg.setContent(content);
-        msg.setLocalPath(locationPath);
+        try {
+            msg.setContent_type(msgtype);
+            msg.setId(UdeskIdBuild.buildMsgId());
+            msg.setMerchant_euid(mChatView.getEuid());
+            msg.setDirection(UdeskConst.ChatMsgDirection.Send);
+            msg.setSendFlag(UdeskConst.SendFlag.RESULT_SEND);
+            msg.setReadFlag(UdeskConst.ChatMsgReadFlag.read);
+            msg.setContent(content);
+            msg.setLocalPath(locationPath);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         return msg;
     }
 
@@ -536,85 +541,92 @@ public class ChatActivityPresenter {
 
     //获取商户详情
     public void getMerchantInfo() {
-        InitMode initMode = UdeskSDKManager.getInstance().getInitMode();
-        if (initMode != null) {
-            HttpFacade.getInstance().getMerchantsDetails(UdeskUtil.getAuthToken(UdeskUtil.objectToString(initMode.getIm_username()),
-                    UdeskUtil.objectToString(initMode.getIm_password())), mChatView.getEuid(), new HttpCallBack() {
-                @Override
-                public void onSuccess(String message) {
-                    Merchant merchant = JsonUtils.parseMerchantDetail(message);
-                    mChatView.setMerchant(merchant);
-                }
+        try {
+            InitMode initMode = UdeskSDKManager.getInstance().getInitMode();
+            if (initMode != null) {
+                HttpFacade.getInstance().getMerchantsDetails(UdeskUtil.getAuthToken(UdeskUtil.objectToString(initMode.getIm_username()),
+                        UdeskUtil.objectToString(initMode.getIm_password())), mChatView.getEuid(), new HttpCallBack() {
+                    @Override
+                    public void onSuccess(String message) {
+                        Merchant merchant = JsonUtils.parseMerchantDetail(message);
+                        mChatView.setMerchant(merchant);
+                    }
 
-                @Override
-                public void onFail(Throwable message) {
-                    if (message instanceof ConnectTimeoutException) {
+                    @Override
+                    public void onFail(Throwable message) {
+                        if (message instanceof ConnectTimeoutException) {
+                            if (UdeskLibConst.isDebug) {
+                                Log.i("udesk", "getMerchantInfo result =" + mChatView.getContext().getString(R.string.time_out));
+                            }
+                        }
+                    }
+
+                    @Override
+                    public void onSuccessFail(String message) {
                         if (UdeskLibConst.isDebug) {
-                            Log.i("udesk", "getMerchantInfo result =" + mChatView.getContext().getString(R.string.time_out));
+                            Log.i("udesk", "getMerchantInfo result =" + message);
                         }
-                    }
-                }
 
-                @Override
-                public void onSuccessFail(String message) {
-//                    {"code":"record_not_found","message":"没有找到商户"}
-                    if (UdeskLibConst.isDebug) {
-                        Log.i("udesk", "getMerchantInfo result =" + message);
-                    }
-
-                    try {
-                        JSONObject object = new JSONObject(message);
-                        String error = object.optString("message");
-                        if (!TextUtils.isEmpty(error)) {
-                            Toast.makeText(mChatView.getContext(), error, Toast.LENGTH_SHORT).show();
+                        try {
+                            JSONObject object = new JSONObject(message);
+                            String error = object.optString("message");
+                            if (!TextUtils.isEmpty(error)) {
+                                Toast.makeText(mChatView.getContext(), error, Toast.LENGTH_SHORT).show();
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
                         }
-                    } catch (JSONException e) {
-                        e.printStackTrace();
+
+
                     }
-
-
-                }
-            });
+                });
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
 
     //创建消息
     public void createMessage(final String id, final Object messa, String type, ExtrasInfo info) {
-        InitMode initMode = UdeskSDKManager.getInstance().getInitMode();
-        if (initMode != null) {
-            final SendMessage sendMessage = new SendMessage();
-            sendMessage.setContent(messa);
-            sendMessage.setContent_type(type);
-            if (info != null) {
-                sendMessage.setExtras(info);
-            }
-            HttpFacade.getInstance().createMessage(UdeskUtil.getAuthToken(UdeskUtil.objectToString(initMode.getIm_username()),
-                    UdeskUtil.objectToString(initMode.getIm_password())), mChatView.getEuid(), sendMessage, new HttpCallBack() {
-                @Override
-                public void onSuccess(String backstirng) {
-                    mChatView.checkConnect();
-                    sendMessageResult(id, UdeskConst.SendFlag.RESULT_SUCCESS, JsonUtils.getCreateTime(backstirng));
+        try {
+            InitMode initMode = UdeskSDKManager.getInstance().getInitMode();
+            if (initMode != null) {
+                final SendMessage sendMessage = new SendMessage();
+                sendMessage.setContent(messa);
+                sendMessage.setContent_type(type);
+                if (info != null) {
+                    sendMessage.setExtras(info);
                 }
+                HttpFacade.getInstance().createMessage(UdeskUtil.getAuthToken(UdeskUtil.objectToString(initMode.getIm_username()),
+                        UdeskUtil.objectToString(initMode.getIm_password())), mChatView.getEuid(), sendMessage, new HttpCallBack() {
+                    @Override
+                    public void onSuccess(String backstirng) {
+                        mChatView.checkConnect();
+                        sendMessageResult(id, UdeskConst.SendFlag.RESULT_SUCCESS, JsonUtils.getCreateTime(backstirng));
+                    }
 
-                @Override
-                public void onFail(Throwable message) {
-                    sendMessageResult(id, UdeskConst.SendFlag.RESULT_FAIL, new SendMsgResult());
-                    if (message instanceof ConnectTimeoutException) {
-                        if (UdeskLibConst.isDebug) {
-                            Log.i("udesk", "createMessage result =" + mChatView.getContext().getString(R.string.time_out));
+                    @Override
+                    public void onFail(Throwable message) {
+                        sendMessageResult(id, UdeskConst.SendFlag.RESULT_FAIL, new SendMsgResult());
+                        if (message instanceof ConnectTimeoutException) {
+                            if (UdeskLibConst.isDebug) {
+                                Log.i("udesk", "createMessage result =" + mChatView.getContext().getString(R.string.time_out));
+                            }
                         }
                     }
-                }
 
-                @Override
-                public void onSuccessFail(String message) {
-                    sendMessageResult(id, UdeskConst.SendFlag.RESULT_FAIL, new SendMsgResult());
-                    if (UdeskLibConst.isDebug) {
-                        Log.i("udesk", "createMessage result =" + message);
+                    @Override
+                    public void onSuccessFail(String message) {
+                        sendMessageResult(id, UdeskConst.SendFlag.RESULT_FAIL, new SendMsgResult());
+                        if (UdeskLibConst.isDebug) {
+                            Log.i("udesk", "createMessage result =" + message);
+                        }
                     }
-                }
-            });
+                });
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
@@ -622,62 +634,105 @@ public class ChatActivityPresenter {
      * 获取消息列表
      */
     public void getMessages(final String fromUUID) {
-        InitMode initMode = UdeskSDKManager.getInstance().getInitMode();
-        if (initMode != null) {
-            HttpFacade.getInstance().getMessages(UdeskUtil.getAuthToken(UdeskUtil.objectToString(initMode.getIm_username()),
-                    UdeskUtil.objectToString(initMode.getIm_password())), mChatView.getEuid(), fromUUID, new HttpCallBack() {
-                @Override
-                public void onSuccess(String message) {
-                    List<ReceiveMessage> messagess = JsonUtils.parserMessages(message);
-                    Collections.reverse(messagess);
-                    mChatView.addMessage(messagess, fromUUID);
+        try {
+            InitMode initMode = UdeskSDKManager.getInstance().getInitMode();
+            if (initMode != null) {
+                HttpFacade.getInstance().getMessages(UdeskUtil.getAuthToken(UdeskUtil.objectToString(initMode.getIm_username()),
+                        UdeskUtil.objectToString(initMode.getIm_password())), mChatView.getEuid(), fromUUID, new HttpCallBack() {
+                    @Override
+                    public void onSuccess(String message) {
+                        List<ReceiveMessage> messagess = JsonUtils.parserMessages(message);
+                        Collections.reverse(messagess);
+                        mChatView.addMessage(messagess, fromUUID);
 
-                }
+                        for (int i = messagess.size() - 1; i > 0; i--) {
 
-                @Override
-                public void onFail(Throwable message) {
-                    List<ReceiveMessage> messagess = new ArrayList<ReceiveMessage>();
-                    mChatView.addMessage(messagess, fromUUID);
-                    if (message instanceof ConnectTimeoutException) {
-                        if (UdeskLibConst.isDebug) {
-                            Log.i("udesk", "getMessages result =" + mChatView.getContext().getString(R.string.time_out));
+                            ReceiveMessage receiveMessage = messagess.get(i);
+                            if (UdeskUtil.objectToString(receiveMessage.getCategory()).equals("event") &&
+                                    UdeskUtil.objectToString(receiveMessage.getContent()).contains("发送满意度调查")) {
+
+                                long createtime = UdeskUtil.stringToLong(UdeskUtil.objectToString(receiveMessage.getCreated_at()));
+                                long currentTimeMillis = System.currentTimeMillis();
+                                Log.i("xxxxxx","createtime="+ createtime
+                                        +";  currentTimeMillis="+currentTimeMillis + " ;  receiveMessage= " +receiveMessage.toString());
+                                if (currentTimeMillis - createtime < 10 *1000) {
+                                    //
+                                    getHasSurvey(new IUdeskHasSurvyCallBack() {
+                                        @Override
+                                        public void hasSurvy(boolean hasSurvy) {
+
+                                            if (!hasSurvy) {
+                                                //未评价，可以发起评价
+                                                if (mChatView.getSurvyOption() != null) {
+                                                    Message messge = mChatView.getHandler().obtainMessage(
+                                                            MessageWhat.surveyNotify);
+                                                    mChatView.getHandler().sendMessage(messge);
+                                                } else {
+                                                    getIMSurveyOptions(true);
+                                                }
+                                            }
+                                        }
+                                    });
+                                }
+
+                                break;
+
+                            }
+                        }
+
+                    }
+
+                    @Override
+                    public void onFail(Throwable message) {
+                        List<ReceiveMessage> messagess = new ArrayList<ReceiveMessage>();
+                        mChatView.addMessage(messagess, fromUUID);
+                        if (message instanceof ConnectTimeoutException) {
+                            if (UdeskLibConst.isDebug) {
+                                Log.i("udesk", "getMessages result =" + mChatView.getContext().getString(R.string.time_out));
+                            }
                         }
                     }
-                }
 
-                @Override
-                public void onSuccessFail(String message) {
-                    if (UdeskLibConst.isDebug) {
-                        Log.i("udesk", "getMessages result =" + message);
+                    @Override
+                    public void onSuccessFail(String message) {
+                        if (UdeskLibConst.isDebug) {
+                            Log.i("udesk", "getMessages result =" + message);
+                        }
+                        List<ReceiveMessage> messagess = new ArrayList<ReceiveMessage>();
+                        mChatView.addMessage(messagess, fromUUID);
                     }
-                    List<ReceiveMessage> messagess = new ArrayList<ReceiveMessage>();
-                    mChatView.addMessage(messagess, fromUUID);
-                }
-            });
+                });
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
 
     }
 
     public void setMessageRead() {
-        InitMode initMode = UdeskSDKManager.getInstance().getInitMode();
-        if (initMode != null) {
-            HttpFacade.getInstance().setMessageRead(UdeskUtil.getAuthToken(UdeskUtil.objectToString(initMode.getIm_username()),
-                    UdeskUtil.objectToString(initMode.getIm_password())), mChatView.getEuid(), new HttpCallBack() {
-                @Override
-                public void onSuccess(String message) {
+        try {
+            InitMode initMode = UdeskSDKManager.getInstance().getInitMode();
+            if (initMode != null) {
+                HttpFacade.getInstance().setMessageRead(UdeskUtil.getAuthToken(UdeskUtil.objectToString(initMode.getIm_username()),
+                        UdeskUtil.objectToString(initMode.getIm_password())), mChatView.getEuid(), new HttpCallBack() {
+                    @Override
+                    public void onSuccess(String message) {
 
-                }
+                    }
 
-                @Override
-                public void onFail(Throwable message) {
+                    @Override
+                    public void onFail(Throwable message) {
 
-                }
+                    }
 
-                @Override
-                public void onSuccessFail(String message) {
+                    @Override
+                    public void onSuccessFail(String message) {
 
-                }
-            });
+                    }
+                });
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
 
     }
@@ -801,5 +856,191 @@ public class ChatActivityPresenter {
 
     }
 
+    public interface IUdeskHasSurvyCallBack {
+
+        void hasSurvy(boolean hasSurvy);
+    }
+
+    //客户主动发起满意度调查，先获取是否评价
+    public void getHasSurvey(final IUdeskHasSurvyCallBack hasSurvyCallBack) {
+        try {
+            InitMode initMode = UdeskSDKManager.getInstance().getInitMode();
+            if (initMode != null) {
+                HttpFacade.getInstance().hasSurvey(UdeskUtil.getAuthToken(UdeskUtil.objectToString(initMode.getIm_username()),
+                        UdeskUtil.objectToString(initMode.getIm_password())), mChatView.getEuid(), new HttpCallBack() {
+                    @Override
+                    public void onSuccess(String message) {
+
+                        try {
+                            JSONObject result = new JSONObject(message);
+//                            has_survey: true(已经评价过)|false(还没有评价过)
+//                                    true 的时候提示不能评价
+                            if (result.has("has_survey")) {
+//                                {"has_survey":false}
+                                if (!result.optBoolean("has_survey")) {
+                                    if (hasSurvyCallBack != null) {
+                                        hasSurvyCallBack.hasSurvy(false);
+                                    } else {
+                                        //未评价，可以发起评价
+                                        if (mChatView.getSurvyOption() != null) {
+                                            Message messge = mChatView.getHandler().obtainMessage(
+                                                    MessageWhat.surveyNotify);
+                                            mChatView.getHandler().sendMessage(messge);
+                                        } else {
+                                            getIMSurveyOptions(true);
+                                        }
+                                    }
+                                } else {
+                                    //已评价，给出提示
+                                    mChatView.setIsPermmitSurvy(true);
+                                    if (hasSurvyCallBack != null) {
+                                        hasSurvyCallBack.hasSurvy(true);
+                                    } else {
+                                        if (mChatView.getHandler() != null) {
+                                            Message messge = mChatView.getHandler().obtainMessage(
+                                                    MessageWhat.Has_Survey);
+                                            mChatView.getHandler().sendMessage(messge);
+                                        }
+                                    }
+
+                                }
+                            }
+
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            if (hasSurvyCallBack != null) {
+                                hasSurvyCallBack.hasSurvy(true);
+                            } else {
+                                //出错给提示
+                                sendSurveyerror();
+                            }
+                        }
+
+                    }
+
+                    @Override
+                    public void onFail(Throwable message) {
+                        if (hasSurvyCallBack != null) {
+                            hasSurvyCallBack.hasSurvy(true);
+                        } else {
+                            sendSurveyerror();
+                        }
+                    }
+
+                    @Override
+                    public void onSuccessFail(String message) {
+                        if (hasSurvyCallBack != null) {
+                            hasSurvyCallBack.hasSurvy(true);
+                        } else {
+                            sendSurveyerror();
+                        }
+                    }
+                });
+            } else {
+                mChatView.setIsPermmitSurvy(true);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            if (hasSurvyCallBack != null) {
+                hasSurvyCallBack.hasSurvy(true);
+            } else {
+                //出错给提示
+                sendSurveyerror();
+            }
+        }
+    }
+
+    //请求满意度调查选项的内容
+    public void getIMSurveyOptions(final boolean isSurveyNotify) {
+        InitMode initMode = UdeskSDKManager.getInstance().getInitMode();
+        try {
+            if (initMode != null) {
+                HttpFacade.getInstance().surveyConfig(UdeskUtil.getAuthToken(UdeskUtil.objectToString(initMode.getIm_username()),
+                        UdeskUtil.objectToString(initMode.getIm_password())), mChatView.getEuid(), new HttpCallBack() {
+                    @Override
+                    public void onSuccess(String message) {
+                        SurveyOptionsModel model = JsonUtils.parseSurveyOptions(message);
+                        mChatView.setSurvyOption(model);
+                        if (isSurveyNotify) {
+                            Message messge = mChatView.getHandler().obtainMessage(
+                                    MessageWhat.surveyNotify);
+                            mChatView.getHandler().sendMessage(messge);
+                        }
+
+                    }
+
+                    @Override
+                    public void onFail(Throwable message) {
+                        if (isSurveyNotify) {
+                            sendSurveyerror();
+                        }
+                    }
+
+                    @Override
+                    public void onSuccessFail(String message) {
+                        if (isSurveyNotify) {
+                            sendSurveyerror();
+                        }
+                    }
+                });
+            } else {
+                if (isSurveyNotify) {
+                    sendSurveyerror();
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            if (isSurveyNotify) {
+                sendSurveyerror();
+            }
+        }
+
+
+    }
+
+    public void putIMSurveyResult(SurvyOption survyOption) {
+        try {
+            InitMode initMode = UdeskSDKManager.getInstance().getInitMode();
+            if (initMode != null) {
+                HttpFacade.getInstance().voteSurvey(UdeskUtil.getAuthToken(UdeskUtil.objectToString(initMode.getIm_username()),
+                        UdeskUtil.objectToString(initMode.getIm_password())), mChatView.getEuid(), survyOption, new HttpCallBack() {
+                            @Override
+                            public void onSuccess(String string) {
+
+                                Message message = mChatView.getHandler().obtainMessage(
+                                        MessageWhat.Survey_Success);
+                                mChatView.getHandler().sendMessage(message);
+                            }
+
+                            @Override
+                            public void onFail(Throwable message) {
+                                sendSurveyerror();
+                            }
+
+                            @Override
+                            public void onSuccessFail(String message) {
+                                sendSurveyerror();
+                            }
+                        }
+                );
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    //提交满意度调查出错
+    private void sendSurveyerror() {
+        try {
+            if (mChatView.getHandler() != null) {
+                Message message = mChatView.getHandler().obtainMessage(
+                        MessageWhat.Survey_error);
+                mChatView.getHandler().sendMessage(message);
+                mChatView.setIsPermmitSurvy(true);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
 }

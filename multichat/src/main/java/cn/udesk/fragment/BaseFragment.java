@@ -8,8 +8,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import cn.udesk.activity.UdeskChatActivity;
-
 
 /**
  * Created by user_img on 2017/9/11.

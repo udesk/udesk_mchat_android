@@ -22,11 +22,13 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
 import android.view.View.OnTouchListener;
+import android.view.WindowManager;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
@@ -36,6 +38,7 @@ import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -61,8 +64,10 @@ import cn.udesk.config.UdekConfigUtil;
 import cn.udesk.config.UdeskConfig;
 import cn.udesk.model.Merchant;
 import cn.udesk.model.SendMsgResult;
+import cn.udesk.model.SurveyOptionsModel;
 import cn.udesk.muchat.bean.Products;
 import cn.udesk.muchat.bean.ReceiveMessage;
+import cn.udesk.muchat.bean.SurvyOption;
 import cn.udesk.permission.RequestCode;
 import cn.udesk.permission.XPermissionUtils;
 import cn.udesk.presenter.ChatActivityPresenter;
@@ -76,6 +81,7 @@ import cn.udesk.widget.HorVoiceView;
 import cn.udesk.widget.UDPullGetMoreListView;
 import cn.udesk.widget.UdeskMultiMenuHorizontalWindow;
 import cn.udesk.widget.UdeskMultiMenuHorizontalWindow.OnPopMultiMenuClick;
+import cn.udesk.widget.UdeskSurvyPopwindow;
 import cn.udesk.widget.UdeskTitleBar;
 import udesk.core.utils.UdeskUtils;
 
@@ -91,7 +97,7 @@ public class UdeskChatActivity extends AppCompatActivity implements IChatActivit
     private HorVoiceView mHorVoiceView;
     private TextView udesk_audio_tips;
     private View emojisPannel;
-    private View btnPhoto, btnCamera;
+    private View btnPhoto, btnCamera, btnSurvy;
     private View showVoiceImg;
     private View audioPanel;
     private View audioCancle;
@@ -117,6 +123,7 @@ public class UdeskChatActivity extends AppCompatActivity implements IChatActivit
     private ChatActivityPresenter mPresenter;
     private BroadcastReceiver mConnectivityChangedReceiver = null;
     private boolean hasAddCommodity = false;
+    private boolean hasAutoProduct = false;
 
     //咨询对象
     public View commodity_rl;
@@ -128,7 +135,10 @@ public class UdeskChatActivity extends AppCompatActivity implements IChatActivit
     private boolean isDestroyed = false;
     private long QUEUE_RETEY_TIME = 5 * 1000;
 
-    private LinearLayout  addNavigationFragmentView;
+    private LinearLayout addNavigationFragmentView;
+
+    //满意度配置
+    SurveyOptionsModel surveyOptionsModel;
 
     public static class MessageWhat {
 
@@ -141,6 +151,10 @@ public class UdeskChatActivity extends AppCompatActivity implements IChatActivit
         public static final int UPDATE_VOCIE_STATUS = 7;
         public static final int recordllegal = 8;
         public static final int Xmpp_is_disConent = 9;
+        public static final int Survey_error = 10;
+        public static final int Has_Survey = 11;
+        public static final int surveyNotify = 12;
+        public static final int Survey_Success = 13;
 
     }
 
@@ -194,7 +208,15 @@ public class UdeskChatActivity extends AppCompatActivity implements IChatActivit
                                 activity.hasAddCommodity = true;
                                 activity.showCommityThunbnail(UdeskSDKManager.getInstance().getProducts());
                                 activity.mPresenter.sendCommodity(UdeskSDKManager.getInstance().getProducts());
-                                activity.mPresenter.sendProductMessage(UdeskSDKManager.getInstance().getProductMessage());
+                            }
+                            if (UdeskSDKManager.getInstance().getProductMessage() != null && !activity.hasAutoProduct) {
+                                activity.hasAutoProduct = true;
+                                this.postDelayed(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        activity.mPresenter.sendProductMessage(UdeskSDKManager.getInstance().getProductMessage());
+                                    }
+                                }, 1500);
                             }
                             if (messages != null) {
                                 int index = messages.size();
@@ -236,6 +258,25 @@ public class UdeskChatActivity extends AppCompatActivity implements IChatActivit
                     case MessageWhat.Xmpp_is_disConent:
                         this.postDelayed(activity.myRunnable, activity.QUEUE_RETEY_TIME);
                         break;
+                    case MessageWhat.Survey_error:
+                        UdeskUtils.showToast(activity, activity.getResources()
+                                .getString(R.string.udesk_survey_error));
+                        break;
+                    case MessageWhat.Has_Survey:
+                        UdeskUtils.showToast(activity, activity.getResources()
+                                .getString(R.string.udesk_has_survey));
+                        break;
+                    case MessageWhat.surveyNotify:
+                        if (activity.surveyOptionsModel != null) {
+                            activity.toLuanchSurveyView(activity.surveyOptionsModel);
+                        } else if (activity.mPresenter != null) {
+                            activity.mPresenter.getIMSurveyOptions(true);
+                        }
+                        break;
+                    case MessageWhat.Survey_Success:
+                        UdeskUtils.showToast(activity, activity.getResources()
+                                .getString(R.string.udesk_thanks_survy));
+                        break;
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -260,6 +301,7 @@ public class UdeskChatActivity extends AppCompatActivity implements IChatActivit
             mPresenter.getMessages("");
             mPresenter.getMerchantInfo();
             mPresenter.setMessageRead();
+            mPresenter.getIMSurveyOptions(false);
             UdeskSDKManager.getInstance().setCustomerOffline(true);
         } catch (Exception e) {
             e.printStackTrace();
@@ -384,6 +426,10 @@ public class UdeskChatActivity extends AppCompatActivity implements IChatActivit
             } else {
                 btnPhoto.setVisibility(View.GONE);
             }
+            btnSurvy = findViewById(R.id.udesk_bottom_option_survy);
+            btnSurvy.setOnClickListener(this);
+            btnSurvy.setVisibility(View.GONE);
+
             mListView = (UDPullGetMoreListView) findViewById(R.id.udesk_conversation);
             showVoiceImg = findViewById(R.id.udesk_bottom_voice_rl);
             showVoiceImg.setOnClickListener(this);
@@ -410,16 +456,16 @@ public class UdeskChatActivity extends AppCompatActivity implements IChatActivit
             });
 
             addNavigationFragmentView = findViewById(R.id.navigation_fragment_view);
-            if (UdeskConfig.isUseNavigationView){
+            if (UdeskConfig.isUseNavigationView) {
                 addNavigationFragmentView.setVisibility(View.VISIBLE);
-            }else {
+            } else {
                 addNavigationFragmentView.setVisibility(View.GONE);
             }
 
             if (UdeskSDKManager.getInstance().getNavigationModes() != null
                     && UdeskSDKManager.getInstance().getNavigationModes().size() > 0) {
                 addNavigationFragment();
-            }else {
+            } else {
                 addNavigationFragmentView.setVisibility(View.GONE);
             }
 
@@ -494,10 +540,10 @@ public class UdeskChatActivity extends AppCompatActivity implements IChatActivit
                     mPresenter.getMessages("");
                 }
                 sendXmppIsDisConnect();
+                UdeskSDKManager.getInstance().connectXmpp(UdeskSDKManager.getInstance().getInitMode());
             }
         }
     };
-
 
 
     @Override
@@ -616,6 +662,8 @@ public class UdeskChatActivity extends AppCompatActivity implements IChatActivit
                                 }
                             });
                 }
+            } else if (R.id.udesk_bottom_option_survy == v.getId()) {
+                clickSurvy();
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -1413,12 +1461,6 @@ public class UdeskChatActivity extends AppCompatActivity implements IChatActivit
         finishAcitivty();
     }
 
-
-    private void finishAcitivty() {
-        finish();
-    }
-
-
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         try {
@@ -1437,6 +1479,11 @@ public class UdeskChatActivity extends AppCompatActivity implements IChatActivit
                 mChatAdapter.addItem(msgInfo);
                 mListView.smoothScrollToPosition(mChatAdapter.getCount());
             }
+            if (msgInfo.getEvent_name().equals("invite_survey")) {
+                Message messge = getHandler().obtainMessage(
+                        MessageWhat.surveyNotify);
+                getHandler().sendMessage(messge);
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -1453,6 +1500,141 @@ public class UdeskChatActivity extends AppCompatActivity implements IChatActivit
             cleanSource();
         }
 
+    }
+
+    private boolean isPermmitSurvy = true;
+
+    //点击评价入口
+    private void clickSurvy() {
+
+        if (mPresenter != null && !TextUtils.isEmpty(euid) && isPermmitSurvy && merchant != null) {
+            setIsPermmitSurvy(false);
+            mPresenter.getHasSurvey(null);
+        } else {
+            Toast.makeText(UdeskChatActivity.this,
+                    getResources().getString(R.string.udesk_survey_error),
+                    Toast.LENGTH_SHORT).show();
+        }
+    }
+
+
+    @Override
+    public void setIsPermmitSurvy(boolean isPermmit) {
+        try {
+            isPermmitSurvy = isPermmit;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void setSurvyOption(SurveyOptionsModel model) {
+        this.surveyOptionsModel = model;
+        if (surveyOptionsModel.getEnabled() && surveyOptionsModel.getCustomer_invite()) {
+            btnSurvy.setVisibility(View.VISIBLE);
+        } else {
+            btnSurvy.setVisibility(View.GONE);
+        }
+    }
+
+    @Override
+    public SurveyOptionsModel getSurvyOption() {
+        return this.surveyOptionsModel;
+    }
+
+    //启动满意度调查
+    private void toLuanchSurveyView(SurveyOptionsModel surveyOptions) {
+        try {
+            setIsPermmitSurvy(true);
+            if (surveyOptions.getOptions() == null || surveyOptions.getOptions().isEmpty()
+                    || surveyOptions.getType().isEmpty()) {
+                UdeskUtils.showToast(this,
+                        getString(R.string.udesk_no_set_survey));
+                return;
+            }
+            showSurveyPopWindow(surveyOptions);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    WindowManager.LayoutParams params;
+    UdeskSurvyPopwindow udeskSurvyPopwindow;
+
+    private void showSurveyPopWindow(final SurveyOptionsModel surveyOptions) {
+
+        if (udeskSurvyPopwindow != null && udeskSurvyPopwindow.isShowing()) {
+            return;
+        }
+        udeskSurvyPopwindow = new UdeskSurvyPopwindow(this, surveyOptions, new UdeskSurvyPopwindow.SumbitSurvyCallBack() {
+
+            @Override
+            public void sumbitSurvyCallBack(String optionId, String show_type, String survey_remark, String tags) {
+                SurvyOption.VoteSurvy voteSurvy = new SurvyOption.VoteSurvy();
+                voteSurvy.setOption_id(optionId);
+                voteSurvy.setType(show_type);
+                if (!TextUtils.isEmpty(survey_remark)) {
+                    voteSurvy.setSurvey_remark(survey_remark);
+                }
+                if (!TextUtils.isEmpty(tags)) {
+                    voteSurvy.setTags(tags);
+                }
+                SurvyOption survyOption = new SurvyOption(voteSurvy);
+                mPresenter.putIMSurveyResult(survyOption);
+            }
+        });
+        udeskSurvyPopwindow.showAtLocation(findViewById(R.id.udesk_im_content), Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL, 0, 0);
+        params = getWindow().getAttributes();
+        params.alpha = 0.7f;
+        getWindow().setAttributes(params);
+        udeskSurvyPopwindow.setOnDismissListener(new PopupWindow.OnDismissListener() {
+            @Override
+            public void onDismiss() {
+                params = getWindow().getAttributes();
+                params.alpha = 1f;
+                getWindow().setAttributes(params);
+            }
+        });
+    }
+
+
+    private void finishAcitivty() {
+        //后台勾选开启后，对于同一个对话，用户多次进入，点击返回离开，若没有进行过满意度调查，
+        // 则返回点击后均弹出满意度调查窗口，若已经有满意度调查结果，则返回不再发起调查都关闭.
+
+        if (surveyOptionsModel == null || !surveyOptionsModel.isAfter_session()) {
+            finish();
+            return;
+        }
+        surveyOptionsModel.setAfter_session(false);
+        try {
+
+            if (mPresenter != null && !TextUtils.isEmpty(euid) && isPermmitSurvy && merchant != null) {
+                mPresenter.getHasSurvey(new ChatActivityPresenter.IUdeskHasSurvyCallBack() {
+                    @Override
+                    public void hasSurvy(boolean hasSurvy) {
+
+                        if (hasSurvy) {
+                            finish();
+                        } else {
+                            //未评价，可以发起评价
+                            if (getSurvyOption() != null) {
+                                Message messge = getHandler().obtainMessage(
+                                        MessageWhat.surveyNotify);
+                                getHandler().sendMessage(messge);
+                            } else {
+                                finish();
+                            }
+                        }
+                    }
+                });
+            } else {
+                finish();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            finish();
+        }
     }
 
 

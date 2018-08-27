@@ -101,7 +101,12 @@
     <color name="list_item_nomal">#fcfcfc</color>
     <color name="list_item_pressed">#f1f1f1</color>
     <color name="color_333333">#333333</color>
+    <color name="color_cd3f31">#cd3f31</color>
+    <color name="color_cccccc">#cccccc</color>
     <color name="color_d8d8d8">#D8D8D8</color>
     <color name="color_1850cc">#1850CC</color>
+    <color name="udesk_color_666666">#666666</color>
+    <color name="udesk_color_2d93fa">#2D93FA</color>
+
 
 </resources>
