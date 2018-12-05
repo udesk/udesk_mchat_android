@@ -266,7 +266,9 @@ public class UdeskSDKManager {
 
 
     public synchronized void connectXmpp(InitMode initMode) {
-
+        if (initMode == null) {
+            return;
+        }
         connection(UdeskUtil.objectToString(initMode.getIm_username()),
                 UdeskUtil.objectToString(initMode.getIm_password()),
                 UdeskUtil.objectToString(initMode.getTcp_server()),
