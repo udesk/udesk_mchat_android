@@ -19,8 +19,11 @@ public class InitActivity extends Activity implements View.OnClickListener {
     private final static String TAG = InitActivity.class.getSimpleName();
 
 
-    String uuid = "63922389-ae73-4368-a610-8da6b0c7796b";
-    String key = "2819bef099b158d46c6a71903ad7c963";
+//    String uuid = "c6042aa7-a1b2-4594-aed8-bf15b547627f";
+//    String key = "240858ffb00b1c814259a6569393bf4e";
+     String uuid = "b1ce357b-8ce8-4ea1-9a87-7d15519dd7e6";
+    String key = "27aa6696cba45cc091ee66fbc25aedab";
+
     private EditText uuidEdit, udesk_sign;
     private Button udesk_next;
     private UdeskLodingDialog lodingDialog;
@@ -50,10 +53,12 @@ public class InitActivity extends Activity implements View.OnClickListener {
     }
 
     private void testSign() {
+        uuid = uuidEdit.getText().toString();
+        key = udesk_sign.getText().toString();
         String time = getSecondTimestamp(new Date());
-        String password = uuidEdit.getText().toString() + udesk_sign.getText().toString() + time;
+        String password = uuid + key + time;
         String sign = DigestUtils.shaHex(password);
-        UdeskSDKManager.getInstance().init(InitActivity.this, uuidEdit.getText().toString(), sign, time);
+        UdeskSDKManager.getInstance().init(InitActivity.this, uuid, sign, time);
     }
 
 

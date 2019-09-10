@@ -8,8 +8,8 @@ repositories{
 }
 
 android {
-    compileSdkVersion 26
-    buildToolsVersion '27.0.3'
+    compileSdkVersion 28
+    buildToolsVersion '28.0.3'
     defaultConfig {
         applicationId "cn.udesk.multimerchant"
         minSdkVersion 14
@@ -37,9 +37,9 @@ android {
 }
 
 dependencies {
-    compile project(':multichat')
-    compile files('libs/jcore-android-1.1.7.jar')
-    compile files('libs/jpush-android-3.0.9.jar')
-    compile files('libs/commons-codec-1.3.jar')
-    compile 'com.android.support:multidex:1.0.0'
+    implementation project(':multichat')
+    implementation files('libs/jcore-android-1.1.7.jar')
+    implementation files('libs/jpush-android-3.0.9.jar')
+    implementation files('libs/commons-codec-1.3.jar')
+    implementation 'com.android.support:multidex:1.0.3'
 }

@@ -37,7 +37,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
         startBtn.setOnClickListener(this);
         //设置咨询对象
         createProducts();
-        UdeskSDKManager.getInstance().setProductMessage(createProduct());
+//        UdeskSDKManager.getInstance().setProductMessage(createProduct());
 
     }
 

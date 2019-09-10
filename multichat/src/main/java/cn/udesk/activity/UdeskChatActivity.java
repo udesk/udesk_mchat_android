@@ -124,7 +124,6 @@ public class UdeskChatActivity extends AppCompatActivity implements IChatActivit
     private BroadcastReceiver mConnectivityChangedReceiver = null;
     private boolean hasAddCommodity = false;
     private boolean hasAutoProduct = false;
-
     //咨询对象
     public View commodity_rl;
     public ImageView commityThumbnail;
@@ -209,6 +208,7 @@ public class UdeskChatActivity extends AppCompatActivity implements IChatActivit
                                 activity.showCommityThunbnail(UdeskSDKManager.getInstance().getProducts());
                                 activity.mPresenter.sendCommodity(UdeskSDKManager.getInstance().getProducts());
                             }
+
                             if (UdeskSDKManager.getInstance().getProductMessage() != null && !activity.hasAutoProduct) {
                                 activity.hasAutoProduct = true;
                                 this.postDelayed(new Runnable() {
@@ -218,6 +218,7 @@ public class UdeskChatActivity extends AppCompatActivity implements IChatActivit
                                     }
                                 }, 1500);
                             }
+
                             if (messages != null) {
                                 int index = messages.size();
                                 if (arg1 > 0) {
@@ -1566,6 +1567,7 @@ public class UdeskChatActivity extends AppCompatActivity implements IChatActivit
         if (udeskSurvyPopwindow != null && udeskSurvyPopwindow.isShowing()) {
             return;
         }
+
         udeskSurvyPopwindow = new UdeskSurvyPopwindow(this, surveyOptions, new UdeskSurvyPopwindow.SumbitSurvyCallBack() {
 
             @Override
@@ -1606,6 +1608,7 @@ public class UdeskChatActivity extends AppCompatActivity implements IChatActivit
             finish();
             return;
         }
+
         surveyOptionsModel.setAfter_session(false);
         try {
 

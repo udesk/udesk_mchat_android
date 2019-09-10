@@ -1,5 +1,6 @@
 package cn.udesk;
 
+import android.content.Context;
 import android.text.TextUtils;
 
 import org.json.JSONArray;
@@ -12,17 +13,17 @@ import java.util.List;
 import cn.udesk.model.InitMode;
 import cn.udesk.model.Merchant;
 import cn.udesk.model.OptionsModel;
+import cn.udesk.model.SendMsgResult;
 import cn.udesk.model.SurveyOptionsModel;
 import cn.udesk.model.Tag;
 import cn.udesk.muchat.bean.AliBean;
 import cn.udesk.muchat.bean.ExtrasInfo;
 import cn.udesk.muchat.bean.ReceiveMessage;
-import cn.udesk.model.SendMsgResult;
 import udesk.core.utils.BaseUtils;
 
 public class JsonUtils {
 
-    public static List<ReceiveMessage> parserMessages(String receives) {
+    public static List<ReceiveMessage> parserMessages(Context mContext,String receives) {
 
         List<ReceiveMessage> receiveMessagess = new ArrayList<>();
         try {
@@ -37,6 +38,10 @@ public class JsonUtils {
                         if (UdeskUtil.objectToString(receiveMessage.getCategory()).equals("event")
                                 && UdeskUtil.objectToString(receiveMessage.getContent()).equals("客服发送满意度调查")) {
                             continue;
+                        }
+                        if (TextUtils.equals(receiveMessage.getSend_status(),"rollback")){
+                            receiveMessage.setCategory(UdeskConst.ChatMsgTypeString.TYPE_EVENT);
+                            receiveMessage.setContent(mContext.getString(R.string.udesk_rollback_tips));
                         }
                         receiveMessagess.add(receiveMessage);
                     }
@@ -67,6 +72,7 @@ public class JsonUtils {
             receiveMessage.setRead_at(content.opt("read_at"));
             receiveMessage.setFailed_at(content.opt("failed_at"));
             receiveMessage.setMerchant_euid(content.opt("merchant_euid"));
+            receiveMessage.setSend_status(content.opt("send_status"));
             if (content.has("extras")) {
                 JSONObject extrasObject = new JSONObject(content.getString("extras"));
                 ExtrasInfo info = new ExtrasInfo();
@@ -116,7 +122,7 @@ public class JsonUtils {
     /**
      * 最近商户列表
      */
-    public static List<Merchant> parseRecentMerchants(String merchantStr) {
+    public static List<Merchant> parseRecentMerchants(Context mContext,String merchantStr) {
         List<Merchant> merchantList = new ArrayList<>();
         try {
             JSONObject object = new JSONObject(merchantStr);
@@ -174,6 +180,13 @@ public class JsonUtils {
                             if (lastMsgJSONObject.has("read_at")) {
                                 message.setRead_at(lastMsgJSONObject.get("read_at"));
                             }
+                            if (lastMsgJSONObject.has("send_status")) {
+                                message.setSend_status(lastMsgJSONObject.opt("send_status"));
+                            }
+                            if (TextUtils.equals(message.getSend_status(),"rollback")){
+                                message.setCategory(UdeskConst.ChatMsgTypeString.TYPE_EVENT);
+                                message.setContent(mContext.getString(R.string.udesk_rollback_tips));
+                            }
                             merchant.setLast_message(message);
                         }
                         merchantList.add(merchant);
@@ -189,7 +202,7 @@ public class JsonUtils {
     /**
      * 获取商户详情
      */
-    public static Merchant parseMerchantDetail(String detailStr) {
+    public static Merchant parseMerchantDetail(Context mContext,String detailStr) {
         Merchant merchant = new Merchant();
         try {
             JSONObject object = new JSONObject(detailStr);
@@ -242,6 +255,13 @@ public class JsonUtils {
                     }
                     if (lastMsgJSONObject.has("read_at")) {
                         message.setRead_at(lastMsgJSONObject.get("read_at"));
+                    }
+                    if (lastMsgJSONObject.has("send_status")) {
+                        message.setSend_status(lastMsgJSONObject.opt("send_status"));
+                    }
+                    if (TextUtils.equals(message.getSend_status(),"rollback")){
+                        message.setCategory(UdeskConst.ChatMsgTypeString.TYPE_EVENT);
+                        message.setContent(mContext.getString(R.string.udesk_rollback_tips));
                     }
                     merchant.setLast_message(message);
                 }

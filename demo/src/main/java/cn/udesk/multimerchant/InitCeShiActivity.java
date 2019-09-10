@@ -21,7 +21,8 @@ import retrofit2.Response;
 
 public class InitCeShiActivity extends Activity implements View.OnClickListener {
     private final static String TAG = InitActivity.class.getSimpleName();
-    String uuid = "199b7bc4-0d04-491e-b323-0fe8bfc22169";
+    String uuid = "1ef5ac37-478e-4dee-b057-1d1394ae1d8f"; //b1
+//    String uuid = "0ad5f61a-3769-4d32-87fc-4ce562d2677a";  // t1
     private EditText uuidEdit, udesk_sign;
     private Button startBtn, udesk_next;
     private UdeskLodingDialog lodingDialog;

@@ -222,6 +222,7 @@ public class UdeskSDKManager {
             public void onSuccess(String message) {
                 initMode = JsonUtils.parserInitMessage(message);
                 if (initMode != null) {
+                    cancleXmpp();
                     connectXmpp(initMode);
                     UdeskDBManager.getInstance().addInitInfo(initMode);
                     getUnReadMessages();
@@ -266,7 +267,8 @@ public class UdeskSDKManager {
 
 
     public synchronized void connectXmpp(InitMode initMode) {
-        if (initMode == null) {
+
+        if (initMode == null){
             return;
         }
         connection(UdeskUtil.objectToString(initMode.getIm_username()),
@@ -478,7 +480,7 @@ public class UdeskSDKManager {
     /**
      * 获取历史会话商户的列表
      */
-    public void getgetMerchants(HttpCallBack httpCallBack) {
+    public void getMerchants(HttpCallBack httpCallBack) {
         if (initMode != null) {
             HttpFacade.getInstance().getMerchants(UdeskUtil.getAuthToken(UdeskUtil.objectToString(initMode.getIm_username()),
                     UdeskUtil.objectToString(initMode.getIm_password())), httpCallBack);

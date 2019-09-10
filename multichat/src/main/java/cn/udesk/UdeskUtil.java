@@ -45,6 +45,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URLEncoder;
 import java.security.MessageDigest;
 import java.text.DecimalFormat;
 import java.text.ParseException;
@@ -550,6 +551,19 @@ public class UdeskUtil {
         }
     }
 
+    public static String uRLEncoder(String urlString){
+        try {
+            urlString = URLEncoder.encode(urlString, "utf-8").
+                    replaceAll("\\+", "%20").
+                    replaceAll("%3A", ":").
+                    replaceAll("%2F", "/").
+                    replaceAll("%3F", "?").
+                    replaceAll("%26amp%3B", "&");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return urlString;
+    }
 
     //过滤掉字符串中的特殊字符
     public static String stringFilter(String str) {

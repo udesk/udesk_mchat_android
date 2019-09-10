@@ -308,13 +308,13 @@ public class ConversationFragment extends BaseFragment implements PullToRefreshS
     }
 
     private void refreshData() {
-        UdeskSDKManager.getInstance().getgetMerchants(new HttpCallBack() {
+        UdeskSDKManager.getInstance().getMerchants(new HttpCallBack() {
             @Override
             public void onSuccess(String message) {
                 if (mListView != null && mListView.getVisibility() == View.VISIBLE) {
                     mListView.stopRefresh(true);
                 }
-                List<Merchant> merchants = JsonUtils.parseRecentMerchants(message);
+                List<Merchant> merchants = JsonUtils.parseRecentMerchants(activity.getApplicationContext(),message);
                 Collections.reverse(merchants);
                 mAdapter.clearData(true);
                 mAdapter.addData(merchants, false);
@@ -448,9 +448,13 @@ public class ConversationFragment extends BaseFragment implements PullToRefreshS
             Merchant tempMerchant = null;
             for (Merchant merchant : merchants) {
                 if (merchant != null && UdeskUtil.objectToString(merchant.getEuid()).equals(receiveMessage.getMerchant_euid())) {
-
+                    if (TextUtils.equals(receiveMessage.getSend_status(),"rollback")){
+                        receiveMessage.setCategory(UdeskConst.ChatMsgTypeString.TYPE_EVENT);
+                        receiveMessage.setContent(activity.getApplicationContext().getString(R.string.udesk_rollback_tips));
+                    }else {
+                        merchant.setUnread_count(UdeskUtil.objectToInt(merchant.getUnread_count()) + 1);
+                    }
                     merchant.setLast_message(receiveMessage);
-                    merchant.setUnread_count(UdeskUtil.objectToInt(merchant.getUnread_count()) + 1);
                     tempMerchant = merchant;
                     merchants.remove(merchant);
                     break;

@@ -36,11 +36,12 @@
         android:name="cn.udesk.multimerchant.jpush.ExampleApplication"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
+        android:usesCleartextTraffic="true"
         android:theme="@style/Theme.AppCompat.NoActionBar">
 
-        <activity android:name="cn.udesk.multimerchant.InitActivity"
-            android:theme="@style/Theme_AppStartLoadTranslucent"
-            >
+        <activity
+            android:name="cn.udesk.multimerchant.InitActivity"
+            android:theme="@style/Theme_AppStartLoadTranslucent">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

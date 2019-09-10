@@ -37,7 +37,6 @@ import org.sufficientlysecure.htmltextview.HtmlTextView;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import cn.udesk.R;
 import cn.udesk.UdeskConst;
@@ -47,7 +46,6 @@ import cn.udesk.adapter.UDEmojiAdapter;
 import cn.udesk.config.UdekConfigUtil;
 import cn.udesk.config.UdeskConfig;
 import cn.udesk.model.Merchant;
-import cn.udesk.model.ProductMessage;
 import cn.udesk.model.SendMsgResult;
 import cn.udesk.muchat.bean.ExtrasInfo;
 import cn.udesk.muchat.bean.Products;
@@ -213,19 +211,21 @@ public class MessageAdatper extends BaseAdapter {
         }
         //不是撤回消息则过滤含有相同msgID的消息，如果是撤回消息则替换掉
         try {
-//            for (ReceiveMessage info : list) {
-//                if (!TextUtils.isEmpty(UdeskUtil.objectToString(message.getUuid())) &&
-//                        !TextUtils.isEmpty(UdeskUtil.objectToString(info.getUuid())) &&
-//                        UdeskUtil.objectToString(message.getUuid()).equals(UdeskUtil.objectToString(info.getUuid()))) {
-//
-//                    if (message.getSend_status().equals("rollback")) {
-//                        list.remove(info);
-//                        break;
-//                    }
-//                    return;
-//
-//                }
-//            }
+            for (ReceiveMessage info : list) {
+                if (!TextUtils.isEmpty(UdeskUtil.objectToString(message.getUuid())) &&
+                        !TextUtils.isEmpty(UdeskUtil.objectToString(info.getUuid())) &&
+                        UdeskUtil.objectToString(message.getUuid()).equals(UdeskUtil.objectToString(info.getUuid()))) {
+
+                    if (message.getSend_status().equals("rollback")) {
+                        list.remove(info);
+                        message.setCategory(UdeskConst.ChatMsgTypeString.TYPE_EVENT);
+                        message.setContent(mContext.getString(R.string.udesk_rollback_tips));
+                        break;
+                    }
+                    return;
+
+                }
+            }
             list.add(message);
             notifyDataSetChanged();
         } catch (Exception e) {
@@ -911,7 +911,7 @@ public class MessageAdatper extends BaseAdapter {
                 if (!TextUtils.isEmpty(message.getLocalPath()) && UdeskUtil.isExitFileByPath(message.getLocalPath())) {
                     UdeskUtil.loadIntoFitSize(context, message.getLocalPath(), R.drawable.udesk_defualt_failure, R.drawable.udesk_defalut_image_loading, imgView);
                 } else {
-                    UdeskUtil.loadIntoFitSize(context, UdeskUtil.objectToString(message.getContent()), R.drawable.udesk_defualt_failure, R.drawable.udesk_defalut_image_loading, imgView);
+                    UdeskUtil.loadIntoFitSize(context, UdeskUtil.uRLEncoder(UdeskUtil.objectToString(message.getContent())), R.drawable.udesk_defualt_failure, R.drawable.udesk_defalut_image_loading, imgView);
                 }
                 imgView.setOnClickListener(new OnClickListener() {
 
@@ -924,7 +924,7 @@ public class MessageAdatper extends BaseAdapter {
                         if (!TextUtils.isEmpty(message.getLocalPath())) {
                             imgUri = Uri.fromFile(new File(message.getLocalPath()));
                         } else if (!TextUtils.isEmpty(UdeskUtil.objectToString(message.getContent()))) {
-                            imgUri = Uri.parse(UdeskUtil.objectToString(message.getContent()));
+                            imgUri = Uri.parse(UdeskUtil.uRLEncoder(UdeskUtil.objectToString(message.getContent())));
                         }
                         UdeskUtil.previewPhoto(mContext, imgUri);
                     }
@@ -1049,7 +1049,7 @@ public class MessageAdatper extends BaseAdapter {
                 if (TextUtils.isEmpty(jsonObject.optString("imgUrl"))) {
                     imgView.setVisibility(View.GONE);
                 } else {
-                    UdeskUtil.loadInto(context, jsonObject.optString("imgUrl"), R.drawable.udesk_defualt_failure,
+                    UdeskUtil.loadInto(context, UdeskUtil.uRLEncoder(jsonObject.optString("imgUrl")), R.drawable.udesk_defualt_failure,
                             R.drawable.udesk_defalut_image_loading, imgView);
                 }
                 productUrl = jsonObject.optString("url");

@@ -548,7 +548,7 @@ public class ChatActivityPresenter {
                         UdeskUtil.objectToString(initMode.getIm_password())), mChatView.getEuid(), new HttpCallBack() {
                     @Override
                     public void onSuccess(String message) {
-                        Merchant merchant = JsonUtils.parseMerchantDetail(message);
+                        Merchant merchant = JsonUtils.parseMerchantDetail(mChatView.getContext().getApplicationContext(),message);
                         mChatView.setMerchant(merchant);
                     }
 
@@ -641,7 +641,7 @@ public class ChatActivityPresenter {
                         UdeskUtil.objectToString(initMode.getIm_password())), mChatView.getEuid(), fromUUID, new HttpCallBack() {
                     @Override
                     public void onSuccess(String message) {
-                        List<ReceiveMessage> messagess = JsonUtils.parserMessages(message);
+                        List<ReceiveMessage> messagess = JsonUtils.parserMessages(mChatView.getContext().getApplicationContext(),message);
                         Collections.reverse(messagess);
                         mChatView.addMessage(messagess, fromUUID);
 

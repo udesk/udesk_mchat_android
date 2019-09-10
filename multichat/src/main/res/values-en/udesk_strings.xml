@@ -67,7 +67,7 @@
 
     <string name="udesk_has_survey">Thank you, you have already done!</string>
 
-    <string name="udesk_no_set_survey">temporarily unable to use!</string>
+    <string name="udesk_no_set_survey">Not set, temporarily unable to use!</string>
     <string name="udesk_survey_error"> Sorry, temporarily unable to use!</string>
     <string name="udesk_service_line"> Customer service line</string>
     <string name="udesk_service_offline"> Customer service offline</string>
@@ -86,4 +86,5 @@
     <string name="udesk_no_sdktoken">Sdktoken is empty. Please import a valid value</string>
     <string name="udesk_close_chart">Chat end</string>
     <string name="time_out">time_out, please check net</string>
+    <string name="udesk_rollback_tips">recalled a message</string>
 </resources>
