@@ -98,4 +98,6 @@
     <string name="summit_remark">提交评价</string>
     <string name="summit_must_remark">评价备注必需填写</string>
     <string name="udesk_rollback_tips">撤回一条消息</string>
+    <string name="add_blocked_tips">抱歉，你已经被加入了黑名单</string>
+
 </resources>

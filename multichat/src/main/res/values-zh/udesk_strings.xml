@@ -83,5 +83,6 @@
     <string name="xlistview_refresh_failure">刷新失败</string>
     <string name="time_out">请求超时 请检查网络</string>
     <string name="udesk_rollback_tips">撤回一条消息</string>
+    <string name="add_blocked_tips">抱歉，你已经被加入了黑名单</string>
 
 </resources>

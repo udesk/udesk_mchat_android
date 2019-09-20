@@ -153,6 +153,17 @@ public class JsonUtils {
                         if (merchantObj.has("off_duty_tips")) {
                             merchant.setOff_duty_tips(merchantObj.get("off_duty_tips"));
                         }
+
+                        if (merchantObj.has("id")) {
+                            merchant.setId(merchantObj.get("id"));
+                        }
+                        if (merchantObj.has("contacted_at")) {
+                            merchant.setContacted_at(merchantObj.get("contacted_at"));
+                        }
+                        if (merchantObj.has("is_blocked")) {
+                            merchant.setIs_blocked(merchantObj.get("is_blocked"));
+                        }
+
                         if (merchantObj.has("last_message")) {
                             JSONObject lastMsgJSONObject = (JSONObject) merchantObj.get("last_message");
                             ReceiveMessage message = new ReceiveMessage();
@@ -229,6 +240,16 @@ public class JsonUtils {
                 if (merchantObj.has("off_duty_tips")) {
                     merchant.setOff_duty_tips(merchantObj.get("off_duty_tips"));
                 }
+                if (merchantObj.has("id")) {
+                    merchant.setId(merchantObj.get("id"));
+                }
+                if (merchantObj.has("contacted_at")) {
+                    merchant.setContacted_at(merchantObj.get("contacted_at"));
+                }
+                if (merchantObj.has("is_blocked")) {
+                    merchant.setIs_blocked(merchantObj.get("is_blocked"));
+                }
+
                 if (merchantObj.has("last_message")) {
                     JSONObject lastMsgJSONObject = (JSONObject) merchantObj.get("last_message");
                     ReceiveMessage message = new ReceiveMessage();

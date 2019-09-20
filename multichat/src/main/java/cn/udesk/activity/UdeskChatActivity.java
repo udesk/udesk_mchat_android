@@ -79,10 +79,12 @@ import cn.udesk.voice.RecordStateCallback;
 import cn.udesk.voice.RecordTouchListener;
 import cn.udesk.widget.HorVoiceView;
 import cn.udesk.widget.UDPullGetMoreListView;
+import cn.udesk.widget.UdeskConfirmPopWindow;
 import cn.udesk.widget.UdeskMultiMenuHorizontalWindow;
 import cn.udesk.widget.UdeskMultiMenuHorizontalWindow.OnPopMultiMenuClick;
 import cn.udesk.widget.UdeskSurvyPopwindow;
 import cn.udesk.widget.UdeskTitleBar;
+import udesk.core.utils.BaseUtils;
 import udesk.core.utils.UdeskUtils;
 
 public class UdeskChatActivity extends AppCompatActivity implements IChatActivityView,
@@ -138,6 +140,8 @@ public class UdeskChatActivity extends AppCompatActivity implements IChatActivit
 
     //满意度配置
     SurveyOptionsModel surveyOptionsModel;
+    private UdeskConfirmPopWindow popWindow = null;
+    private boolean isblocked;
 
     public static class MessageWhat {
 
@@ -154,6 +158,7 @@ public class UdeskChatActivity extends AppCompatActivity implements IChatActivit
         public static final int Has_Survey = 11;
         public static final int surveyNotify = 12;
         public static final int Survey_Success = 13;
+        public static final int IM_BOLACKED = 14;
 
     }
 
@@ -166,6 +171,9 @@ public class UdeskChatActivity extends AppCompatActivity implements IChatActivit
                     return;
                 boolean bNetWorkAvailabl = UdeskUtils.isNetworkConnected(context);
                 if (bNetWorkAvailabl) {
+                    if (isblocked){
+                        return;
+                    }
                     if (merchant == null && mPresenter != null) {
                         mPresenter.getMerchantInfo();
                     }
@@ -197,19 +205,21 @@ public class UdeskChatActivity extends AppCompatActivity implements IChatActivit
                 }
                 switch (msg.what) {
                     case MessageWhat.BackMerchant:
-                        activity.setTitlebar();
+                        activity.setTitlebar(activity.merchant.getName());
                         break;
                     case MessageWhat.refreshAdapter:
                         if (activity.mChatAdapter != null) {
                             List<ReceiveMessage> messages = (List<ReceiveMessage>) msg.obj;
                             int arg1 = msg.arg1;
                             if (UdeskSDKManager.getInstance().getProducts() != null && !activity.hasAddCommodity) {
-                                activity.hasAddCommodity = true;
                                 activity.showCommityThunbnail(UdeskSDKManager.getInstance().getProducts());
-                                activity.mPresenter.sendCommodity(UdeskSDKManager.getInstance().getProducts());
+                                if (!activity.isblocked){
+                                    activity.hasAddCommodity = true;
+                                    activity.mPresenter.sendCommodity(UdeskSDKManager.getInstance().getProducts());
+                                }
                             }
 
-                            if (UdeskSDKManager.getInstance().getProductMessage() != null && !activity.hasAutoProduct) {
+                            if (UdeskSDKManager.getInstance().getProductMessage() != null && !activity.hasAutoProduct && !activity.isblocked) {
                                 activity.hasAutoProduct = true;
                                 this.postDelayed(new Runnable() {
                                     @Override
@@ -278,13 +288,52 @@ public class UdeskChatActivity extends AppCompatActivity implements IChatActivit
                         UdeskUtils.showToast(activity, activity.getResources()
                                 .getString(R.string.udesk_thanks_survy));
                         break;
+                    case MessageWhat.IM_BOLACKED:
+                        activity.setTitlebar(activity.getResources().getString(R.string.add_bolcked_tips));
+                        this.postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                activity.toBlockedView();
+                            }
+                        }, 1500);
+
+                        break;
                 }
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
     }
+    //显示黑名单提示框
+    private void toBlockedView() {
+        try {
+            String positiveLabel = this.getString(R.string.udesk_sure);
+            String negativeLabel = this.getString(R.string.udesk_cancel);
+            String title = this.getString(R.string.add_bolcked_tips);
+            if (UdeskChatActivity.this.isFinishing()) {
+                return;
+            }
+            if (!popWindow.isShowing() && this.getWindow() != null
+                    && this.getWindow().getDecorView() != null && this.getWindow().getDecorView().getWindowToken() != null) {
+                popWindow.show(this, this.getWindow().getDecorView(),
+                        positiveLabel, negativeLabel, title,
+                        new UdeskConfirmPopWindow.OnPopConfirmClick() {
+                            @Override
+                            public void onPositiveClick() {
+                                finish();
+                            }
 
+                            @Override
+                            public void onNegativeClick() {
+                                popWindow.dismiss();
+                            }
+
+                        });
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -387,6 +436,10 @@ public class UdeskChatActivity extends AppCompatActivity implements IChatActivit
         commityLink.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (isblocked){
+                    toBlockedView();
+                    return;
+                }
                 sentProduct(products);
             }
         });
@@ -394,6 +447,8 @@ public class UdeskChatActivity extends AppCompatActivity implements IChatActivit
 
     private void initView() {
         try {
+            popWindow = new UdeskConfirmPopWindow(this);
+
             commodity_rl = findViewById(R.id.commodity_rl);
             commityThumbnail = (ImageView) findViewById(R.id.udesk_im_commondity_thumbnail);
             commityTitle = (TextView) findViewById(R.id.udesk_im_commondity_title);
@@ -565,6 +620,11 @@ public class UdeskChatActivity extends AppCompatActivity implements IChatActivit
     @Override
     public void onClick(View v) {
         try {
+            //检查是否处在可发消息的状态
+            if (isblocked) {
+                toBlockedView();
+                return;
+            }
             //检查是否处在可发消息的状态
             if (!isShowNotSendMsg()) {
                 UdeskUtils.hideSoftKeyboard(this, mInputEditView);
@@ -1129,9 +1189,17 @@ public class UdeskChatActivity extends AppCompatActivity implements IChatActivit
     public void setMerchant(Merchant merchant) {
         this.merchant = merchant;
         try {
-            Message backMerchant = mHandler
-                    .obtainMessage(MessageWhat.BackMerchant);
-            mHandler.sendMessage(backMerchant);
+            isblocked = BaseUtils.objectToBoolean(merchant.getIs_blocked());
+            if (isblocked){
+                isblocked = true;
+                Message blockMessage = mHandler
+                        .obtainMessage(MessageWhat.IM_BOLACKED);
+                mHandler.sendMessage(blockMessage);
+            }else {
+                Message backMerchant = mHandler
+                        .obtainMessage(MessageWhat.BackMerchant);
+                mHandler.sendMessage(backMerchant);
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -1379,12 +1447,12 @@ public class UdeskChatActivity extends AppCompatActivity implements IChatActivit
     }
 
 
-    private void setTitlebar() {
+    private void setTitlebar(Object title) {
         try {
             if (mTitlebar != null) {
                 mTitlebar.getudeskStateImg().setVisibility(View.GONE);
                 if (merchant != null) {
-                    mTitlebar.setLeftTextSequence(UdeskUtil.objectToString(merchant.getName()));
+                    mTitlebar.setLeftTextSequence(UdeskUtil.objectToString(title));
                 }
             }
         } catch (Exception e) {

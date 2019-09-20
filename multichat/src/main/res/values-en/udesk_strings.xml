@@ -87,4 +87,6 @@
     <string name="udesk_close_chart">Chat end</string>
     <string name="time_out">time_out, please check net</string>
     <string name="udesk_rollback_tips">recalled a message</string>
+    <string name="add_blocked_tips">Sorry, you are in blacklist</string>
+
 </resources>

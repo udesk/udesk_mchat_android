@@ -29,6 +29,9 @@ public class Merchant {
     private Object logo_url;
     private Object on_duty;
     private Object off_duty_tips;
+    private Object id;
+    private Object contacted_at;
+    private Object is_blocked;
 
     public Object getEuid() {
         return euid;
@@ -108,5 +111,29 @@ public class Merchant {
 
     public void setMessage(Object message) {
         this.message = message;
+    }
+
+    public Object getId() {
+        return id;
+    }
+
+    public void setId(Object id) {
+        this.id = id;
+    }
+
+    public Object getContacted_at() {
+        return contacted_at;
+    }
+
+    public void setContacted_at(Object contacted_at) {
+        this.contacted_at = contacted_at;
+    }
+
+    public Object getIs_blocked() {
+        return is_blocked;
+    }
+
+    public void setIs_blocked(Object is_blocked) {
+        this.is_blocked = is_blocked;
     }
 }
