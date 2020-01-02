@@ -295,8 +295,14 @@ UdeskSDKManager.getInstance().logout();
 -dontwarn org.xbill.**
 -keep class org.xbill.** {*;} 
 
-//retrofit2
+//JSONobject
+-keep class org.json.** {*; }
 
+//okhttp
+-keep class okhttp3.** {*;} 
+-keep class okio.** {*;} 
+
+//retrofit2
 # Platform calls Class.forName on types which do not exist on Android to determine platform.
 -dontnote retrofit2.Platform
 # Platform used when running on Java 8 VMs. Will not be used at runtime.
@@ -305,20 +311,6 @@ UdeskSDKManager.getInstance().logout();
 -keepattributes Signature
 # Retain declared checked exceptions for use by a Proxy instance.
 -keepattributes Exceptions
-
-
-
-//eventbus
--keepattributes *Annotation*
--keepclassmembers class ** {
-    @org.greenrobot.eventbus.Subscribe <methods>;
-}
--keep enum org.greenrobot.eventbus.ThreadMode { *; }
- 
-# Only required if you use AsyncExecutor
--keepclassmembers class * extends org.greenrobot.eventbus.util.ThrowableFailureEvent {
-    <init>(java.lang.Throwable);
-}
 
 //glide
 -keep public class * implements com.bumptech.glide.module.GlideModule
@@ -338,10 +330,9 @@ UdeskSDKManager.getInstance().logout();
 -dontwarn javax.annotation.**
 -dontwarn com.android.volley.toolbox.**
 -dontwarn com.facebook.infer.**
-
+-dontwarn com.bumptech.glide.**
 
  //其它
--keep class com.tencent.bugly.** {*; } 
 -keep class org.sufficientlysecure.htmltextview.** {*; } 
 
 ```

@@ -32,19 +32,38 @@
             android:screenOrientation="portrait"
             android:theme="@style/Udesk_Theme" />
 
+        >
+        <meta-data
+            android:name="cn.udesk.config.UdeskGlideModule"
+            android:value="GlideModule" />
         <provider
-            android:name="cn.udesk.provider.UdeskFileProvider"
-            android:authorities="${applicationId}.fileprovider"
+            android:name="cn.udesk.provider.UdeskExternalFileProvider"
+            android:authorities="${applicationId}.udesk_external_file_provider"
             android:exported="false"
             android:grantUriPermissions="true">
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/udesk_provider_paths" />
+                android:resource="@xml/udesk_provider_paths_external_file" />
+        </provider>
+        <provider
+            android:name="cn.udesk.provider.UdeskExternalCacheProvider"
+            android:authorities="${applicationId}.udesk_external_cache_provider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/udesk_provider_paths_external_cache" />
         </provider>
 
-        <meta-data
-            android:name="cn.udesk.config.UdeskGlideModule"
-            android:value="GlideModule" />
+        <provider
+            android:name="cn.udesk.provider.UdeskInternalFileProvider"
+            android:authorities="${applicationId}.udesk_internal_file_provider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/udesk_provider_paths_internal_file" />
+        </provider>
 
     </application>
 

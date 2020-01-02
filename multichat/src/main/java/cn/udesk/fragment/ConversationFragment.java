@@ -133,7 +133,6 @@ public class ConversationFragment extends BaseFragment implements PullToRefreshS
         }
         UdeskSDKManager.getInstance().setCustomerOffline(true);
         mHandler = new MyHandler(ConversationFragment.this);
-        UdeskSDKManager.getInstance().setCustomerOffline(true);
         mClearIv = (ImageView) rootView.findViewById(R.id.iv_clear);
         mSearchEt = (EditText) rootView.findViewById(R.id.et_search_msg);
         mSearchEt.addTextChangedListener(new TextWatcher() {

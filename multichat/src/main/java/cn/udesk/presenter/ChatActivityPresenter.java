@@ -1,20 +1,16 @@
 package cn.udesk.presenter;
 
+import android.content.Context;
+import android.content.res.AssetFileDescriptor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Message;
 import android.text.Selection;
 import android.text.Spannable;
 import android.text.TextUtils;
 import android.util.Log;
 import android.widget.Toast;
-
-import com.lzy.okgo.OkGo;
-import com.lzy.okgo.callback.Callback;
-import com.lzy.okgo.model.HttpParams;
-import com.lzy.okgo.model.Progress;
-import com.lzy.okgo.model.Response;
-import com.lzy.okgo.request.base.Request;
 
 import org.apache.http.conn.ConnectTimeoutException;
 import org.json.JSONArray;
@@ -25,7 +21,10 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -57,6 +56,15 @@ import cn.udesk.voice.AudioRecordState;
 import cn.udesk.voice.AudioRecordingAacThread;
 import cn.udesk.voice.VoiceRecord;
 import cn.udesk.xmpp.Concurrents;
+import okhttp3.Call;
+import okhttp3.MediaType;
+import okhttp3.MultipartBody;
+import okhttp3.OkHttpClient;
+import okhttp3.RequestBody;
+import okio.Buffer;
+import okio.BufferedSink;
+import okio.Okio;
+import okio.Source;
 import udesk.core.utils.UdeskIdBuild;
 import udesk.core.utils.UdeskUtils;
 
@@ -66,6 +74,7 @@ public class ChatActivityPresenter {
     private VoiceRecord mVoiceRecord = null;
     private String mRecordTmpFile = "";
     int failureCount;
+    private OkHttpClient okHttpClient;
 
     public ChatActivityPresenter(IChatActivityView chatview) {
         this.mChatView = chatview;
@@ -209,7 +218,7 @@ public class ChatActivityPresenter {
             info.setDuration(duration);
             receiveMessage.setExtras(info);
             onNewMessage(receiveMessage);
-            upLoadFile(audiopath, receiveMessage);
+            upLoadFileQ(audiopath, receiveMessage);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -225,7 +234,7 @@ public class ChatActivityPresenter {
             }
             ReceiveMessage receiveMessage = buildSendMessage(UdeskConst.ChatMsgTypeString.TYPE_IMAGE, "", photoPath);
             onNewMessage(receiveMessage);
-            upLoadFile(photoPath, receiveMessage);
+            upLoadFileQ(photoPath, receiveMessage);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -414,7 +423,7 @@ public class ChatActivityPresenter {
 
     }
 
-    private void upLoadFile(final String filePath, final ReceiveMessage receiveMessage) {
+    private void upLoadFileQ(final String filePath, final ReceiveMessage receiveMessage) {
         try {
 
             InitMode initMode = UdeskSDKManager.getInstance().getInitMode();
@@ -428,8 +437,16 @@ public class ChatActivityPresenter {
                         if (UdeskLibConst.isDebug) {
                             Log.i("udesk", "getAliInfo result =" + message);
                         }
-                        File file = new File(filePath);
-                        String fileName = file.getName();
+                        String fileName = "";
+                        String path = filePath;
+                        if (UdeskUtil.isAndroidQ()) {
+                            path = UdeskUtil.getFilePathQ(mChatView.getContext().getApplicationContext(), filePath);
+                            fileName = UdeskUtil.getFileName(mChatView.getContext(), path);
+
+                        } else {
+                            File file = new File(path);
+                            fileName = file.getName();
+                        }
                         final AliBean aliBean = JsonUtils.parseAlInfo(message);
                         final String alikey = UdeskUtil.objectToString(aliBean.getPrefix()) + "/" + fileName;
                         String endpoint = UdeskUtil.objectToString(aliBean.getEndpoint());
@@ -437,62 +454,30 @@ public class ChatActivityPresenter {
                             endpoint = "https://" + UdeskUtil.objectToString(aliBean.getBucket()) + "." + endpoint;
                         }
                         final String uploadurl = endpoint + "/" + alikey;
-                        OkGo.<String>post(endpoint).isMultipart(true).params("file", new File(filePath))
-                                .execute(new Callback<String>() {
-                                    @Override
-                                    public void onStart(Request<String, ? extends Request> request) {
 
-                                        HttpParams params = new HttpParams();
-                                        try {
-                                            params.put("OSSAccessKeyId", UdeskUtil.objectToString(aliBean.getAccess_id()));
-                                            params.put("bucket", UdeskUtil.objectToString(aliBean.getBucket()));
-                                            params.put("policy", UdeskUtil.objectToString(aliBean.getPolicy_Base64()));
-                                            params.put("Signature", UdeskUtil.objectToString(aliBean.getSignature()));
-                                            params.put("key", alikey);
-                                            params.put("expire", UdeskUtil.objectToString(aliBean.getExpire_at()));
-                                            params.put("file", new File(filePath));
-                                            request.getParams().put(params);
-                                        } catch (Exception e) {
-                                            e.printStackTrace();
-                                        }
-                                    }
+                        MultipartBody.Builder builder = new MultipartBody.Builder().setType(MultipartBody.FORM);
+                        builder.addFormDataPart("OSSAccessKeyId", UdeskUtil.objectToString(aliBean.getAccess_id()));
+                        builder.addFormDataPart("bucket", UdeskUtil.objectToString(aliBean.getBucket()));
+                        builder.addFormDataPart("policy", UdeskUtil.objectToString(aliBean.getPolicy_Base64()));
+                        builder.addFormDataPart("Signature", UdeskUtil.objectToString(aliBean.getSignature()));
+                        builder.addFormDataPart("key", alikey);
+                        builder.addFormDataPart("expire", UdeskUtil.objectToString(aliBean.getExpire_at()));
+                        addCustomRequestBody(mChatView.getContext().getApplicationContext(), builder, path, fileName);
+                        Call call = getCall(endpoint, builder);
+                        call.enqueue(new okhttp3.Callback() {
+                            @Override
+                            public void onFailure(Call call, IOException e) {
+                                Log.d("OkHttp", "onFailure=====");
+                                sendMessageResult(UdeskUtil.objectToString(receiveMessage.getId()), UdeskConst.SendFlag.RESULT_FAIL, new SendMsgResult());
+                            }
 
-                                    @Override
-                                    public void onSuccess(Response<String> response) {
-
-                                    }
-
-                                    @Override
-                                    public void onCacheSuccess(Response<String> response) {
-
-                                    }
-
-                                    @Override
-                                    public void onError(Response<String> response) {
-                                        sendMessageResult(UdeskUtil.objectToString(receiveMessage.getId()), UdeskConst.SendFlag.RESULT_FAIL, new SendMsgResult());
-                                    }
-
-                                    @Override
-                                    public void onFinish() {
-
-                                    }
-
-                                    @Override
-                                    public void uploadProgress(Progress progress) {
-
-                                    }
-
-                                    @Override
-                                    public void downloadProgress(Progress progress) {
-
-                                    }
-
-                                    @Override
-                                    public String convertResponse(okhttp3.Response response) throws Throwable {
-                                        createMessage(UdeskUtil.objectToString(receiveMessage.getId()), uploadurl, UdeskUtil.objectToString(receiveMessage.getContent_type()), receiveMessage.getExtras());
-                                        return null;
-                                    }
-                                });
+                            @Override
+                            public void onResponse(Call call, okhttp3.Response response) throws IOException {
+                                Log.d("OkHttp", "onResponse=====" + response.code());
+                                createMessage(UdeskUtil.objectToString(receiveMessage.getId()), uploadurl, UdeskUtil.objectToString(receiveMessage.getContent_type()), receiveMessage.getExtras());
+                            }
+                        });
+//
                     }
 
                     @Override
@@ -517,6 +502,84 @@ public class ChatActivityPresenter {
 
     }
 
+    private Call getCall(String url, MultipartBody.Builder builder) {
+        if (okHttpClient == null) {
+            okHttpClient = new OkHttpClient.Builder().build();
+        }
+        RequestBody requestBody = builder.build();
+        okhttp3.Request request = new okhttp3.Request.Builder()
+                .url(url)
+                .post(requestBody)
+                .build();
+        return okHttpClient.newCall(request);
+    }
+
+    private void addCustomRequestBody(Context context, MultipartBody.Builder builder, String filePath, String fileName) {
+        try {
+            builder.addFormDataPart("file", URLEncoder.encode(fileName, "UTF-8"), createCustomRequestBody(context, filePath, new ProgressListener() {
+                @Override
+                public void onProgress(long totalBytes, long remainingBytes, boolean done) {
+                }
+            }));
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public RequestBody createCustomRequestBody(Context context, String filePath, final ProgressListener listener) {
+
+        try {
+            FileInputStream fileInputStream = null;
+            long contentLength = 0;
+            if (UdeskUtil.isAndroidQ()) {
+                AssetFileDescriptor assetFileDescriptor = context.getContentResolver().openAssetFileDescriptor(Uri.parse(UdeskUtil.getFilePathQ(context, filePath)), "r");
+                if (assetFileDescriptor != null) {
+                    contentLength = assetFileDescriptor.getLength();
+                    fileInputStream = assetFileDescriptor.createInputStream();
+                }
+            } else {
+                File file = new File(filePath);
+                contentLength = file.length();
+                fileInputStream = new FileInputStream(file);
+            }
+            final FileInputStream fis = fileInputStream;
+            final long length = contentLength;
+            return new RequestBody() {
+                @Override
+                public MediaType contentType() {
+                    return MediaType.parse("application/octet-stream");
+                }
+
+                @Override
+                public long contentLength() {
+                    return length;
+                }
+
+                @Override
+                public void writeTo(BufferedSink sink) throws IOException {
+                    Source source;
+                    try {
+                        source = Okio.source(fis);
+                        Buffer buf = new Buffer();
+                        Long remaining = contentLength();
+                        for (long readCount; (readCount = source.read(buf, 2048)) != -1; ) {
+                            sink.write(buf, readCount);
+                            listener.onProgress(contentLength(), remaining -= readCount, remaining == 0);
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            };
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    interface ProgressListener {
+        void onProgress(long totalBytes, long remainingBytes, boolean done);
+    }
 
     //点击失败按钮 重试发送消息
     public void startRetryMsg(ReceiveMessage message) {
@@ -527,7 +590,7 @@ public class ChatActivityPresenter {
                     || UdeskUtil.objectToString(message.getContent_type()).equals(UdeskConst.ChatMsgTypeString.TYPE_IMAGE)) {
 
                 if (!UdeskUtil.objectToString(message.getLocalPath()).isEmpty()) {
-                    upLoadFile(UdeskUtil.objectToString(message.getLocalPath()), message);
+                    upLoadFileQ(UdeskUtil.objectToString(message.getLocalPath()), message);
 
                 }
             }
@@ -548,7 +611,7 @@ public class ChatActivityPresenter {
                         UdeskUtil.objectToString(initMode.getIm_password())), mChatView.getEuid(), new HttpCallBack() {
                     @Override
                     public void onSuccess(String message) {
-                        Merchant merchant = JsonUtils.parseMerchantDetail(mChatView.getContext().getApplicationContext(),message);
+                        Merchant merchant = JsonUtils.parseMerchantDetail(mChatView.getContext().getApplicationContext(), message);
                         mChatView.setMerchant(merchant);
                     }
 
@@ -641,7 +704,7 @@ public class ChatActivityPresenter {
                         UdeskUtil.objectToString(initMode.getIm_password())), mChatView.getEuid(), fromUUID, new HttpCallBack() {
                     @Override
                     public void onSuccess(String message) {
-                        List<ReceiveMessage> messagess = JsonUtils.parserMessages(mChatView.getContext().getApplicationContext(),message);
+                        List<ReceiveMessage> messagess = JsonUtils.parserMessages(mChatView.getContext().getApplicationContext(), message);
                         Collections.reverse(messagess);
                         mChatView.addMessage(messagess, fromUUID);
 
@@ -653,9 +716,9 @@ public class ChatActivityPresenter {
 
                                 long createtime = UdeskUtil.stringToLong(UdeskUtil.objectToString(receiveMessage.getCreated_at()));
                                 long currentTimeMillis = System.currentTimeMillis();
-                                Log.i("xxxxxx","createtime="+ createtime
-                                        +";  currentTimeMillis="+currentTimeMillis + " ;  receiveMessage= " +receiveMessage.toString());
-                                if (currentTimeMillis - createtime < 10 *1000) {
+                                Log.i("xxxxxx", "createtime=" + createtime
+                                        + ";  currentTimeMillis=" + currentTimeMillis + " ;  receiveMessage= " + receiveMessage.toString());
+                                if (currentTimeMillis - createtime < 10 * 1000) {
                                     //
                                     getHasSurvey(new IUdeskHasSurvyCallBack() {
                                         @Override
@@ -783,7 +846,7 @@ public class ChatActivityPresenter {
                          * 在不分配空间状态下计算出图片的大小
                          */
                         options.inJustDecodeBounds = true;
-                        BitmapFactory.decodeFile(path, options);
+                        UdeskUtil.decodeFileAndContent(mChatView.getContext(), path, options);
                         int width = options.outWidth;
                         int height = options.outHeight;
                         max = Math.max(width, height);
@@ -791,7 +854,15 @@ public class ChatActivityPresenter {
                         options.inJustDecodeBounds = false;
                         options.inPurgeable = true;
                         options.inPreferredConfig = Bitmap.Config.ARGB_8888;
-                        InputStream inStream = new FileInputStream(path);
+                        InputStream inStream;
+                        if (UdeskUtil.isAndroidQ()) {
+                            inStream = mChatView.getContext().getContentResolver().openInputStream(Uri.parse(UdeskUtil.getFilePathQ(mChatView.getContext(), path)));
+                        } else {
+                            inStream = new FileInputStream(path);
+                        }
+                        if (inStream == null) {
+                            return;
+                        }
                         data = readStream(inStream);
                         if (data == null || data.length <= 0) {
                             sendBitmapMessage(path);
@@ -800,6 +871,9 @@ public class ChatActivityPresenter {
                         String imageName = UdeskUtil.MD5(data);
                         File scaleImageFile = UdeskUtil.getOutputMediaFile(mChatView.getContext(), imageName
                                 + UdeskConst.ORIGINAL_SUFFIX);
+                        if (scaleImageFile == null) {
+                            return;
+                        }
                         if (!scaleImageFile.exists()) {
                             // 缩略图不存在，生成上传图
                             if (max > UdeskConfig.ScaleMax) {
@@ -823,7 +897,11 @@ public class ChatActivityPresenter {
                         if (TextUtils.isEmpty(scaleImageFile.getPath())) {
                             sendBitmapMessage(path);
                         } else {
-                            sendBitmapMessage(scaleImageFile.getPath());
+                            if (UdeskUtil.isAndroidQ()) {
+                                sendBitmapMessage(UdeskUtil.getOutputMediaFileUri(mChatView.getContext().getApplicationContext(), scaleImageFile).toString());
+                            } else {
+                                sendBitmapMessage(scaleImageFile.getPath());
+                            }
                         }
 
                     } catch (Exception e) {

@@ -17,11 +17,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.provider.MediaStore;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.FragmentTransaction;
-import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
@@ -42,6 +38,9 @@ import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.fragment.app.FragmentTransaction;
 
 import com.bumptech.glide.Glide;
 
@@ -171,7 +170,7 @@ public class UdeskChatActivity extends AppCompatActivity implements IChatActivit
                     return;
                 boolean bNetWorkAvailabl = UdeskUtils.isNetworkConnected(context);
                 if (bNetWorkAvailabl) {
-                    if (isblocked){
+                    if (isblocked) {
                         return;
                     }
                     if (merchant == null && mPresenter != null) {
@@ -213,7 +212,7 @@ public class UdeskChatActivity extends AppCompatActivity implements IChatActivit
                             int arg1 = msg.arg1;
                             if (UdeskSDKManager.getInstance().getProducts() != null && !activity.hasAddCommodity) {
                                 activity.showCommityThunbnail(UdeskSDKManager.getInstance().getProducts());
-                                if (!activity.isblocked){
+                                if (!activity.isblocked) {
                                     activity.hasAddCommodity = true;
                                     activity.mPresenter.sendCommodity(UdeskSDKManager.getInstance().getProducts());
                                 }
@@ -304,6 +303,7 @@ public class UdeskChatActivity extends AppCompatActivity implements IChatActivit
             }
         }
     }
+
     //显示黑名单提示框
     private void toBlockedView() {
         try {
@@ -334,6 +334,7 @@ public class UdeskChatActivity extends AppCompatActivity implements IChatActivit
             e.printStackTrace();
         }
     }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -436,7 +437,7 @@ public class UdeskChatActivity extends AppCompatActivity implements IChatActivit
         commityLink.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (isblocked){
+                if (isblocked) {
                     toBlockedView();
                     return;
                 }
@@ -1190,12 +1191,12 @@ public class UdeskChatActivity extends AppCompatActivity implements IChatActivit
         this.merchant = merchant;
         try {
             isblocked = BaseUtils.objectToBoolean(merchant.getIs_blocked());
-            if (isblocked){
+            if (isblocked) {
                 isblocked = true;
                 Message blockMessage = mHandler
                         .obtainMessage(MessageWhat.IM_BOLACKED);
                 mHandler.sendMessage(blockMessage);
-            }else {
+            } else {
                 Message backMerchant = mHandler
                         .obtainMessage(MessageWhat.BackMerchant);
                 mHandler.sendMessage(backMerchant);

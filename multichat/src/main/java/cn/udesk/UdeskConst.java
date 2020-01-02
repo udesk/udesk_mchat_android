@@ -21,6 +21,9 @@ public class UdeskConst {
     public static final String WELCOME_URL = "welcome_url";
 
 
+    public static final String EXTERNAL_CACHE_FOLDER = "udeskcache";
+
+
 
     public static class UdeskSurvyShowType {
         public static final int TEXT = 1;

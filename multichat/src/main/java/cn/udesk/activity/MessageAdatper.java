@@ -34,7 +34,6 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.sufficientlysecure.htmltextview.HtmlTextView;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -484,7 +483,7 @@ public class MessageAdatper extends BaseAdapter {
                 if (itemType == MSG_TXT_L
                         || itemType == MSG_AUDIO_L
                         || itemType == MSG_IMG_L
-                        ) {
+                ) {
                     ivStatus.setVisibility(View.GONE);
                 } else {
                     changeUiState(message.getSendFlag());
@@ -908,7 +907,7 @@ public class MessageAdatper extends BaseAdapter {
         @Override
         void bind(Context context) {
             try {
-                if (!TextUtils.isEmpty(message.getLocalPath()) && UdeskUtil.isExitFileByPath(message.getLocalPath())) {
+                if (!TextUtils.isEmpty(message.getLocalPath()) && UdeskUtil.isExitFileByPath(context, message.getLocalPath())) {
                     UdeskUtil.loadIntoFitSize(context, message.getLocalPath(), R.drawable.udesk_defualt_failure, R.drawable.udesk_defalut_image_loading, imgView);
                 } else {
                     UdeskUtil.loadIntoFitSize(context, UdeskUtil.uRLEncoder(UdeskUtil.objectToString(message.getContent())), R.drawable.udesk_defualt_failure, R.drawable.udesk_defalut_image_loading, imgView);
@@ -922,7 +921,8 @@ public class MessageAdatper extends BaseAdapter {
                         }
                         Uri imgUri = null;
                         if (!TextUtils.isEmpty(message.getLocalPath())) {
-                            imgUri = Uri.fromFile(new File(message.getLocalPath()));
+                            imgUri = UdeskUtil.getUriFromPath(mContext, message.getLocalPath());
+
                         } else if (!TextUtils.isEmpty(UdeskUtil.objectToString(message.getContent()))) {
                             imgUri = Uri.parse(UdeskUtil.uRLEncoder(UdeskUtil.objectToString(message.getContent())));
                         }

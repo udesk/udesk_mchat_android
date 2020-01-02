@@ -27,6 +27,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import cn.udesk.JsonUtils;
+import cn.udesk.LoaderTask;
 import cn.udesk.UdeskSDKManager;
 import cn.udesk.muchat.UdeskLibConst;
 import cn.udesk.muchat.bean.ReceiveMessage;
@@ -216,7 +217,7 @@ public class UdeskXmppManager implements ConnectionListener, StanzaListener {
         if (isConnection()) {
             return;
         }
-        new Thread(new Runnable() {
+        LoaderTask.getThreadPoolExecutor().execute(new Runnable() {
 
             @Override
             public void run() {
@@ -230,7 +231,7 @@ public class UdeskXmppManager implements ConnectionListener, StanzaListener {
 
 
             }
-        }).start();
+        });
     }
 
 

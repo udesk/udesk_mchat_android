@@ -8,13 +8,12 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.tencent.bugly.crashreport.CrashReport;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.List;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import cn.udesk.activity.UdeskChatActivity;
 import cn.udesk.callback.ICommodityCallBack;
@@ -74,6 +73,7 @@ public class UdeskSDKManager {
     public List<NavigationMode> navigationModes;
 
     private INavigationItemClickCallBack navigationItemClickCallBack;
+    private ExecutorService singleExecutor;
 
     private void ensureMessageExecutor() {
         if (scaleExecutor == null) {
@@ -84,8 +84,11 @@ public class UdeskSDKManager {
 
 
     private UdeskSDKManager() {
+        singleExecutor = Executors.newSingleThreadExecutor();
     }
-
+    public ExecutorService getSingleExecutor() {
+        return singleExecutor;
+    }
     public List<NavigationMode> getNavigationModes() {
         return navigationModes;
     }
@@ -178,7 +181,6 @@ public class UdeskSDKManager {
             PreferenceHelper.write(context, UdeskLibConst.SharePreParams.Udesk_Sharepre_Name,
                     UdeskLibConst.SharePreParams.TimeStamp, timestamp);
         }
-        initCrashReport(context);
         Cockroach.install(new Cockroach.ExceptionHandler() {
             @Override
             public void handlerException(final Thread thread, final Throwable throwable) {
@@ -302,14 +304,14 @@ public class UdeskSDKManager {
 
     public void cancleXmpp() {
         try {
-            new Thread(new Runnable() {
+            LoaderTask.getThreadPoolExecutor().execute(new Runnable() {
                 @Override
                 public void run() {
                     if (mUdeskXmppManager != null) {
                         mUdeskXmppManager.cancel();
                     }
                 }
-            }).start();
+            });
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -389,15 +391,6 @@ public class UdeskSDKManager {
     }
 
 
-    private void initCrashReport(Context context) {
-        try {
-            CrashReport.UserStrategy strategy = new CrashReport.UserStrategy(context);
-            strategy.setAppVersion(UdeskLibConst.sdkversion + UdeskUtil.getAppName(context));
-            CrashReport.initCrashReport(context, UdeskLibConst.buglyAppid, false, strategy);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
 
 
     /**
