@@ -21,7 +21,7 @@ import cn.udesk.widget.UdeskTitleBar;
  * Created by user on 2016/12/21.
  */
 
-public class UdeskBaseWebViewActivity extends Activity {
+public class UdeskBaseWebViewActivity extends UdeskBaseActivity {
 
     protected WebView mwebView;
     private LinearLayout linearLayout;

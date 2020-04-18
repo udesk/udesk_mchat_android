@@ -262,7 +262,44 @@ UdeskSDKManager.getInstance().logout();
 
 ```
 
-### 12.混淆配置
+### 12 多语言设置
+
+application 中加入 
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        LocalManageUtil.setApplicationLanguage(this);
+    }
+    @Override
+    protected void attachBaseContext(Context base) {
+        super.attachBaseContext(base);
+        LocalManageUtil.saveSystemCurrentLanguage(base);
+    }
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        //保存系统选择语言
+        LocalManageUtil.onConfigurationChanged(getApplicationContext());
+    }
+在初始化的时候设置
+
+	LocalManageUtil.saveSelectLanguage(getApplicationContext(),new Locale("en-us");
+
+传入语言对应的编码，比如
+
+	"en-us" => "英语",
+    "es" => "西班牙语",
+    "fr" => "法语",
+    "ja" => "日语",
+    "th" => "泰语",
+    "id" => "印度尼西亚语",
+    "pt" => "葡萄牙语",
+    "ru" => "俄语"，
+	"zh-CN" => “中文”
+
+
+### 13.混淆配置
 
 ``` java
 //udesk

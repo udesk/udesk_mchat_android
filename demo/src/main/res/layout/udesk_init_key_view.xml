@@ -51,13 +51,27 @@
             android:textSize="16sp" />
     </LinearLayout>
 
+    <TextView
+        android:id="@+id/set_language"
+        android:layout_width="fill_parent"
+        android:layout_height="@dimen/udesk_50"
+        android:layout_marginTop="@dimen/udesk_15"
+        android:layout_marginLeft="@dimen/udesk_25"
+        android:layout_marginRight="@dimen/udesk_25"
+        android:background="@drawable/udesk_btn_bg"
+        android:gravity="center"
+        android:textColor="#ffffffff"
+        android:textSize="16sp"
+        android:text="设置语言"
+        />
+
     <Button
         android:id="@+id/udesk_next"
         android:layout_width="fill_parent"
         android:layout_height="50dp"
         android:layout_marginLeft="25dp"
         android:layout_marginRight="25dp"
-        android:layout_marginTop="25dp"
+        android:layout_marginTop="50dp"
         android:background="@drawable/udesk_btn_bg"
         android:gravity="center"
         android:text="下一步"

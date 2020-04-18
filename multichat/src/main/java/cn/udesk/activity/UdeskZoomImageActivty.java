@@ -41,7 +41,7 @@ import cn.udesk.UdeskSDKManager;
 import cn.udesk.UdeskUtil;
 
 
-public class UdeskZoomImageActivty extends Activity implements
+public class UdeskZoomImageActivty extends UdeskBaseActivity implements
         OnClickListener {
 
     private PhotoView zoomImageView;

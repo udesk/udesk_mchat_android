@@ -86,7 +86,7 @@ import cn.udesk.widget.UdeskTitleBar;
 import udesk.core.utils.BaseUtils;
 import udesk.core.utils.UdeskUtils;
 
-public class UdeskChatActivity extends AppCompatActivity implements IChatActivityView,
+public class UdeskChatActivity extends UdeskBaseActivity implements IChatActivityView,
         OnClickListener, OnTouchListener, OnLongClickListener,
         OnItemClickListener, RecordStateCallback, HorVoiceView.UdeskTimeCallback {
 

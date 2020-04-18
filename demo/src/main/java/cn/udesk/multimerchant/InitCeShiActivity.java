@@ -11,6 +11,8 @@ import android.widget.Toast;
 
 import org.json.JSONObject;
 
+import java.util.Locale;
+
 import cn.udesk.UdeskSDKManager;
 import cn.udesk.muchat.net.SdkRetrofitClient;
 import cn.udesk.widget.UdeskLodingDialog;
@@ -18,11 +20,12 @@ import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
+import udesk.core.utils.LocalManageUtil;
 
 public class InitCeShiActivity extends Activity implements View.OnClickListener {
     private final static String TAG = InitActivity.class.getSimpleName();
-    String uuid = "1ef5ac37-478e-4dee-b057-1d1394ae1d8f"; //b1
-//    String uuid = "0ad5f61a-3769-4d32-87fc-4ce562d2677a";  // t1
+//    String uuid = "1ef5ac37-478e-4dee-b057-1d1394ae1d8f"; //b1
+    String uuid = "0ad5f61a-3769-4d32-87fc-4ce562d2677a";  // t1
     private EditText uuidEdit, udesk_sign;
     private Button startBtn, udesk_next;
     private UdeskLodingDialog lodingDialog;
@@ -38,6 +41,7 @@ public class InitCeShiActivity extends Activity implements View.OnClickListener 
         udesk_next = (Button) findViewById(R.id.udesk_next);
         startBtn.setOnClickListener(this);
         udesk_next.setOnClickListener(this);
+        findViewById(R.id.set_language).setOnClickListener(this);
     }
 
     @Override
@@ -57,6 +61,30 @@ public class InitCeShiActivity extends Activity implements View.OnClickListener 
             } else {
                 showloadingDialog("请先获取签名");
             }
+        }else if(view.getId() == R.id.set_language){
+            //请查找对应android系统的对应简写填入，不确定找应用系统的简写在接口中查找填入
+            final UdeskCustomDialog dialog = new UdeskCustomDialog(this);
+            dialog.setDialogTitle("输入语言android系统对应的简写");
+            final EditText editText = (EditText) dialog.getEditText();
+            editText.setHint("语言简写");
+            dialog.setOkTextViewOnclick(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    dialog.dismiss();
+                    if (TextUtils.isEmpty(editText.getText().toString().trim())) {
+                        Toast.makeText(getApplicationContext(), "设置语言", Toast.LENGTH_LONG).show();
+                        return;
+                    }
+                    LocalManageUtil.saveSelectLanguage(getApplicationContext(),new Locale(editText.getText().toString().trim()));
+                }
+            });
+            dialog.setCancleTextViewOnclick(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    dialog.dismiss();
+                }
+            });
+            dialog.show();
         }
     }
 

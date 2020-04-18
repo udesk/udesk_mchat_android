@@ -68,9 +68,11 @@
     <string name="udesk_has_survey">Thank you, you have already done!</string>
 
     <string name="udesk_no_set_survey">Not set, temporarily unable to use!</string>
+
     <string name="udesk_survey_error"> Sorry, temporarily unable to use!</string>
     <string name="udesk_service_line"> Customer service line</string>
     <string name="udesk_service_offline"> Customer service offline</string>
+
     <string name="udesk_upload_img_error">Failed to upload pictures, please try again</string>
     <string name="udesk_customer_leavemsg">Customer leaving a message</string>
     <string name="udesk_offline_reply_msg">Offline message reply</string>
@@ -85,7 +87,26 @@
     <string name="udesk_no_app_handle">The application could not be found to execute the file</string>
     <string name="udesk_no_sdktoken">Sdktoken is empty. Please import a valid value</string>
     <string name="udesk_close_chart">Chat end</string>
+
+    <string name="xlistview_header_hint_normal">Pull down to refresh</string>
+    <string name="xlistview_header_hint_ready">Release the refresh data</string>
+    <string name="xlistview_header_hint_loading">Refreshing&#8230;</string>
+    <string name="xlistview_footer_hint_ready">Release to load more</string>
+    <string name="xlistview_refresh_sucess">Refresh successful</string>
+    <string name="xlistview_refresh_failure">Refresh failed</string>
+
+    <string name="msg_type_image">[image]</string>
+    <string name="msg_type_audio">[audio]</string>
+    <string name="close_conversation">Delete conversation</string>
     <string name="time_out">time_out, please check net</string>
+    <string name="no_conversation">No history dialogue</string>
+    <string name="udesk_statify">satisfaction</string>
+    <string name="udesk_unstatify">Dissatisfied</string>
+    <string name="udesk_common">general</string>
+    <string name="udesk_remark_must">* remark is required</string>
+    <string name="summit_remark">Submit remark</string>
+    <string name="summit_must_remark">remark must be filled</string>
+
     <string name="udesk_rollback_tips">recalled a message</string>
     <string name="add_blocked_tips">Sorry, you are in blacklist</string>
 

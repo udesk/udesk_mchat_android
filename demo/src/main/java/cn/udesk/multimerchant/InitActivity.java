@@ -3,26 +3,30 @@ package cn.udesk.multimerchant;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import org.apache.commons.codec.digest.DigestUtils;
 
 import java.util.Date;
+import java.util.Locale;
 
 import cn.udesk.UdeskSDKManager;
 import cn.udesk.widget.UdeskLodingDialog;
+import udesk.core.utils.LocalManageUtil;
 
 public class InitActivity extends Activity implements View.OnClickListener {
 
     private final static String TAG = InitActivity.class.getSimpleName();
 
 
-//    String uuid = "c6042aa7-a1b2-4594-aed8-bf15b547627f";
-//    String key = "240858ffb00b1c814259a6569393bf4e";
-     String uuid = "b1ce357b-8ce8-4ea1-9a87-7d15519dd7e6";
-    String key = "27aa6696cba45cc091ee66fbc25aedab";
+    String uuid = "c6042aa7-a1b2-4594-aed8-bf15b547627f";
+    String key = "240858ffb00b1c814259a6569393bf4e";
+//     String uuid = "b1ce357b-8ce8-4ea1-9a87-7d15519dd7e6";
+//    String key = "27aa6696cba45cc091ee66fbc25aedab";
 
     private EditText uuidEdit, udesk_sign;
     private Button udesk_next;
@@ -39,6 +43,7 @@ public class InitActivity extends Activity implements View.OnClickListener {
         udesk_sign.setText(key);
         udesk_next = (Button) findViewById(R.id.udesk_next);
         udesk_next.setOnClickListener(this);
+        findViewById(R.id.set_language).setOnClickListener(this);
         testSign();
 
     }
@@ -49,6 +54,30 @@ public class InitActivity extends Activity implements View.OnClickListener {
             Intent intent = new Intent();
             intent.setClass(InitActivity.this, MainActivity.class);
             startActivity(intent);
+        }else if(view.getId() == R.id.set_language){
+            //请查找对应android系统的对应简写填入，不确定找应用系统的简写在接口中查找填入
+            final UdeskCustomDialog dialog = new UdeskCustomDialog(this);
+            dialog.setDialogTitle("输入语言android系统对应的简写");
+            final EditText editText = (EditText) dialog.getEditText();
+            editText.setHint("语言简写");
+            dialog.setOkTextViewOnclick(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    dialog.dismiss();
+                    if (TextUtils.isEmpty(editText.getText().toString().trim())) {
+                        Toast.makeText(getApplicationContext(), "设置语言", Toast.LENGTH_LONG).show();
+                        return;
+                    }
+                    LocalManageUtil.saveSelectLanguage(getApplicationContext(),new Locale(editText.getText().toString().trim()));
+                }
+            });
+            dialog.setCancleTextViewOnclick(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    dialog.dismiss();
+                }
+            });
+            dialog.show();
         }
     }
 

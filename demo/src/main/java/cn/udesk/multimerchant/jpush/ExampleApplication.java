@@ -3,9 +3,12 @@ package cn.udesk.multimerchant.jpush;
 import android.app.Application;
 import android.content.Context;
 import androidx.multidex.MultiDex;
+
+import android.content.res.Configuration;
 import android.util.Log;
 
 import cn.jpush.android.api.JPushInterface;
+import udesk.core.utils.LocalManageUtil;
 
 /**
  * For developer startup JPush SDK
@@ -20,7 +23,7 @@ public class ExampleApplication extends Application {
     public void onCreate() {
         Log.d(TAG, "[ExampleApplication] onCreate");
         super.onCreate();
-
+        LocalManageUtil.setApplicationLanguage(this);
         //管理activity的生命周期，用来判断处在前后台情况
         registerActivityLifecycleCallbacks(new MyLifecycleHandler());
 
@@ -32,6 +35,15 @@ public class ExampleApplication extends Application {
     @Override
     protected void attachBaseContext(Context base) {
         super.attachBaseContext(base);
+        LocalManageUtil.saveSystemCurrentLanguage(base);
         MultiDex.install(base);
     }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        //保存系统选择语言
+        LocalManageUtil.onConfigurationChanged(getApplicationContext());
+    }
+
 }

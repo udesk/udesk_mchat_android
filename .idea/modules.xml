@@ -2,9 +2,9 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/demo/demo.iml" filepath="$PROJECT_DIR$/demo/demo.iml" />
-      <module fileurl="file://$PROJECT_DIR$/multichat/multichat.iml" filepath="$PROJECT_DIR$/multichat/multichat.iml" />
-      <module fileurl="file://$PROJECT_DIR$/udesk_mchat_android.iml" filepath="$PROJECT_DIR$/udesk_mchat_android.iml" />
+      <module fileurl="file://$PROJECT_DIR$/demo/demo.iml" filepath="$PROJECT_DIR$/demo/demo.iml" group="udesk_mchat_android/demo" />
+      <module fileurl="file://$PROJECT_DIR$/multichat/multichat.iml" filepath="$PROJECT_DIR$/multichat/multichat.iml" group="udesk_mchat_android/multichat" />
+      <module fileurl="file://$PROJECT_DIR$/udesk_mchat_android.iml" filepath="$PROJECT_DIR$/udesk_mchat_android.iml" group="udesk_mchat_android" />
     </modules>
   </component>
 </project>
