@@ -1,0 +1,1 @@
+package cn.udesk.audio;import cn.udesk.muchat.bean.ReceiveMessage;import cn.udesk.voice.RecordPlayCallback;public interface RecordFilePlay {	void click(ReceiveMessage message, RecordPlayCallback callback);	 void recycleRes();	 void recycleCallback();	void toggle();	 String getMediaPath();	ReceiveMessage getPlayAduioMessage();}

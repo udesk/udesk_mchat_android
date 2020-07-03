@@ -7,10 +7,6 @@ public class UdeskConst {
      * 上传图片的后缀
      */
     public final static String ORIGINAL_SUFFIX = "_upload.jpg";
-    /**
-     * 语音的后缀
-     */
-    public final static String AUDIO_SUF = ".aac";
 
     /**
      * 录音声音大小的分段
@@ -23,8 +19,31 @@ public class UdeskConst {
 
     public static final String EXTERNAL_CACHE_FOLDER = "udeskcache";
 
+    public static final String FileImg = "image";
+    public static final String FileVideo = "video";
+    public static final String PICTURE = "picture";
+    public static final String FileAudio = "aduio";
 
+    public final static String AUDIO_SUF_WAV= ".wav";
+    //    public final static String AUDIO_SUF = ".aac";
+    public final static String IMG_SUF = ".jpg";
+    public final static String VIDEO_SUF = ".mp4";
 
+    public static final String Camera_Error = "camera_error";
+    public static final String SEND_BUNDLE = "udesk_send_bundle";
+    public static final String SEND_SMALL_VIDEO = "send_small_aideo";
+    public static final String SMALL_VIDEO = "small_video";
+    public static final String PREVIEW_Video_Path = "udeskkeyVideoPath";
+    public static final String BitMapData = "bitmap_data";
+    public static final String PREVIEW_PHOTO_IS_ALL = "udesk_preview_is_all";
+    public static final String SEND_PHOTOS = "udesk_send_photo";
+    public static final String SEND_PHOTOS_IS_ORIGIN = "udesk_send_is_origin";
+    public static final String PREVIEW_PHOTO_INDEX = "udeskkeyOfPreviewPhotoIndex";
+    public static final String IS_SEND = "udesk_is_send";
+
+    public final static String EXTERNAL_FOLDER = "udeskmchat";
+    public static final String FileEmotion = "emotion";
+    public static int count = 9;
     public static class UdeskSurvyShowType {
         public static final int TEXT = 1;
         public static final int EXPRESSION = 2;
@@ -61,6 +80,8 @@ public class UdeskConst {
         public static final int TYPE_LEAVEMSG = 6;
         public static final int TYPE_EVENT = 7;
         public static final int TYPE_PRODUCT = 8;
+        public static final int TYPE_VIDEO = 9;
+        public static final int TYPE_STRUCT = 10;
 
     }
 
@@ -77,6 +98,10 @@ public class UdeskConst {
             return ChatMsgTypeInt.TYPE_RICH;
         }else if ("product".equals(type)){
             return ChatMsgTypeInt.TYPE_PRODUCT;
+        }else if ("video".equals(type)){
+            return ChatMsgTypeInt.TYPE_VIDEO;
+        } else if ("struct".equalsIgnoreCase(type)) {
+            return ChatMsgTypeInt.TYPE_STRUCT;
         }
         return ChatMsgTypeInt.TYPE_TEXT;
     }
@@ -88,8 +113,17 @@ public class UdeskConst {
         public static final String TYPE_TEXT = "text";
         public static final String TYPE_EVENT = "event";
         public static final String TYPE_PRODUCT = "product";
+        public static final String TYPE_VIDEO = "video";
+        public static final String TYPE_STRUCT = "struct";
     }
 
+    public static class UdeskFunctionFlag {
+        public static final int Udesk_Camera = 1;
+        public static final int Udesk_Photo = 2;
+        public static final int Udesk_Survy = 3;
+        public static final int Udesk_Message_Center = 4;
+        public static final int Udesk_Video = 5;
 
+    }
 
 }

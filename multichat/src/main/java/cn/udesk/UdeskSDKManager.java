@@ -17,6 +17,7 @@ import java.util.concurrent.Executors;
 
 import cn.udesk.activity.UdeskChatActivity;
 import cn.udesk.callback.ICommodityCallBack;
+import cn.udesk.callback.IInitCallBack;
 import cn.udesk.callback.IMerchantUnreadMsgCnt;
 import cn.udesk.callback.IMessageArrived;
 import cn.udesk.callback.INavigationItemClickCallBack;
@@ -24,6 +25,7 @@ import cn.udesk.callback.IProductMessageWebonCliclk;
 import cn.udesk.callback.ItotalUnreadMsgCnt;
 import cn.udesk.config.UdeskConfig;
 import cn.udesk.db.UdeskDBManager;
+import cn.udesk.emotion.LQREmotionKit;
 import cn.udesk.model.InitMode;
 import cn.udesk.model.NavigationMode;
 import cn.udesk.model.ProductMessage;
@@ -139,7 +141,7 @@ public class UdeskSDKManager {
 
     public InitMode getInitMode() {
         if (initMode == null) {
-            initMode(customerEuid, customerName);
+            initMode(customerEuid, customerName,null);
         }
         return initMode;
     }
@@ -181,6 +183,7 @@ public class UdeskSDKManager {
             PreferenceHelper.write(context, UdeskLibConst.SharePreParams.Udesk_Sharepre_Name,
                     UdeskLibConst.SharePreParams.TimeStamp, timestamp);
         }
+        LQREmotionKit.init(context.getApplicationContext());
         Cockroach.install(new Cockroach.ExceptionHandler() {
             @Override
             public void handlerException(final Thread thread, final Throwable throwable) {
@@ -215,10 +218,10 @@ public class UdeskSDKManager {
         }
         customerEuid = customer_euid;
         customerName = customer_name;
-        initMode(customer_euid, customer_name);
+        initMode(customer_euid, customer_name,null);
     }
 
-    private void initMode(final String customer_euid, final String customer_name) {
+    private void initMode(final String customer_euid, final String customer_name, final IInitCallBack iInitCallBack) {
         HttpFacade.getInstance().init(customer_euid, customer_name, new HttpCallBack() {
             @Override
             public void onSuccess(String message) {
@@ -228,7 +231,9 @@ public class UdeskSDKManager {
                     connectXmpp(initMode);
                     UdeskDBManager.getInstance().addInitInfo(initMode);
                     getUnReadMessages();
-
+                    if (iInitCallBack != null){
+                        iInitCallBack.initSuccess(initMode);
+                    }
                 }
             }
 
@@ -243,6 +248,7 @@ public class UdeskSDKManager {
             }
         });
     }
+
 
 
     public void setCustomerOffline(boolean offline) {
@@ -330,7 +336,20 @@ public class UdeskSDKManager {
      * @param context
      * @param euid    商户的euid
      */
-    public void entryChat(Context context, String euid) {
+    public void entryChat(final Context context, final String euid) {
+        if (initMode != null) {
+            entryUdeskChat(context,euid);
+        } else {
+            initMode(customerEuid, customerName, new IInitCallBack() {
+                @Override
+                public void initSuccess(InitMode initMode) {
+                    entryUdeskChat(context,euid);
+                }
+            });
+        }
+    }
+
+    private void entryUdeskChat(Context context, String euid) {
         Intent intent = new Intent(context, UdeskChatActivity.class);
         intent.putExtra(UdeskConst.Euid, euid);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);

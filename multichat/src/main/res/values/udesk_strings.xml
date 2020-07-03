@@ -55,6 +55,7 @@
     <string name="udesk_agent_inti">客服连接中,请稍后&#8230;</string>
     <string name="udesk_agent_connecting_error_net_uavailabl">连接失败,稍后再试!</string>
 
+<!--    <string name="udesk_edit_hint_msg">输入消息...</string>-->
     <string name="udesk_edit_hint_msg">输入消息...</string>
     <string name="udesk_voice_init">按住说话</string>
     <string name="udesk_voice_cancle">手指松开，取消发送</string>
@@ -75,7 +76,7 @@
     <string name="udesk_upload_img_error">上传图片失败，请重试</string>
     <string name="udesk_customer_leavemsg">客户留言</string>
     <string name="udesk_offline_reply_msg">留言工单离线回复</string>
-    <string name="udesk_file_to_large">文件过大无法发送</string>
+    <string name="udesk_file_to_large">视频不可以过大，请压缩</string>
     <string name="udesk_gps_tips">当前在非Wi-Fi环境，发送文件将消耗一定流量，是否继续？</string>
     <string name="udesk_gps_downfile_tips">当前在非Wi-Fi环境，下载文件将消耗一定流量，是否继续？</string>
     <string name="udesk_has_send">已发送</string>
@@ -107,5 +108,29 @@
     <string name="summit_must_remark">评价备注必需填写</string>
     <string name="udesk_rollback_tips">撤回一条消息</string>
     <string name="add_blocked_tips">抱歉，你已经被加入了黑名单</string>
+
+    <string name="funtion_camera">拍摄</string>
+    <string name="photo">相册</string>
+    <string name="survy">评价</string>
+    <string name="video">拍视频</string>
+
+    <string name="udesk_too_short">录制时间过短,请重新录制</string>
+    <string name="camera_view_tips">长按拍摄小视频</string>
+    <string name="udesk_audio_permission_error">请检查是否开启了应用的录音权限</string>
+    <string name="press_record">按住 说话</string>
+    <string name="release_end">松开 发送</string>
+    <string name="release_cancel">松开手指 取消发送</string>
+    <string name="move_up_cancel">手指上滑 取消发送</string>
+    <string name="record_to_short">说话时间过短</string>
+    <string name="service_valuation">服务评价</string>
+    <string name="udesk_img_video">图片和视频</string>
+    <string name="udesk_all_video">所有视频</string>
+    <string name="udesk_original_photos">原图</string>
+    <string name="udesk_photo_pre">预览</string>
+    <string name="udesk_max_tips">你最多选择9个图片或者视频</string>
+    <string name="udesk_selector_action_done_photos">发送(%1$d/%2$d)</string>
+    <string name="udesk_selector_action_done_photo_pre">预览(%1$d)</string>
+    <string name="udesk_selector_photos">选择</string>
+    <string name="udesk_selector_photo_index_num">(%1$d/%2$d)</string>
 
 </resources>

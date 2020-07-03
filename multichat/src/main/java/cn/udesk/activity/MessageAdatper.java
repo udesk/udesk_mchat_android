@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.graphics.drawable.AnimationDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.Bundle;
 import android.text.Html;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
@@ -26,6 +27,7 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.google.gson.Gson;
@@ -34,7 +36,9 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.sufficientlysecure.htmltextview.HtmlTextView;
 
+import java.io.File;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import cn.udesk.R;
@@ -49,12 +53,15 @@ import cn.udesk.model.SendMsgResult;
 import cn.udesk.muchat.bean.ExtrasInfo;
 import cn.udesk.muchat.bean.Products;
 import cn.udesk.muchat.bean.ReceiveMessage;
+import cn.udesk.widget.CircleProgressBar;
 import cn.udesk.widget.HtmlTagHandler;
+import udesk.core.utils.UdeskUtils;
 
 import static android.util.Patterns.PHONE;
 import static android.util.Patterns.WEB_URL;
 
-public class MessageAdatper extends BaseAdapter {
+public class
+MessageAdatper extends BaseAdapter {
     private static final int[] layoutRes = {
             R.layout.udesk_chat_msg_item_txt_l,//文本消息左边的UI布局文件
             R.layout.udesk_chat_msg_item_txt_r,//文本消息右边的UI布局文件
@@ -68,6 +75,8 @@ public class MessageAdatper extends BaseAdapter {
             R.layout.udesk_chat_leavemsg_item_txt_r, // 显示收到留言消息的回复
             R.layout.udesk_chat_event_item, // 显示收到留言消息的回复
             R.layout.udesk_chat_msg_item_product_r, // 显示客户定义的商品消息
+            R.layout.udesk_chat_msg_item_smallvideo_l,//短视频消息左
+            R.layout.udesk_chat_msg_item_smallvideo_r,//短视频消息右
     };
 
     /**
@@ -113,7 +122,8 @@ public class MessageAdatper extends BaseAdapter {
     private static final int LEAVEMSG_TXT_R = 9;
     private static final int Udesk_Event = 10;
     private static final int MSG_PRODUCT_R = 11;
-
+    private static final int MSG_SMALL_VIDEO_L = 12;
+    private static final int MSG_SMALL_VIDEO_R = 13;
     private Activity mContext;
     private List<ReceiveMessage> list = new ArrayList<ReceiveMessage>();
 
@@ -179,6 +189,13 @@ public class MessageAdatper extends BaseAdapter {
                 case UdeskConst.ChatMsgTypeInt.TYPE_PRODUCT:
                     return MSG_PRODUCT_R;
 
+                case UdeskConst.ChatMsgTypeInt.TYPE_VIDEO:
+                    if (UdeskUtil.objectToString(message.getDirection()).equals(UdeskConst.ChatMsgDirection.Recv)) {
+                        return MSG_SMALL_VIDEO_L;
+                    } else {
+                        return MSG_SMALL_VIDEO_R;
+                    }
+
                 default:
                     return ILLEGAL;
             }
@@ -206,6 +223,10 @@ public class MessageAdatper extends BaseAdapter {
      */
     public synchronized void addItem(ReceiveMessage message) {
         if (message == null) {
+            return;
+        }
+        if (TextUtils.isEmpty(UdeskUtil.objectToString(message.getContent()))
+                && TextUtils.equals(UdeskUtil.objectToString(message.getContent_type()), UdeskConst.ChatMsgTypeString.TYPE_TEXT)){
             return;
         }
         //不是撤回消息则过滤含有相同msgID的消息，如果是撤回消息则替换掉
@@ -237,6 +258,13 @@ public class MessageAdatper extends BaseAdapter {
         try {
             if (messages == null || messages.isEmpty()) {
                 return;
+            }
+            Iterator<ReceiveMessage> iterator = messages.iterator();
+            while (iterator.hasNext()){
+                if (TextUtils.isEmpty(UdeskUtil.objectToString(iterator.next().getContent()))
+                        && TextUtils.equals(UdeskUtil.objectToString(iterator.next().getContent_type()), UdeskConst.ChatMsgTypeString.TYPE_TEXT)){
+                    iterator.remove();
+                }
             }
             if (isMore) {
                 list.addAll(0, messages);
@@ -390,7 +418,16 @@ public class MessageAdatper extends BaseAdapter {
                         productViewHolder.imgView = (ImageView) convertView.findViewById(R.id.udesk_product_icon);
                         convertView.setTag(productViewHolder);
                         break;
-
+                    case MSG_SMALL_VIDEO_L:
+                    case MSG_SMALL_VIDEO_R:
+                        SmallVideoViewHolder smallVideoViewHolder = new SmallVideoViewHolder();
+                        initItemNormalView(convertView, smallVideoViewHolder);
+                        smallVideoViewHolder.imgView =  convertView.findViewById(R.id.udesk_im_image);
+                        smallVideoViewHolder.cancleImg = (ImageView) convertView.findViewById(R.id.udesk_iv_cancle);
+                        smallVideoViewHolder.video_tip = (ImageView) convertView.findViewById(R.id.video_tip);
+                        smallVideoViewHolder.circleProgressBar = (CircleProgressBar) convertView.findViewById(R.id.video_upload_bar);
+                        convertView.setTag(smallVideoViewHolder);
+                        break;
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -436,6 +473,7 @@ public class MessageAdatper extends BaseAdapter {
                     case MSG_IMG_R:
                     case LEAVEMSG_TXT_R:
                     case COMMODITY:
+                    case MSG_SMALL_VIDEO_R:
                         this.isLeft = false;
                         Glide.with(mContext).load(UdeskConfig.customerUrl).error(R.drawable.udesk_im_default_user_avatar).placeholder(R.drawable.udesk_im_default_user_avatar).into(ivHeader);
                         break;
@@ -443,6 +481,7 @@ public class MessageAdatper extends BaseAdapter {
                     case MSG_AUDIO_L:
                     case RICH_TEXT:
                     case MSG_IMG_L:
+                    case MSG_SMALL_VIDEO_L:
                         this.isLeft = true;
                         Merchant merchant = ((UdeskChatActivity) mContext).getMerchant();
                         if (merchant != null && !TextUtils.isEmpty(UdeskUtil.objectToString(merchant.getLogo_url()))) {
@@ -483,6 +522,7 @@ public class MessageAdatper extends BaseAdapter {
                 if (itemType == MSG_TXT_L
                         || itemType == MSG_AUDIO_L
                         || itemType == MSG_IMG_L
+                        || itemType == MSG_SMALL_VIDEO_L
                 ) {
                     ivStatus.setVisibility(View.GONE);
                 } else {
@@ -513,7 +553,7 @@ public class MessageAdatper extends BaseAdapter {
         }
 
         public void setTvTime(String create) {
-            tvTime.setText(UdeskUtil.formatLongTypeTimeToString(mContext, create));
+            tvTime.setText(UdeskUtil.formatLongTypeTimeToString(mContext, create).trim());
         }
 
         abstract void bind(Context context);
@@ -823,6 +863,14 @@ public class MessageAdatper extends BaseAdapter {
                 int step = (int) ((duration < 10) ? duration : (duration / 10 + 9));
                 record_item_content.getLayoutParams().width = (step == 0) ? min
                         : (min + (max - min) / 15 * step);
+                ivStatus.setOnClickListener(new OnClickListener() {
+
+                    @Override
+                    public void onClick(View v) {
+                        changeUiState(UdeskConst.SendFlag.RESULT_RETRY);
+                        ((UdeskChatActivity) mContext).retrySendMsg(message);
+                    }
+                });
             } catch (Exception e) {
                 e.printStackTrace();
             } catch (OutOfMemoryError error) {
@@ -955,7 +1003,7 @@ public class MessageAdatper extends BaseAdapter {
             try {
                 tvTime.setVisibility(View.VISIBLE);
                 if (!UdeskUtil.objectToString(message.getCreated_at()).isEmpty()) {
-                    tvTime.setText("----" + UdeskUtil.parseEventTime(UdeskUtil.objectToString(message.getCreated_at())) + "----");
+                    tvTime.setText("----" + UdeskUtil.parseEventTime(UdeskUtil.objectToString(message.getCreated_at())).trim() + "----");
                 }
                 events.setHtml(UdeskUtil.objectToString(message.getContent()));
                 dealRichText(events);
@@ -1006,7 +1054,9 @@ public class MessageAdatper extends BaseAdapter {
                 if (extrasBeens != null && extrasBeens.size() > 0) {
                     subTitle.setText(extrasBeens.get(0).getTitle() + ": " + extrasBeens.get(0).getContent());
                 }
-//                UdeskUtil.loadNoChangeView(thumbnail, Uri.parse(item.getProduct().getImage()));
+                UdeskUtil.loadInto(context, UdeskUtil.uRLEncoder(item.getProduct().getImage()), R.drawable.udesk_defualt_failure,
+                        R.drawable.udesk_defalut_image_loading, thumbnail);
+
                 link.setOnClickListener(new OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -1099,6 +1149,7 @@ public class MessageAdatper extends BaseAdapter {
 
                     @Override
                     public void onClick(View v) {
+                        changeUiState(UdeskConst.SendFlag.RESULT_RETRY);
                         ((UdeskChatActivity) mContext).retrySendMsg(message);
                     }
                 });
@@ -1112,6 +1163,158 @@ public class MessageAdatper extends BaseAdapter {
         }
     }
 
+    /**
+     * 展示小视频消息
+     */
+    public class SmallVideoViewHolder extends BaseViewHolder {
+        ImageView imgView;
+        ImageView cancleImg;
+        ImageView video_tip;
+        CircleProgressBar circleProgressBar;
+
+        void showSuccessView() {
+            try {
+//                cancleImg.setVisibility(View.GONE);
+                circleProgressBar.setVisibility(View.GONE);
+                ivStatus.setVisibility(View.GONE);
+                pbWait.setVisibility(View.GONE);
+                video_tip.setVisibility(View.VISIBLE);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        void showFailureView() {
+            try {
+                ivStatus.setVisibility(View.VISIBLE);
+                pbWait.setVisibility(View.GONE);
+//                cancleImg.setVisibility(View.GONE);
+                circleProgressBar.setVisibility(View.GONE);
+                video_tip.setVisibility(View.VISIBLE);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        void showSendView() {
+            try {
+                if (circleProgressBar.getPercent() == 100) {
+                    pbWait.setVisibility(View.VISIBLE);
+                    video_tip.setVisibility(View.VISIBLE);
+//                    cancleImg.setVisibility(View.GONE);
+                    circleProgressBar.setVisibility(View.GONE);
+                } else {
+                    pbWait.setVisibility(View.VISIBLE);
+//                    cancleImg.setVisibility(View.VISIBLE);
+                    circleProgressBar.setVisibility(View.VISIBLE);
+                    circleProgressBar.setPercent(circleProgressBar.getPercent());
+                    video_tip.setVisibility(View.GONE);
+                }
+                ivStatus.setVisibility(View.GONE);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        @Override
+        void bind(final Context context) {
+            try {
+                if (itemType == MSG_SMALL_VIDEO_L) {
+                    showSuccessView();
+                } else {
+                    if (message.getSendFlag() == UdeskConst.SendFlag.RESULT_SUCCESS) {
+                        showSuccessView();
+                    } else {
+                        if (message.getSendFlag() == UdeskConst.SendFlag.RESULT_RETRY || message.getSendFlag() == UdeskConst.SendFlag.RESULT_SEND) {
+                            showSendView();
+                        } else if (message.getSendFlag() == UdeskConst.SendFlag.RESULT_FAIL) {
+                            showFailureView();
+                        }
+                    }
+                }
+
+                if (!TextUtils.isEmpty(message.getLocalPath()) && UdeskUtil.isExitFileByPath(mContext, message.getLocalPath())) {
+                    UdeskUtil.loadIntoFitSize(context, message.getLocalPath(), R.drawable.udesk_defualt_failure, R.drawable.udesk_defalut_image_loading, imgView);
+                } else if (UdeskUtil.fileIsExitByUrl(mContext, UdeskConst.FileImg, UdeskUtil.objectToString(message.getContent()))) {
+                    String loaclpath = UdeskUtil.getPathByUrl(mContext, UdeskConst.FileImg, UdeskUtil.objectToString(message.getContent()));
+                    UdeskUtil.loadIntoFitSize(context, loaclpath, R.drawable.udesk_defualt_failure, R.drawable.udesk_defalut_image_loading, imgView);
+                } else {
+                    if (!UdeskUtils.isNetworkConnected(mContext.getApplicationContext())) {
+                        UdeskUtils.showToast(mContext.getApplicationContext(), mContext.getResources().getString(R.string.udesk_has_wrong_net));
+                        return;
+                    }
+                    ((UdeskChatActivity) mContext).showVideoThumbnail(message);
+                }
+
+
+//                imgView.setTag(message.getTime());
+                imgView.setOnClickListener(new OnClickListener() {
+
+                    @Override
+                    public void onClick(View v) {
+                        if (message == null) {
+                            return;
+                        }
+                        String path = "";
+                        if (!TextUtils.isEmpty(message.getLocalPath()) && UdeskUtil.isExitFileByPath(context,message.getLocalPath())) {
+                            path = message.getLocalPath();
+                        } else if (!TextUtils.isEmpty(UdeskUtil.objectToString(message.getContent()))) {
+                            File file = UdeskUtil.getFileByUrl(mContext, UdeskConst.FileVideo, UdeskUtil.objectToString(message.getContent()));
+                            if (file != null && UdeskUtil.getFileSize(file) > 0) {
+                                path = file.getPath();
+                            } else {
+                                if (!UdeskUtils.isNetworkConnected(mContext.getApplicationContext())) {
+                                    UdeskUtils.showToast(mContext.getApplicationContext(), mContext.getResources().getString(R.string.udesk_has_wrong_net));
+                                    return;
+                                }
+                                ((UdeskChatActivity) mContext).downLoadVideo(message);
+                                path = UdeskUtil.objectToString(message.getContent());
+                            }
+                        }
+
+                        Intent intent = new Intent();
+                        intent.setClass(mContext, PictureVideoPlayActivity.class);
+                        Bundle data = new Bundle();
+                        data.putString(UdeskConst.PREVIEW_Video_Path, path);
+                        intent.putExtras(data);
+                        mContext.startActivity(intent);
+                    }
+                });
+                ivStatus.setOnClickListener(new OnClickListener() {
+
+                    @Override
+                    public void onClick(View v) {
+                        if (!UdeskUtils.isNetworkConnected(mContext.getApplicationContext())) {
+                            UdeskUtils.showToast(mContext.getApplicationContext(), mContext.getResources().getString(R.string.udesk_has_wrong_net));
+                            changeUiState(UdeskConst.SendFlag.RESULT_FAIL);
+                            return;
+                        }
+                        message.setSendFlag(UdeskConst.SendFlag.RESULT_RETRY);
+                        changeUiState(UdeskConst.SendFlag.RESULT_RETRY);
+                        ((UdeskChatActivity) mContext).retrySendMsg(message);
+                    }
+                });
+
+                cancleImg.setOnClickListener(new OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        if (!UdeskUtils.isNetworkConnected(mContext.getApplicationContext())) {
+                            UdeskUtils.showToast(mContext.getApplicationContext(), mContext.getResources().getString(R.string.udesk_has_wrong_net));
+                            changeUiState(UdeskConst.SendFlag.RESULT_FAIL);
+                            return;
+                        }
+                        message.setSendFlag(UdeskConst.SendFlag.RESULT_FAIL);
+                        showFailureView();
+                        ((UdeskChatActivity) mContext).cancleSendVideoMsg(message);
+                    }
+                });
+            } catch (Exception e) {
+                e.printStackTrace();
+            } catch (OutOfMemoryError error) {
+                error.printStackTrace();
+            }
+        }
+    }
 
     private void initItemNormalView(View convertView, BaseViewHolder holder) {
         try {
@@ -1138,14 +1341,14 @@ public class MessageAdatper extends BaseAdapter {
                 Products products = (Products) info;
                 if (products.getSendTime() > 0) {
                     holder.tvTime.setVisibility(View.VISIBLE);
-                    holder.tvTime.setText(UdeskUtil.formatLongTypeTimeToString(mContext, products.getSendTime()));
+                    holder.tvTime.setText(UdeskUtil.formatLongTypeTimeToString(mContext, products.getSendTime()).trim());
                 } else {
                     holder.tvTime.setVisibility(View.GONE);
                 }
                 return;
             }
             if (info.getCreated_at() != null) {
-                holder.tvTime.setText(UdeskUtil.formatLongTypeTimeToString(mContext, UdeskUtil.objectToString(info.getCreated_at())));
+                holder.tvTime.setText(UdeskUtil.formatLongTypeTimeToString(mContext, UdeskUtil.objectToString(info.getCreated_at())).trim());
             }
 
         } catch (Exception e) {
@@ -1169,6 +1372,7 @@ public class MessageAdatper extends BaseAdapter {
                     }
                     cache.message.setSendFlag(sendMsgResult.getFlag());
                     cache.message.setUuid(sendMsgResult.getUuid());
+                    cache.message.setCreated_at(sendMsgResult.getCreateTime());
                     return true;
                 }
             }
@@ -1189,6 +1393,7 @@ public class MessageAdatper extends BaseAdapter {
                 if (UdeskUtil.objectToString(msg.getId()) != null && UdeskUtil.objectToString(msg.getId()).equals(sendMsgResult.getId())) {
                     msg.setSendFlag(sendMsgResult.getFlag());
                     msg.setUuid(sendMsgResult.getUuid());
+                    msg.setCreated_at(sendMsgResult.getCreateTime());
                 }
             }
             notifyDataSetChanged();
@@ -1197,5 +1402,72 @@ public class MessageAdatper extends BaseAdapter {
         }
     }
 
+    boolean changeVideoThumbnail(View convertView, String msgId) {
+        try {
+            Object tag = convertView.getTag();
+            if (tag != null && tag instanceof SmallVideoViewHolder) {
+                SmallVideoViewHolder cache = (SmallVideoViewHolder) tag;
+                if (cache.message != null && msgId.equals(cache.message.getUuid())) {
+                    if (UdeskUtil.fileIsExitByUrl(mContext, UdeskConst.FileImg, UdeskUtil.objectToString(cache.message.getContent()))) {
+                        String loaclpath = UdeskUtil.getPathByUrl(mContext, UdeskConst.FileImg, UdeskUtil.objectToString(cache.message.getContent()));
+                        UdeskUtil.loadIntoFitSize(mContext, loaclpath, R.drawable.udesk_defualt_failure, R.drawable.udesk_defalut_image_loading, cache.imgView);
+
+                    }
+                    return true;
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return false;
+    }
+
+    /**
+     * 根据消息ID  修改对应消息的进度
+     */
+    boolean changeFileState(View convertView, String msgId, int precent) {
+        try {
+            Object tag = convertView.getTag();
+            if (tag != null && tag instanceof SmallVideoViewHolder) {
+                SmallVideoViewHolder smallVideo = (SmallVideoViewHolder) tag;
+                if (smallVideo.message != null && msgId.contains(UdeskUtil.objectToString(smallVideo.message.getId()))) {
+                    smallVideo.circleProgressBar.setPercent(precent);
+                    if (precent == 100) {
+//                        smallVideo.cancleImg.setVisibility(View.GONE);
+                        smallVideo.circleProgressBar.setVisibility(View.GONE);
+                        smallVideo.video_tip.setVisibility(View.VISIBLE);
+                        smallVideo.pbWait.setVisibility(View.GONE);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return false;
+    }
+    /**
+     * 根据消息ID  修改对应文件上传的进度
+     */
+    void updateProgress(String msgId, int present) {
+        try {
+            boolean isNeedRefresh = false;
+            for (ReceiveMessage msg : list) {
+                if (msg != null && msg.getContent_type() != null
+                        && msg.getContent_type().equals(UdeskConst.ChatMsgTypeString.TYPE_VIDEO)
+                        && msg.getId() != null
+                        && UdeskUtil.objectToString(msg.getId()).equals(msgId)) {
+//                    msg.setPrecent(present);
+                    isNeedRefresh = true;
+                }
+            }
+            if (isNeedRefresh) {
+                notifyDataSetChanged();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
 }

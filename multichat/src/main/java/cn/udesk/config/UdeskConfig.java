@@ -59,7 +59,7 @@ public class UdeskConfig {
     public static int udeskProductNameLinkColorResId = R.color.color_1850cc;
 
     //设置是否使用导航UI rue表示使用 false表示不使用
-    public static boolean isUseNavigationView = true;
+    public static boolean isUseNavigationView = false;
 
     //配置是否把domain 和 appid 和 appkey 和 sdktoken 存在sharePrefence中， true保存，false 不存
     public static boolean isUseShare = true;
@@ -77,6 +77,12 @@ public class UdeskConfig {
     public static  boolean isScaleImg = true;
 
     //缩放图 设置宽高最大值，如果超出则压缩，否则不压缩
-    public static  int ScaleMax = 1024;
+    public static  int scaleMax = 1024;
+    //是否使用更多展示出的列表选项 true表示使用 false表示不使用
+    public static boolean isUseMore = true;
+    //设置是否需要小视频的功能 rue表示使用 false表示不使用
+    public static boolean isUseSmallVideo = true;
 
+    //是否使用表情 true表示使用 false表示不使用
+    public static boolean isUseEmotion = true;
 }

@@ -19,7 +19,7 @@ public class InitMode {
     private Object bucket;
     private Object access_id;
     private Object prefix;
-//    private Object is_open_survey;
+    private Object is_open_survey;
 
 
 
@@ -103,11 +103,11 @@ public class InitMode {
         this.prefix = prefix;
     }
 
-//    public Object getIs_open_survey() {
-//        return is_open_survey;
-//    }
-//
-//    public void setIs_open_survey(Object is_open_survey) {
-//        this.is_open_survey = is_open_survey;
-//    }
+    public Object getIs_open_survey() {
+        return is_open_survey;
+    }
+
+    public void setIs_open_survey(Object is_open_survey) {
+        this.is_open_survey = is_open_survey;
+    }
 }

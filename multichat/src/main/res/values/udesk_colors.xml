@@ -66,9 +66,11 @@
     <!-- 消息底部面板的背景色 -->
     <color name="udesk_message_bottom_pannel_bg1">#FAFBFC</color>
     <color name="udesk_message_bottom_pannel_bg2">#FFFFFF</color>
+    <color name="udesk_color_f0f2f2">#f0f2f2</color>
 
     <color name="udesk_edit_input_msg_cololr1">#333333</color>
     <color name="udesk_edit_input_msg_cololr2">#333333</color>
+    <color name="udesk_color_ADADAD">#ADADAD</color>
 
     <color name="udesk_edit_input_hint_msg_cololr1">#C3CDD4</color>
     <color name="udesk_bottom_send1">#0093FF</color>
@@ -107,6 +109,25 @@
     <color name="color_1850cc">#1850CC</color>
     <color name="udesk_color_666666">#666666</color>
     <color name="udesk_color_2d93fa">#2D93FA</color>
+    <color name="udesk_color_7878787">#787878</color>
+    <color name="dialog_back_color">#80000000</color>
+    <color name="white">#fff</color>
+    <color name="gray">#D9D9D9</color>
+    <color name="line">#ccc</color>
+    <color name="light_gray_color">#f7f7f7</color>
+    <color name="udesk_color_D3D5D6">#D3D5D6</color>
+    <color name="udesk_color_f9f9f9">#f9f9f9</color>
+    <color name="gray4">#F5F5F5</color>
+    <color name="gray1">#7e7e7e</color>
+    <color name="stroke_color">#e9e5e5</color>
+    <color name="default_back_color">#fAfAfA</color>
+    <color name="udesk_color_999999">#999999</color>
+    <color name="udesk_color_f2242526">#f2242526</color>
+    <color name="udesk_color_393a3f">#393A3F</color>
+    <color name="udesk_color_747578">#747578</color>
+    <color name="udesk_color_eb212121">#eb212121</color>
+    <color name="udesk_color_8045c01a">#8045C01A</color>
+    <color name="udesk_color_45c01a">#45C01A</color>
 
 
 </resources>

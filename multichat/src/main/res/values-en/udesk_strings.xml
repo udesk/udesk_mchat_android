@@ -57,6 +57,7 @@
     <string name="udesk_agent_connecting_error_net_uavailabl">Failed connection, please try later!</string>
 
     <string name="udesk_edit_hint_msg">Typing...</string>
+<!--    <string name="udesk_edit_hint_msg">Glad to serve you, please describe your problem</string>-->
     <string name="udesk_voice_init">Hold to talk</string>
     <string name="udesk_voice_cancle">Release to cancel</string>
     <string name="udesk_thanks_survy">Thanks for your comment！</string>
@@ -76,7 +77,7 @@
     <string name="udesk_upload_img_error">Failed to upload pictures, please try again</string>
     <string name="udesk_customer_leavemsg">Customer leaving a message</string>
     <string name="udesk_offline_reply_msg">Offline message reply</string>
-    <string name="udesk_file_to_large">The file is too large to send</string>
+    <string name="udesk_file_to_large">The video cannot be too large, please compress</string>
     <string name="udesk_gps_tips">Currently in a non Wi-Fi environment, sending a file consumes a certain amount of traffic. Do you want to continue?</string>
     <string name="udesk_gps_downfile_tips">Currently in a non Wi-Fi environment, download a file consumes a certain amount of traffic. Do you want to continue?</string>
     <string name="udesk_has_send">has been sent</string>
@@ -109,5 +110,29 @@
 
     <string name="udesk_rollback_tips">recalled a message</string>
     <string name="add_blocked_tips">Sorry, you are in blacklist</string>
+
+    <string name="funtion_camera">Camera</string>
+    <string name="photo">Album</string>
+    <string name="survy">Satisfaction Rating</string>
+    <string name="video">Video call</string>
+
+    <string name="udesk_too_short">Message too short</string>
+    <string name="camera_view_tips">hold to record small video</string>
+    <string name="udesk_audio_permission_error">Allow app to access your microphone</string>
+    <string name="press_record">Hold to Talk</string>
+    <string name="release_end">Release to Send</string>
+    <string name="release_cancel">Release to cancel</string>
+    <string name="move_up_cancel">Slide up to cancel</string>
+    <string name="record_to_short">Message too short</string>
+    <string name="service_valuation">Satisfaction Rating</string>
+    <string name="udesk_img_video">Photos</string>
+    <string name="udesk_all_video">Videos</string>
+    <string name="udesk_original_photos">Full Image</string>
+    <string name="udesk_photo_pre">Preview</string>
+    <string name="udesk_max_tips">Select a maximum of 9 phots</string>
+    <string name="udesk_selector_action_done_photos">Send(%1$d/%2$d)</string>
+    <string name="udesk_selector_action_done_photo_pre">Preview(%1$d)</string>
+    <string name="udesk_selector_photos">Select</string>
+    <string name="udesk_selector_photo_index_num">(%1$d/%2$d)</string>
 
 </resources>

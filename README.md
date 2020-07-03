@@ -1,38 +1,37 @@
-### 1.导入multichat
+## 1.导入multichat ##
 
-```java
-	Add this in your root build.gradle file (not your module build.gradle file):
+Add this in your root build.gradle file (not your module build.gradle file):
 
-    allprojects {
-	repositories {
-        maven { url "https://jitpack.io" }
-    }
-   }
-```
-
-### 2.快速使用
+	allprojects {
+		repositories {
+			maven { url "https://jitpack.io" }
+		}
+	}
 
 
+## 2.快速使用 ##
   
-  1初始化
+### 1 初始化
   
   出于安全的考虑，建议租户将 key 保存在自己的服务器端，App 端通过租户提供的接口获取经过 SHA1
   计算后的加密字符串(sign)和时间戳(timestamp),时间戳精确到秒，然后传给 SDK。密码的有效期为时间戳 +/- 5分钟
   
-   SHA1("租户uuid+租户key+时间戳")加密字符粗的格式
-  
-  // String uuid 租户ID，Udesk后台系统获取
- 
-  //String timestamp 时间戳，由你们后端返回
+	SHA1("租户uuid+租户key+时间戳")加密字符粗的格式
 
-  //String sign  签名，由你们后端返回
+	// String uuid 租户ID，Udesk后台系统获取
+ 
+	//String timestamp 时间戳，由你们后端返回
+
+	//String sign  签名，由你们后端返回
   
-  //customer_euid  用户ID是用户的唯一标示，请不要重复，并且只允许使用数字、字母、数字+字母
+	//customer_euid  用户ID是用户的唯一标示，请不要重复，并且只允许使用数字、字母、数字+字母
   
-  UdeskSDKManager.getInstance().init(content, uuid, sign, time);
-  UdeskSDKManager.getInstance().setCustomerInfo(customer_euid, customer_name);     
+	UdeskSDKManager.getInstance().init(content, uuid, sign, time);
+
+	UdeskSDKManager.getInstance().setCustomerInfo(customer_euid, customer_name);     
   
-  备注：签名生成规则：建议由客户的服务端提供接口计算签名并返回对应的参数
+  **备注：签名生成规则：建议由客户的服务端提供接口计算签名并返回对应的参数**
+
 |  数据名称  |     说明                                 |
 |-----------|-----------------------------------------|
 | uuid      | Udesk后台提供                            |
@@ -41,10 +40,41 @@
  
  sign = SHA1("uuid+secret+timestamp")
 
-  2 客户通过某个商品详情页点击咨询按钮直接和客服进行会话
+
+**配置信息（UdeskConfig）明细**
+
+|  属性                            |     说明                                 |
+|---------------------------------|-----------------------------------------|
+| registerId                      | 相关推送平台注册生成的ID                            |
+| customerUrl                     | 保存客户的头像地址，由用户app传递                            |
+| udeskTitlebarBgResId            | 标题栏TitleBar的背景色  通过颜色设置                       |
+| udeskTitlebarTextLeftRightResId | 标题栏TitleBar，左右两侧文字的颜色                       |
+| udeskIMLeftTextColorResId       | IM界面，左侧文字的字体颜色                       |
+| udeskIMRightTextColorResId      | IM界面，右侧文字的字体颜色                      |
+| udeskIMAgentNickNameColorResId  | IM界面，左侧客服昵称文字的字体颜色                     |
+| udeskIMTimeTextColorResId       | IM界面，时间文字的字体颜色                       |
+| udeskIMTipTextColorResId        | IM界面，提示语文字的字体颜色，比如客服转移                       |
+| udeskbackArrowIconResId         | 返回箭头图标资源id                       |
+| udeskCommityBgResId             | 咨询商品item的背景颜色                       |
+| udeskCommityTitleColorResId     | 商品介绍Title的字样颜色                       |
+| udeskCommitysubtitleColorResId  | 商品咨询页面中，商品介绍子Title的字样颜色        |
+| udeskCommityLinkColorResId      | 商品咨询页面中，发送链接的字样颜色                       |
+| udeskProductNameLinkColorResId  | 商品消息 含有链接时的标题的颜色                       |
+| isUseNavigationView             | 设置是否使用导航UI                       |
+| isUseShare                      | 配置是否把uuid、sign、timestamp存在sharePrefence中            |
+| isUseVoice                      | 是否使用录音功能                       |
+| isUsephoto                      | 是否使用相册的功能                       |
+| isUsecamera                     | 是否使用拍照的功能                       |
+| isScaleImg                      | 上传图片是否使用缩率图                       |
+| scaleMax                        | 缩放图 设置宽高最大值，如果超出则压缩，否则不压缩                       |
+| isUseMore                       | 是否使用更多展示出的列表选项                       |
+| isUseSmallVideo                 | 设置是否需要小视频的功能                       |
+| isUseEmotion                    | 是否使用表情                      |
+
+###2 客户通过某个商品详情页点击咨询按钮直接和客服进行会话
   
       //进入会话可以设置咨询对象 (可选)
-	   //设置咨询的商品 如下：
+	  //设置咨询的商品 如下：
     private void createProducts() {
         Products products = new Products();
         Products.ProductBean productBean = new Products.ProductBean();
@@ -72,26 +102,19 @@
      // merchantId  商户ID
     UdeskSDKManager.getInstance().entryChat(content, merchantId);
 
-}
-```
+
 
 ### 3.获取历史对话商户列表
 
-```java
+	//提供了历史对话商户列表，提供ConversationFragment，可根据你们app加入，参见demo。
 
- //提供了历史对话商户列表，提供ConversationFragment，可根据你们app加入，参见demo。
-```
 
 ### 4.获取指定的商户的未读消息
 
-```java
+	UdeskSDKManager.getInstance().getMerchantUnReadMsg(merchant_euid,merchantUnreadMsgCnt)
 
-  UdeskSDKManager.getInstance().getMerchantUnReadMsg(merchant_euid,merchantUnreadMsgCnt)
-```
 
 ### 5.查询所有商户未读消息
-
-```java
 
     UdeskSDKManager.getInstance().setItotalCount(new ItotalUnreadMsgCnt() {
                 @Override
@@ -100,42 +123,37 @@
                 }
             });
     UdeskSDKManager.getInstance().getUnReadMessages();
-```
+
 
 
 ### 6.设置在线状态下收到消息的监听事件
 
-```java
 
-       UdeskSDKManager.getInstance().setMessageArrived(new IMessageArrived() {
+	UdeskSDKManager.getInstance().setMessageArrived(new IMessageArrived() {
                 @Override
                 public void onNewMessage(final ReceiveMessage receiveMessage) {
 
                 }
             });
-```
 
 ### 7.设置咨询对象的回调
 
-```java
 
-        UdeskSDKManager.getInstance().setCommodityCallBack(new ICommodityCallBack() {
+	UdeskSDKManager.getInstance().setCommodityCallBack(new ICommodityCallBack() {
                 @Override
                 public void callBackProduct(Products products) {
 
                 
                 }
             });
-```
 
 
 ### 8.设置商品信息
 
 商品信息属性 存放在ProductMessage类中;
 
-```java
 
-public class ProductMessage implements Serializable {
+	public class ProductMessage implements Serializable {
 
 
     /**
@@ -223,35 +241,32 @@ public class ProductMessage implements Serializable {
 			return modes;
     }
 
-```
-
-
-
-
 ### 9.离线推送
-```java
+	
 
-//App 进入后台时，开启Udesk推送
+	//保存注册推送的的唯一ID
+	UdeskSDKManager.getInstance().setRegisterId(context, registerId);
 
-调用 UdeskSDKManager.getInstance().setCustomerOffline(false);
-
-建议 在application中registerActivityLifecycleCallbacks（ActivityLifecycleCallbacks activityLifecycleCallbacks）来控所有前后台逻辑
-
-```
+    public void setRegisterId(Context context, String registerId) {
+        UdeskConfig.registerId = registerId;
+        PreferenceHelper.write(context, UdeskLibConst.SharePreParams.RegisterIdName,
+                UdeskLibConst.SharePreParams.Udesk_Push_RegisterId, registerId);
+    }
+	
+	//开启关闭推送开关  开启传false  关闭传true.
+	UdeskSDKManager.getInstance().setCustomerOffline(false);
+	
+	现在默认是进入会话界面关闭推送，退到后台开启推送
+	建议 在application中registerActivityLifecycleCallbacks（ActivityLifecycleCallbacks activityLifecycleCallbacks）来控所有前后台逻辑
 
 ### 10.退出断开xmpp链接
 
-```java
 
-//退出登录时 断开xmpp链接 
-
-UdeskSDKManager.getInstance().logout();
-
-```
+	//退出登录时 断开xmpp链接 
+	
+	UdeskSDKManager.getInstance().logout();
 
 ### 11.图片上传压缩配置
-
-```java
 
      在UdeskConfig类中
     //上传图片是否使用原图 还是缩率图
@@ -259,8 +274,6 @@ UdeskSDKManager.getInstance().logout();
 
     //缩放图 设置宽高最大值，如果超出则压缩，否则不压缩
     public static  int ScaleMax = 1024;
-
-```
 
 ### 12 多语言设置
 
@@ -282,6 +295,7 @@ application 中加入
         //保存系统选择语言
         LocalManageUtil.onConfigurationChanged(getApplicationContext());
     }
+
 在初始化的时候设置
 
 	LocalManageUtil.saveSelectLanguage(getApplicationContext(),new Locale("en-us");
@@ -301,76 +315,73 @@ application 中加入
 
 ### 13.混淆配置
 
-``` java
-//udesk
--keep class udesk.** {*;} 
--keep class cn.udesk.**{*; } 
-
-//oss
--keep com.alibaba.sdk.**{*; } 
--keep com.google.gson.**{*; } 
--keep org.jxmpp.**{*; } 
--keep  de.measite.minidns.**{*; } 
-
-//eventbus
--keepattributes *Annotation*
--keepclassmembers class ** {
-    @org.greenrobot.eventbus.Subscribe <methods>;
-}
--keep enum org.greenrobot.eventbus.ThreadMode { *; }
- 
-# Only required if you use AsyncExecutor
--keepclassmembers class * extends org.greenrobot.eventbus.util.ThrowableFailureEvent {
-    <init>(java.lang.Throwable);
-}
-
-//smack
--keep class org.jxmpp.** {*;} 
--keep class de.measite.** {*;} 
--keep class org.jivesoftware.** {*;} 
--keep class org.xmlpull.** {*;} 
--dontwarn org.xbill.**
--keep class org.xbill.** {*;} 
-
-//JSONobject
--keep class org.json.** {*; }
-
-//okhttp
--keep class okhttp3.** {*;} 
--keep class okio.** {*;} 
-
-//retrofit2
-# Platform calls Class.forName on types which do not exist on Android to determine platform.
--dontnote retrofit2.Platform
-# Platform used when running on Java 8 VMs. Will not be used at runtime.
--dontwarn retrofit2.Platform$Java8
-# Retain generic type information for use by reflection by converters and adapters.
--keepattributes Signature
-# Retain declared checked exceptions for use by a Proxy instance.
--keepattributes Exceptions
-
-//glide
--keep public class * implements com.bumptech.glide.module.GlideModule
--keep public enum com.bumptech.glide.load.resource.bitmap.ImageHeaderParser$** {
-  **[] $VALUES;
-  public *;
-}
-
-# for DexGuard only
--keepresourcexmlelements manifest/application/meta-data@value=GlideModule
-
--keep class com.github.chrisbanes.** {*;} 
-
--dontwarn okio.**
--dontwarn com.squareup.okhttp.**
--dontwarn okhttp3.**
--dontwarn javax.annotation.**
--dontwarn com.android.volley.toolbox.**
--dontwarn com.facebook.infer.**
--dontwarn com.bumptech.glide.**
-
- //其它
--keep class org.sufficientlysecure.htmltextview.** {*; } 
-
-```
+	//udesk
+	-keep class udesk.** {*;} 
+	-keep class cn.udesk.**{*; } 
+	
+	//oss
+	-keep com.alibaba.sdk.**{*; } 
+	-keep com.google.gson.**{*; } 
+	-keep org.jxmpp.**{*; } 
+	-keep  de.measite.minidns.**{*; } 
+	
+	//eventbus
+	-keepattributes *Annotation*
+	-keepclassmembers class ** {
+	    @org.greenrobot.eventbus.Subscribe <methods>;
+	}
+	-keep enum org.greenrobot.eventbus.ThreadMode { *; }
+	 
+	# Only required if you use AsyncExecutor
+	-keepclassmembers class * extends org.greenrobot.eventbus.util.ThrowableFailureEvent {
+	    <init>(java.lang.Throwable);
+	}
+	
+	//smack
+	-keep class org.jxmpp.** {*;} 
+	-keep class de.measite.** {*;} 
+	-keep class org.jivesoftware.** {*;} 
+	-keep class org.xmlpull.** {*;} 
+	-dontwarn org.xbill.**
+	-keep class org.xbill.** {*;} 
+	
+	//JSONobject
+	-keep class org.json.** {*; }
+	
+	//okhttp
+	-keep class okhttp3.** {*;} 
+	-keep class okio.** {*;} 
+	
+	//retrofit2
+	# Platform calls Class.forName on types which do not exist on Android to determine platform.
+	-dontnote retrofit2.Platform
+	# Platform used when running on Java 8 VMs. Will not be used at runtime.
+	-dontwarn retrofit2.Platform$Java8
+	# Retain generic type information for use by reflection by converters and adapters.
+	-keepattributes Signature
+	# Retain declared checked exceptions for use by a Proxy instance.
+	-keepattributes Exceptions
+	
+	//glide
+	-keep public class * implements com.bumptech.glide.module.GlideModule
+	-keep public enum com.bumptech.glide.load.resource.bitmap.ImageHeaderParser$** {
+	  **[] $VALUES;
+	  public *;
+	}
+	
+	# for DexGuard only
+	-keepresourcexmlelements manifest/application/meta-data@value=GlideModule
+	
+	-keep class com.github.chrisbanes.** {*;} 
+	
+	-dontwarn okio.**
+	-dontwarn com.squareup.okhttp.**
+	-dontwarn okhttp3.**
+	-dontwarn javax.annotation.**
+	-dontwarn com.android.volley.toolbox.**
+	-dontwarn com.facebook.infer.**
+	-dontwarn com.bumptech.glide.**
+	
+	 //其它
+	-keep class org.sufficientlysecure.htmltextview.** {*; } 
 

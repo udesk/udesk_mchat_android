@@ -20,12 +20,7 @@ public interface IChatActivityView {
 	void addMessage(List<ReceiveMessage> messages,String fromUUID);
 
 	Handler getHandler();
-	
-	void refreshInputEmjio(String s) ;
-	
-	List<String> getEmotionStringList();
-	
-	void onRecordSuccess(String filePath , long duration);
+
 
 	String getEuid();
 

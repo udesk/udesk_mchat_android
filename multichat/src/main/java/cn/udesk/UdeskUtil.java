@@ -9,7 +9,10 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.res.AssetFileDescriptor;
 import android.database.Cursor;
+import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.Drawable;
+import android.media.MediaMetadataRetriever;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
@@ -26,6 +29,7 @@ import android.view.Display;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -51,6 +55,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -61,6 +66,7 @@ import cn.udesk.provider.UdeskExternalFileProvider;
 import cn.udesk.provider.UdeskExternalProvider;
 import cn.udesk.provider.UdeskInternalCacheProvider;
 import cn.udesk.provider.UdeskInternalFileProvider;
+import udesk.core.utils.UdeskUtils;
 
 
 public class UdeskUtil {
@@ -81,7 +87,115 @@ public class UdeskUtil {
         return false;
 
     }
+    /**
+     * 获取存储路径目录
+     *
+     * @param context
+     * @param folderName
+     * @return
+     */
+    public static String getDirectoryPath(Context context, String folderName) {
+        String directoryPath = "";
+        if (context == null) {
+            return "";
+        }
+        try {
+            if (UdeskUtils.checkSDcard() && context.getExternalFilesDir(UdeskConst.EXTERNAL_FOLDER) != null) {
+                directoryPath = context.getExternalFilesDir(UdeskConst.EXTERNAL_FOLDER).getAbsolutePath() + File.separator + folderName;
+            } else {
+                directoryPath = context.getFilesDir() + File.separator + UdeskConst.EXTERNAL_FOLDER + File.separator + folderName;
+            }
+        } catch (Exception e) {
+            directoryPath = context.getFilesDir() + File.separator + UdeskConst.EXTERNAL_FOLDER + File.separator + folderName;
+        }
+        File file = new File(directoryPath);
+        if (!file.exists()) {
+            file.mkdirs();
+        }
+        return directoryPath;
+    }
 
+    /**
+     * 根据文件类型和路径 创建目录和判断文件是否存在
+     *
+     * @param context
+     * @param fileType
+     * @param url
+     * @return
+     */
+    public static boolean fileIsExitByUrl(Context context, String fileType, String url) {
+        try {
+            if (TextUtils.isEmpty(url)) {
+                return false;
+            }
+            String fileName = getFileName(context, url, fileType);
+            String filepath = getDirectoryPath(context.getApplicationContext(), fileType) + File.separator + fileName;
+            File file = new File(filepath);
+            return file.exists();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public static String getFileName(Context context, String filePath, String type) {
+        if (TextUtils.isEmpty(filePath)) {
+            return "";
+        }
+        try {
+            String filename = getFileName(context, filePath);
+            if (filePath.startsWith("http") || filePath.startsWith("https")) {
+                return filename;
+            }
+            if (type.equals(UdeskConst.FileAudio) && !filename.contains(UdeskConst.AUDIO_SUF_WAV)) {
+                filename = filename + UdeskConst.AUDIO_SUF_WAV;
+            } else if (type.equals(UdeskConst.FileImg) && !filename.contains(UdeskConst.IMG_SUF)) {
+                filename = filename + UdeskConst.IMG_SUF;
+            } else if (type.equals(UdeskConst.FileVideo) && !filename.contains(UdeskConst.VIDEO_SUF)) {
+                filename = filename + UdeskConst.VIDEO_SUF;
+            }
+            return filename;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return "";
+    }
+    public static String getPathByUrl(Context context, String fileType, String url) {
+        String fileName = getFileName(context, url, fileType);
+        try {
+            return getDirectoryPath(context.getApplicationContext(), fileType) + File.separator + fileName;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return fileName;
+    }
+    public static File getFileByUrl(Context context, String fileType, String url) {
+        String fileName = getFileName(url, fileType);
+        try {
+            String filepath = getDirectoryPath(context.getApplicationContext(), fileType) + File.separator + fileName;
+            File file = new File(filepath);
+            if (file.exists()) {
+                return file;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+    public static String getFileName(String url, String type) {
+        if (TextUtils.isEmpty(url)) {
+            return "";
+        }
+        String filename = url.substring(url.lastIndexOf("/") + 1);
+        if (type.equals(UdeskConst.FileAudio) && !filename.contains(UdeskConst.AUDIO_SUF_WAV)) {
+            filename = filename + UdeskConst.AUDIO_SUF_WAV;
+        } else if (type.equals(UdeskConst.FileImg) && !filename.contains(UdeskConst.IMG_SUF)) {
+            filename = filename + UdeskConst.IMG_SUF;
+        } else if (type.equals(UdeskConst.FileVideo) && !filename.contains(UdeskConst.VIDEO_SUF)) {
+            filename = filename + UdeskConst.VIDEO_SUF;
+        }
+        return filename;
+    }
     public static File cameaFile(Context context) {
         try {
             String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
@@ -91,6 +205,79 @@ public class UdeskUtil {
         }
         return null;
 
+    }
+
+    public static long getFileSizeQ(Context context, String filePath) {
+        long blockSize = 0L;
+        try {
+            if (UdeskUtil.isAndroidQ()) {
+                AssetFileDescriptor assetFileDescriptor = context.getContentResolver().openAssetFileDescriptor(Uri.parse(getFilePathQ(context, filePath)), "r");
+                if (assetFileDescriptor != null) {
+                    blockSize = assetFileDescriptor.getLength();
+                }
+            } else {
+                File file = new File(filePath);
+                if (file.exists()) {
+                    blockSize = getFileSize(file);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return blockSize;
+    }
+
+    public static String saveBitmap(Context context, Bitmap b) {
+        try {
+            String path = getDirectoryPath(context, UdeskConst.FileImg);
+            long dataTake = System.currentTimeMillis();
+            String jpegName = path + File.separator + "picture_" + dataTake + ".jpg";
+            FileOutputStream fout = new FileOutputStream(jpegName);
+            BufferedOutputStream bos = new BufferedOutputStream(fout);
+            b.compress(Bitmap.CompressFormat.JPEG, 100, bos);
+            bos.flush();
+            bos.close();
+            return jpegName;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return "";
+        }
+    }
+    public static String saveBitmap(Context context, String url, Bitmap b) {
+        String jpegName = getPathByUrl(context, UdeskConst.FileImg, url);
+        try {
+            FileOutputStream fout = new FileOutputStream(jpegName);
+            BufferedOutputStream bos = new BufferedOutputStream(fout);
+            b.compress(Bitmap.CompressFormat.JPEG, 100, bos);
+            bos.flush();
+            bos.close();
+            return jpegName;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return "";
+        }
+    }
+    public static Bitmap getVideoThumbnail(String url) {
+        Bitmap bitmap = null;
+        // MediaMetadataRetriever 是android中定义好的一个类，提供了统一
+        // 的接口，用于从输入的媒体文件中取得帧和元数据；
+        MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+        try {
+            retriever.setDataSource(url, new HashMap());
+            //获得第一帧图片
+            bitmap = retriever.getFrameAtTime();
+        } catch (IllegalArgumentException e) {
+            e.printStackTrace();
+        } catch (RuntimeException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                retriever.release();
+            } catch (RuntimeException e) {
+                e.printStackTrace();
+            }
+        }
+        return bitmap;
     }
 
 public static Uri getOutputMediaFileUri(Context context, File file) {
@@ -503,7 +690,7 @@ public static Uri getOutputMediaFileUri(Context context, File file) {
 
     public static String getOutputAudioPath(Context context) {
         return getOutputAudioPath(context, "audio_"
-                + new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date()));
+                + new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date())+ UdeskConst.AUDIO_SUF_WAV);
     }
 
 
@@ -622,7 +809,7 @@ public static Uri getOutputMediaFileUri(Context context, File file) {
             }
         }
 
-        return build.toString();
+        return build.toString().trim();
     }
 
 
@@ -1315,6 +1502,52 @@ public static Uri getOutputMediaFileUri(Context context, File file) {
             {".zip", "application/x-zip-compressed"},
     };
 
+    public final static int TYPE_IMAGE = 1;
+    public final static int TYPE_SHORT_VIDEO = 2;
+    public final static int TYPE_AUDIO = 3;
+
+    public static int isPictureType(String pictureType) {
+        if (TextUtils.isEmpty(pictureType)) {
+            return TYPE_IMAGE;
+        }
+        switch (pictureType) {
+            case "image/png":
+            case "image/PNG":
+            case "image/jpeg":
+            case "image/JPEG":
+            case "image/webp":
+            case "image/WEBP":
+            case "image/gif":
+            case "image/bmp":
+            case "image/GIF":
+            case "imagex-ms-bmp":
+                return TYPE_IMAGE;
+            case "video/3gp":
+            case "video/3gpp":
+            case "video/3gpp2":
+            case "video/avi":
+            case "video/mp4":
+            case "video/quicktime":
+            case "video/x-msvideo":
+            case "video/x-matroska":
+            case "video/mpeg":
+            case "video/webm":
+            case "video/mp2ts":
+                return TYPE_SHORT_VIDEO;
+            case "audio/mpeg":
+            case "audio/x-ms-wma":
+            case "audio/x-wav":
+            case "audio/amr":
+            case "audio/wav":
+            case "audio/aac":
+            case "audio/mp4":
+            case "audio/quicktime":
+            case "audio/lamr":
+            case "audio/3gpp":
+                return TYPE_AUDIO;
+        }
+        return TYPE_IMAGE;
+    }
 
     public static String getAuthToken(String userName, String password) {
         String basic = userName + ":" + password;
@@ -1322,14 +1555,67 @@ public static Uri getOutputMediaFileUri(Context context, File file) {
         return basic;
     }
 
+    public static void modifyTextViewDrawable(TextView v, Drawable drawable, int index) {
+        drawable.setBounds(0, 0, drawable.getMinimumWidth(), drawable.getMinimumHeight());
+        //index 0:左 1：上 2：右 3：下
+        if (index == 0) {
+            v.setCompoundDrawables(drawable, null, null, null);
+        } else if (index == 1) {
+            v.setCompoundDrawables(null, drawable, null, null);
+        } else if (index == 2) {
+            v.setCompoundDrawables(null, null, drawable, null);
+        } else {
+            v.setCompoundDrawables(null, null, null, drawable);
+        }
+    }
+    public static String timeParse(long duration) {
+        String time = "";
+        if (duration > 1000) {
+            time = timeParseMinute(duration);
+        } else {
+            long minute = duration / 60000;
+            long seconds = duration % 60000;
+            long second = Math.round((float) seconds / 1000);
+            if (minute < 10) {
+                time += "0";
+            }
+            time += minute + ":";
+            if (second < 10) {
+                time += "0";
+            }
+            time += second;
+        }
+        return time;
+    }
+
+    private static SimpleDateFormat msFormat = new SimpleDateFormat("mm:ss");
+
+    public static String timeParseMinute(long duration) {
+        try {
+            return msFormat.format(duration);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "0:00";
+        }
+    }
 
     public static void loadInto(final Context context, final String imageUrl, int errorImageId, int placeHolder, final ImageView imageView) {
 
         Glide.with(context.getApplicationContext())
                 .load(imageUrl)
-                .diskCacheStrategy(DiskCacheStrategy.SOURCE)
+                .diskCacheStrategy(DiskCacheStrategy.RESULT)
                 .placeholder(placeHolder)
                 .error(errorImageId)
+                .into(imageView);
+    }
+    public static void loadIntoCustomerSize(final Context context, final String imageUrl, int errorImageId, int placeHolder, final ImageView imageView,int width,int height) {
+
+        Glide.with(context.getApplicationContext())
+                .load(imageUrl)
+                .diskCacheStrategy(DiskCacheStrategy.RESULT)
+                .placeholder(placeHolder)
+                .error(errorImageId)
+                .override(width,height)
                 .into(imageView);
     }
 
@@ -1364,7 +1650,7 @@ public static Uri getOutputMediaFileUri(Context context, File file) {
 
         Glide.with(context.getApplicationContext())
                 .load(path)
-                .diskCacheStrategy(DiskCacheStrategy.SOURCE)
+                .diskCacheStrategy(DiskCacheStrategy.RESULT)
                 .placeholder(placeHolder)
                 .error(errorImageId)
                 .override(getScreenWidth(context), getScreenHeight(context))

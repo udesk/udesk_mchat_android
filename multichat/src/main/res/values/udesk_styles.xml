@@ -57,5 +57,13 @@
         <item name="android:windowEnterAnimation">@anim/udesk_pop_enter_anim</item>
         <item name="android:windowExitAnimation">@anim/udesk_pop_exit_anim</item>
     </style>
+    <style name="Theme_Audio_Record_Button">
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowFrame">@null</item>
+        <item name="android:windowIsFloating">true</item>
+        <item name="android:windowIsTranslucent">true</item>
+        <!--背景变暗-->
+        <item name="android:backgroundDimEnabled">false</item>
+    </style>
 
 </resources>

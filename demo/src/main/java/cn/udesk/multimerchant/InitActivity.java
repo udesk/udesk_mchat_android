@@ -23,10 +23,12 @@ public class InitActivity extends Activity implements View.OnClickListener {
     private final static String TAG = InitActivity.class.getSimpleName();
 
 
-    String uuid = "c6042aa7-a1b2-4594-aed8-bf15b547627f";
-    String key = "240858ffb00b1c814259a6569393bf4e";
-//     String uuid = "b1ce357b-8ce8-4ea1-9a87-7d15519dd7e6";
-//    String key = "27aa6696cba45cc091ee66fbc25aedab";
+//    String uuid = "c6042aa7-a1b2-4594-aed8-bf15b547627f";
+//    String key = "240858ffb00b1c814259a6569393bf4e";
+     String uuid = "b1ce357b-8ce8-4ea1-9a87-7d15519dd7e6";
+    String key = "27aa6696cba45cc091ee66fbc25aedab";
+//     String uuid = "fdb9d75a-ccae-4cd8-b761-3ac436454810";
+//    String key = "f6103178f7ca8e5b2c988e688850d106";
 
     private EditText uuidEdit, udesk_sign;
     private Button udesk_next;
@@ -44,13 +46,13 @@ public class InitActivity extends Activity implements View.OnClickListener {
         udesk_next = (Button) findViewById(R.id.udesk_next);
         udesk_next.setOnClickListener(this);
         findViewById(R.id.set_language).setOnClickListener(this);
-        testSign();
 
     }
 
     @Override
     public void onClick(View view) {
         if (view.getId() == R.id.udesk_next) {
+            testSign();
             Intent intent = new Intent();
             intent.setClass(InitActivity.this, MainActivity.class);
             startActivity(intent);

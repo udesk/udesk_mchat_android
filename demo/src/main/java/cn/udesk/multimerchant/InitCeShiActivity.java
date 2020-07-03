@@ -24,8 +24,9 @@ import udesk.core.utils.LocalManageUtil;
 
 public class InitCeShiActivity extends Activity implements View.OnClickListener {
     private final static String TAG = InitActivity.class.getSimpleName();
-//    String uuid = "1ef5ac37-478e-4dee-b057-1d1394ae1d8f"; //b1
-    String uuid = "0ad5f61a-3769-4d32-87fc-4ce562d2677a";  // t1
+    String uuid = "1ef5ac37-478e-4dee-b057-1d1394ae1d8f"; //b1
+//    String uuid = "0ad5f61a-3769-4d32-87fc-4ce562d2677a";  // t1
+//    String uuid = "f229226e-9881-4c27-8887-3d069de00852";
     private EditText uuidEdit, udesk_sign;
     private Button startBtn, udesk_next;
     private UdeskLodingDialog lodingDialog;
