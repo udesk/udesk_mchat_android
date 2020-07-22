@@ -170,7 +170,7 @@ public class UdeskSDKManager {
      * @param timestamp 加密时传的时间
      */
     public void init(Context context, String uuid, String sign, String timestamp) {
-        this.context = context;
+        this.context = context.getApplicationContext();
         initDB(context, uuid);
         UdeskLibConst.uuid = uuid;
         UdeskLibConst.sign = sign;
@@ -505,5 +505,9 @@ public class UdeskSDKManager {
 
     public void setProductMessageWebonCliclk(IProductMessageWebonCliclk productMessageWebonCliclk) {
         this.productMessageWebonCliclk = productMessageWebonCliclk;
+    }
+
+    public Context getContext(){
+        return context;
     }
 }

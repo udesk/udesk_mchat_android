@@ -34,7 +34,7 @@ import cn.udesk.UdeskUtil;
 import cn.udesk.activity.UdeskChatActivity;
 import cn.udesk.adapter.AbsCommonAdapter;
 import cn.udesk.adapter.AbsViewHolder;
-import cn.udesk.adapter.UDEmojiAdapter;
+import cn.udesk.emotion.MoonUtils;
 import cn.udesk.model.InitMode;
 import cn.udesk.model.Merchant;
 import cn.udesk.muchat.HttpCallBack;
@@ -211,12 +211,11 @@ public class ConversationFragment extends BaseFragment implements PullToRefreshS
                     timeTv.setText(UdeskUtil.formatLongTypeTimeToString(ConversationFragment.this.getContext(), BaseUtils.objectToString(message.getCreated_at())));
                     String contentType = BaseUtils.objectToString(message.getContent_type());
                     if (UdeskConst.ChatMsgTypeString.TYPE_TEXT.equals(contentType)) {
-                        if (UDEmojiAdapter.replaceEmoji(mContext, BaseUtils.objectToString(message.getContent()),
-                                (int) contentTv.getTextSize()) != null) {
-                            contentTv.setText(UDEmojiAdapter.replaceEmoji(mContext, BaseUtils.objectToString(message.getContent()),
-                                    (int) contentTv.getTextSize()));
-                        } else {
-                            contentTv.setText(BaseUtils.objectToString(message.getContent()));
+                        String content = BaseUtils.objectToString(message.getContent());
+                        if (MoonUtils.isHasEmotions(content)){
+                            contentTv.setText(MoonUtils.replaceEmoticons(mContext, content, (int) contentTv.getTextSize()));
+                        }else {
+                            contentTv.setText(content);
                         }
                     } else if (UdeskConst.ChatMsgTypeString.TYPE_AUDIO.equals(contentType)) {
                         contentTv.setText(getString(R.string.msg_type_audio));

@@ -55,13 +55,11 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 
-import cn.udesk.LoaderTask;
 import cn.udesk.R;
 import cn.udesk.UdeskConst;
 import cn.udesk.UdeskSDKManager;
 import cn.udesk.UdeskUtil;
 import cn.udesk.activity.MessageAdatper.AudioViewHolder;
-import cn.udesk.adapter.UDEmojiAdapter;
 import cn.udesk.adapter.UdeskFunctionAdapter;
 import cn.udesk.audio.AudioRecordButton;
 import cn.udesk.camera.UdeskCameraActivity;

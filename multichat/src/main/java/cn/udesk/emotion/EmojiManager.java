@@ -24,6 +24,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
+import cn.udesk.UdeskSDKManager;
+
 /**
  * emoji表情管理器
  */
@@ -36,20 +38,22 @@ public class EmojiManager {
 
     private static final List<Entry> mDefaultEntries = new ArrayList<>();
     private static final Map<String, Entry> mText2Entry = new HashMap<>();
+    private static Map<String, String> specialCharMap = new HashMap<>();
     private static LruCache<String, Bitmap> mDrawableCache;
-
+    private static String weixinfaceRegex = "\\[emoji[0-9]{1,3}\\]|\\[笑脸\\]|\\[开心\\]|\\[美女\\]" +
+            "|\\[眨眼\\]|\\[囧\\]|\\[呲牙\\]|\\[亲亲\\]|\\[酷\\]|\\[睡觉\\]|\\[难过\\]|\\[破涕为笑\\]|\\[哭\\]|\\[吐舌\\]|\\[怒\\]|\\[恐惧\\]|\\[得意\\]"+
+            "|\\[生病\\]|\\[赞\\]|\\[鼓掌\\]|\\[OK\\]|\\[加油\\]|\\[拜托\\]|\\[太阳\\]|\\[咖啡\\]|\\[红心\\]|\\[花\\]|\\[冰激凌\\]|\\[叹号\\]";
     static {
-        Context context = LQREmotionKit.getContext();
-
+        Context context = UdeskSDKManager.getInstance().getContext();
         load(context, EMOT_DIR + "emoji.xml");
-
         mPattern = makePattern();
 
         mDrawableCache = new LruCache<String, Bitmap>(CACHE_MAX_SIZE) {
             @Override
             protected void entryRemoved(boolean evicted, String key, Bitmap oldValue, Bitmap newValue) {
-                if (oldValue != newValue)
+                if (oldValue != newValue) {
                     oldValue.recycle();
+                }
             }
         };
     }
@@ -117,7 +121,7 @@ public class EmojiManager {
     }
 
     private static String patternOfDefault() {
-        return "\\[[^\\[]{1,10}\\]";
+        return weixinfaceRegex;
     }
 
     private static final void load(Context context, String xmlPath) {
@@ -187,5 +191,4 @@ public class EmojiManager {
             }
         }
     }
-
 }

@@ -27,7 +27,6 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.google.gson.Gson;
@@ -45,9 +44,9 @@ import cn.udesk.R;
 import cn.udesk.UdeskConst;
 import cn.udesk.UdeskSDKManager;
 import cn.udesk.UdeskUtil;
-import cn.udesk.adapter.UDEmojiAdapter;
 import cn.udesk.config.UdekConfigUtil;
 import cn.udesk.config.UdeskConfig;
+import cn.udesk.emotion.MoonUtils;
 import cn.udesk.model.Merchant;
 import cn.udesk.model.SendMsgResult;
 import cn.udesk.muchat.bean.ExtrasInfo;
@@ -715,12 +714,11 @@ MessageAdatper extends BaseAdapter {
         void bind(Context context) {
             try {
                 //设置文本消息内容，表情符转换对应的表情,没表情的另外处理
-                if (UDEmojiAdapter.replaceEmoji(context, UdeskUtil.objectToString(message.getContent()),
-                        (int) tvMsg.getTextSize()) != null) {
-                    tvMsg.setText(UDEmojiAdapter.replaceEmoji(context, UdeskUtil.objectToString(message.getContent()),
-                            (int) tvMsg.getTextSize()));
+                String content = UdeskUtil.objectToString(message.getContent());
+                if (MoonUtils.isHasEmotions(content)){
+                    tvMsg.setText(MoonUtils.replaceEmoticons(mContext, content, (int) tvMsg.getTextSize()));
                 } else {
-                    tvMsg.setHtml(UdeskUtil.objectToString(message.getContent()));
+                    tvMsg.setHtml(content);
                     dealRichText(tvMsg);
                 }
 
@@ -762,12 +760,11 @@ MessageAdatper extends BaseAdapter {
         void bind(Context context) {
             try {
                 //设置文本消息内容，表情符转换对应的表情,没表情的另外处理
-                if (UDEmojiAdapter.replaceEmoji(context, UdeskUtil.objectToString(message.getContent()),
-                        (int) tvMsg.getTextSize()) != null) {
-                    tvMsg.setText(UDEmojiAdapter.replaceEmoji(context, UdeskUtil.objectToString(message.getContent()),
-                            (int) tvMsg.getTextSize()));
+                String content = UdeskUtil.objectToString(message.getContent());
+                if (MoonUtils.isHasEmotions(content)){
+                    tvMsg.setText(MoonUtils.replaceEmoticons(mContext, content, (int) tvMsg.getTextSize()));
                 } else {
-                    tvMsg.setText(UdeskUtil.objectToString(message.getContent()));
+                    tvMsg.setText(content);
                     tvMsg.setMovementMethod(LinkMovementMethod.getInstance());
                     CharSequence text = tvMsg.getText();
                     if (text instanceof Spannable) {

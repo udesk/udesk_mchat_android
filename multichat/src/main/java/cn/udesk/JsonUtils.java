@@ -74,10 +74,13 @@ public class JsonUtils {
             receiveMessage.setMerchant_euid(content.opt("merchant_euid"));
             receiveMessage.setSend_status(content.opt("send_status"));
             if (content.has("extras")) {
-                JSONObject extrasObject = new JSONObject(content.getString("extras"));
-                ExtrasInfo info = new ExtrasInfo();
-                info.setDuration(extrasObject.opt("duration"));
-                receiveMessage.setExtras(info);
+                String extras = content.optString("extras");
+                if (!TextUtils.isEmpty(extras) && !TextUtils.equals("null",extras)){
+                    JSONObject extrasObject = new JSONObject(extras);
+                    ExtrasInfo info = new ExtrasInfo();
+                    info.setDuration(extrasObject.opt("duration"));
+                    receiveMessage.setExtras(info);
+                }
             }
         } catch (JSONException e) {
             e.printStackTrace();
