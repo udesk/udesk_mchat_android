@@ -17,6 +17,7 @@ import java.util.concurrent.Executors;
 
 import cn.udesk.activity.UdeskChatActivity;
 import cn.udesk.callback.ICommodityCallBack;
+import cn.udesk.callback.IFunctionItemClickCallBack;
 import cn.udesk.callback.IInitCallBack;
 import cn.udesk.callback.IMerchantUnreadMsgCnt;
 import cn.udesk.callback.IMessageArrived;
@@ -26,6 +27,7 @@ import cn.udesk.callback.ItotalUnreadMsgCnt;
 import cn.udesk.config.UdeskConfig;
 import cn.udesk.db.UdeskDBManager;
 import cn.udesk.emotion.LQREmotionKit;
+import cn.udesk.model.FunctionMode;
 import cn.udesk.model.InitMode;
 import cn.udesk.model.NavigationMode;
 import cn.udesk.model.ProductMessage;
@@ -76,6 +78,8 @@ public class UdeskSDKManager {
 
     private INavigationItemClickCallBack navigationItemClickCallBack;
     private ExecutorService singleExecutor;
+    private List<FunctionMode> extraFunctions;
+    private IFunctionItemClickCallBack functionItemClickCallBack;
 
     private void ensureMessageExecutor() {
         if (scaleExecutor == null) {
@@ -87,9 +91,13 @@ public class UdeskSDKManager {
 
     private UdeskSDKManager() {
         singleExecutor = Executors.newSingleThreadExecutor();
+        ensureMessageExecutor();
     }
     public ExecutorService getSingleExecutor() {
         return singleExecutor;
+    }
+    public ExecutorService getXmppExecutor() {
+        return scaleExecutor;
     }
     public List<NavigationMode> getNavigationModes() {
         return navigationModes;
@@ -164,6 +172,39 @@ public class UdeskSDKManager {
     }
 
     /**
+     * @param extraFunctions            设置额外的功能按钮
+     * @param functionItemClickCallBack 支持自定义功能按钮后 点击事件回调 直接发送文本,图片,视频,商品信息等
+     */
+    public void setExtraFunctions(List<FunctionMode> extraFunctions, IFunctionItemClickCallBack functionItemClickCallBack) {
+        this.extraFunctions = extraFunctions;
+        this.functionItemClickCallBack = functionItemClickCallBack;
+    }
+
+    /**
+     * 设置额外的自定义按钮
+     * @param extraFunctions
+     */
+    public void setExtraFunctions(List<FunctionMode> extraFunctions) {
+        this.extraFunctions = extraFunctions;
+    }
+
+    /**
+     * 支持自定义功能按钮后 点击事件回调 直接发送文本,图片,视频,商品信息等
+     * @param functionItemClickCallBack
+     */
+    public void setFunctionItemClickCallBack(IFunctionItemClickCallBack functionItemClickCallBack) {
+        this.functionItemClickCallBack = functionItemClickCallBack;
+    }
+
+    public List<FunctionMode> getExtraFunctions() {
+        return extraFunctions;
+    }
+
+    public IFunctionItemClickCallBack getFunctionItemClickCallBack() {
+        return functionItemClickCallBack;
+    }
+
+    /**
      * @param context
      * @param uuid      租户的唯一标识
      * @param sign      加密的key
@@ -222,37 +263,49 @@ public class UdeskSDKManager {
     }
 
     private void initMode(final String customer_euid, final String customer_name, final IInitCallBack iInitCallBack) {
-        HttpFacade.getInstance().init(customer_euid, customer_name, new HttpCallBack() {
-            @Override
-            public void onSuccess(String message) {
-                initMode = JsonUtils.parserInitMessage(message);
-                if (initMode != null) {
-                    cancleXmpp();
-                    connectXmpp(initMode);
-                    UdeskDBManager.getInstance().addInitInfo(initMode);
-                    getUnReadMessages();
-                    if (iInitCallBack != null){
-                        iInitCallBack.initSuccess(initMode);
+        try {
+            if (TextUtils.isEmpty(customer_euid) || TextUtils.isEmpty(customer_name)) {
+                return;
+            }
+
+            HttpFacade.getInstance().init(customer_euid, customer_name, new HttpCallBack() {
+                @Override
+                public void onSuccess(String message) {
+                    initMode = JsonUtils.parserInitMessage(message);
+                    if (initMode != null) {
+                        connectXmpp(initMode);
+                        UdeskDBManager.getInstance().addInitInfo(initMode);
+                        getUnReadMessages();
+                        if (iInitCallBack != null) {
+                            iInitCallBack.initSuccess(initMode);
+                        }
                     }
                 }
-            }
 
-            @Override
-            public void onFail(Throwable message) {
+                @Override
+                public void onFail(Throwable message) {
 
-            }
+                }
 
-            @Override
-            public void onSuccessFail(String message) {
+                @Override
+                public void onSuccessFail(String message) {
 
-            }
-        });
+                }
+            });
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
 
 
     public void setCustomerOffline(boolean offline) {
         if (initMode != null) {
+            if (offline){
+                connectXmpp(initMode);
+            }else {
+                cancleXmpp();
+            }
             HttpFacade.getInstance().switchPush(UdeskUtil.getAuthToken(UdeskUtil.objectToString(initMode.getIm_username()),
                     UdeskUtil.objectToString(initMode.getIm_password())), getRegisterId(context), offline, new HttpCallBack() {
                 @Override
@@ -293,11 +346,13 @@ public class UdeskSDKManager {
             if (isConnection()) {
                 return;
             }
-            ensureMessageExecutor();
             scaleExecutor.submit(new Runnable() {
                 @Override
                 public void run() {
                     if (mUdeskXmppManager != null) {
+                        if (mUdeskXmppManager != null) {
+                            mUdeskXmppManager.cancel();
+                        }
                         mUdeskXmppManager.startLoginXmpp(loginName, loginPassword, loginServer, loginPort);
                     }
                 }
@@ -310,14 +365,17 @@ public class UdeskSDKManager {
 
     public void cancleXmpp() {
         try {
-            LoaderTask.getThreadPoolExecutor().execute(new Runnable() {
+            scaleExecutor.submit(new Runnable() {
                 @Override
                 public void run() {
                     if (mUdeskXmppManager != null) {
-                        mUdeskXmppManager.cancel();
+                        if (mUdeskXmppManager != null) {
+                            mUdeskXmppManager.cancel();
+                        }
                     }
                 }
             });
+
         } catch (Exception e) {
             e.printStackTrace();
         }

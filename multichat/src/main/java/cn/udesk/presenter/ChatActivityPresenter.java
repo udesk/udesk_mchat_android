@@ -1075,5 +1075,34 @@ public class ChatActivityPresenter {
             e.printStackTrace();
         }
     }
+    public void queue() {
+        try {
+            InitMode initMode = UdeskSDKManager.getInstance().getInitMode();
+            if (initMode != null) {
+                HttpFacade.getInstance().queue(UdeskUtil.getAuthToken(UdeskUtil.objectToString(initMode.getIm_username()),
+                        UdeskUtil.objectToString(initMode.getIm_password())), mChatView.getEuid(), new HttpCallBack() {
+                            @Override
+                            public void onSuccess(String string) {
+                                Log.i("udesk", "queue result =" + string);
+                            }
+
+                            @Override
+                            public void onFail(Throwable message) {
+                                Log.i("udesk", "queue onFail =" + message);
+
+                            }
+
+                            @Override
+                            public void onSuccessFail(String message) {
+                                Log.i("udesk", "queue onSuccessFail =" + message);
+
+                            }
+                        }
+                );
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
 }

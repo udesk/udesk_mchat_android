@@ -15,6 +15,7 @@ import java.util.List;
 
 import cn.jpush.android.api.JPushInterface;
 import cn.udesk.callback.ICommodityCallBack;
+import cn.udesk.callback.IFunctionItemClickCallBack;
 import cn.udesk.callback.IMessageArrived;
 import cn.udesk.callback.INavigationItemClickCallBack;
 import cn.udesk.callback.ItotalUnreadMsgCnt;
@@ -22,6 +23,7 @@ import cn.udesk.UdeskSDKManager;
 import cn.udesk.callback.IMerchantUnreadMsgCnt;
 import cn.udesk.UdeskUtil;
 import cn.udesk.config.UdeskConfig;
+import cn.udesk.model.FunctionMode;
 import cn.udesk.model.NavigationMode;
 import cn.udesk.model.ProductMessage;
 import cn.udesk.muchat.bean.Products;
@@ -43,6 +45,7 @@ public class UdeskUseGuideActivity extends Activity implements View.OnClickListe
         findViewById(R.id.commity_callback).setOnClickListener(this);
         findViewById(R.id.all_unread_msg).setOnClickListener(this);
         findViewById(R.id.add_navigation).setOnClickListener(this);
+        findViewById(R.id.add_extraFunction).setOnClickListener(this);
         merchant_unread_count = (TextView) findViewById(R.id.merchant_unread_count);
         all_unread_count = (TextView) findViewById(R.id.all_unread_count);
         receive_msg = (TextView) findViewById(R.id.receive_msg);
@@ -183,7 +186,41 @@ public class UdeskUseGuideActivity extends Activity implements View.OnClickListe
                 }
             });
             Toast.makeText(UdeskUseGuideActivity.this, "设置成功", Toast.LENGTH_SHORT).show();
+        } else if (v.getId() == R.id.add_extraFunction) {
+
+            UdeskSDKManager.getInstance().setExtraFunctions(getExtraFunctions(), new IFunctionItemClickCallBack() {
+                @Override
+                public void callBack(Context context, ChatActivityPresenter mPresenter, FunctionMode functionMode) {
+                    switch (functionMode.getId()){
+                        case 11:
+                            mPresenter.sendTxtMessage("发送文本消息");
+                            break;
+                        case 12:
+                            mPresenter.sendProductMessage(createProduct());
+                            break;
+                        case 13:
+                            UdeskSDKManager.getInstance().cancleXmpp();
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            });
+            Toast.makeText(UdeskUseGuideActivity.this, "设置成功", Toast.LENGTH_SHORT).show();
         }
+    }
+
+
+    private List<FunctionMode> getExtraFunctions() {
+        // id  1-5 已被占用
+        List<FunctionMode> modes = new ArrayList<>();
+        FunctionMode functionMode1 = new FunctionMode("发送文本消息", 11, R.mipmap.udesk_form_table);
+        FunctionMode functionMode2 = new FunctionMode("发送商品消息", 12, R.mipmap.udesk_form_table);
+        FunctionMode functionMode3 = new FunctionMode("断开xmpp连接", 13, R.mipmap.udesk_form_table);
+        modes.add(functionMode1);
+        modes.add(functionMode2);
+        modes.add(functionMode3);
+        return modes;
     }
 
     private List<NavigationMode> getNavigations() {

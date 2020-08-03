@@ -130,6 +130,17 @@
             android:textSize="16sp"
             android:text="添加导航兰"
            />
+        <TextView
+            android:id="@+id/add_extraFunction"
+            android:layout_width="fill_parent"
+            android:layout_height="@dimen/udesk_40"
+            android:layout_margin="10dip"
+            android:background="@drawable/udesk_btn_bg"
+            android:gravity="center"
+            android:textColor="#0D253E"
+            android:textSize="16sp"
+            android:text="添加自定义按钮和回调"
+           />
 
     </LinearLayout>
 </ScrollView>

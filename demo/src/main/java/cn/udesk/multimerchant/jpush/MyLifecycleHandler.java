@@ -32,6 +32,7 @@ public class MyLifecycleHandler implements Application.ActivityLifecycleCallback
     @Override
     public void onActivityResumed(Activity activity) {
         ++resumed;
+        UdeskSDKManager.getInstance().setCustomerOffline(true);
     }
 
     @Override

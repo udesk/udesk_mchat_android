@@ -250,10 +250,13 @@ public class UdeskChatActivity extends UdeskBaseActivity implements IChatActivit
                                 int index = messages.size();
                                 if (arg1 > 0) {
                                     activity.mChatAdapter.listAddItems(messages, true);
+                                    activity.smoothScrollToPosition(activity.mListView,index+1);
+
                                 } else {
                                     activity.mChatAdapter.listAddItems(messages, false);
+                                    activity.smoothScrollToPosition(activity.mListView,activity.mChatAdapter.getCount());
+
                                 }
-                                activity.mListView.smoothScrollToPosition(index + 1);
                             }
                         }
                         break;
@@ -265,7 +268,8 @@ public class UdeskChatActivity extends UdeskBaseActivity implements IChatActivit
                         ReceiveMessage msgInfo = (ReceiveMessage) msg.obj;
                         if (msgInfo != null && UdeskUtil.objectToString(msgInfo.getMerchant_euid()).equals(activity.euid) && activity.mChatAdapter != null) {
                             activity.mChatAdapter.addItem(msgInfo);
-                            activity.mListView.smoothScrollToPosition(activity.mChatAdapter.getCount());
+                            activity.smoothScrollToPosition(activity.mListView,activity.mChatAdapter.getCount());
+
                         }
                         break;
                     case MessageWhat.RECORD_ERROR:
@@ -318,6 +322,19 @@ public class UdeskChatActivity extends UdeskBaseActivity implements IChatActivit
         }
     }
 
+    private void smoothScrollToPosition(final UDPullGetMoreListView listView, final int positon){
+        try {
+            listView.smoothScrollToPosition(positon);
+            listView.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    listView.setSelection(positon);
+                }
+            },400);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
     /**
      * 根据消息的ID 修改发送状态
      */
@@ -612,6 +629,12 @@ public class UdeskChatActivity extends UdeskBaseActivity implements IChatActivit
                             clickVideo();
                             mBottomFramlayout.setVisibility(View.GONE);
                             break;
+                        default:
+                            if (UdeskSDKManager.getInstance().getFunctionItemClickCallBack() != null) {
+                                UdeskSDKManager.getInstance().getFunctionItemClickCallBack()
+                                        .callBack(getApplicationContext(), mPresenter, functionItem);
+                            }
+                            break;
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -905,6 +928,10 @@ public class UdeskChatActivity extends UdeskBaseActivity implements IChatActivit
             if (UdeskConfig.isUseSmallVideo) {
                 FunctionMode videoItem = new FunctionMode(getString(R.string.video), UdeskConst.UdeskFunctionFlag.Udesk_Video, R.drawable.udesk_video);
                 functionItems.add(videoItem);
+            }
+            if (UdeskSDKManager.getInstance().getExtraFunctions() != null
+                    && UdeskSDKManager.getInstance().getExtraFunctions().size() > 0) {
+                functionItems.addAll(UdeskSDKManager.getInstance().getExtraFunctions());
             }
 
             udeskFunctionAdapter.setFunctionItems(functionItems);
@@ -1745,7 +1772,7 @@ public class UdeskChatActivity extends UdeskBaseActivity implements IChatActivit
         try {
             if (mChatAdapter != null && UdeskUtil.objectToString(msgInfo.getMerchant_euid()).equals(euid)) {
                 mChatAdapter.addItem(msgInfo);
-                mListView.smoothScrollToPosition(mChatAdapter.getCount());
+                smoothScrollToPosition(mListView,mChatAdapter.getCount());
             }
             if (msgInfo.getEvent_name().equals("invite_survey")) {
                 Message messge = getHandler().obtainMessage(
@@ -1949,6 +1976,7 @@ public class UdeskChatActivity extends UdeskBaseActivity implements IChatActivit
             recycleVoiceRes();
             unRegister();
             if (mPresenter != null) {
+                mPresenter.queue();
                 mPresenter.unBind();
                 mPresenter = null;
             }

@@ -27,7 +27,6 @@ import java.util.Set;
 import java.util.UUID;
 
 import cn.udesk.JsonUtils;
-import cn.udesk.LoaderTask;
 import cn.udesk.UdeskSDKManager;
 import cn.udesk.muchat.UdeskLibConst;
 import cn.udesk.muchat.bean.ReceiveMessage;
@@ -131,12 +130,15 @@ public class UdeskXmppManager implements ConnectionListener, StanzaListener {
                 xmppConnection.login(name, password);
                 xmppConnection.sendStanza(new Presence(Presence.Type.available));
                 if (handler != null) {
-                    handler.post(runnable);
+                    handler.postDelayed(runnable,1000);
                 }
             }
         } catch (Exception e) {
             Log.i("xxxxx", "Exception =");
             e.printStackTrace();
+            if (handler != null) {
+                handler.postDelayed(runnable,10000);
+            }
             return false;
         }
         return true;
@@ -146,6 +148,10 @@ public class UdeskXmppManager implements ConnectionListener, StanzaListener {
         @Override
         public void run() {
 
+            if (!isConnection()){
+                reConnected();
+                return;
+            }
             sendSelfStatus();
             if (handler != null) {
                 handler.postDelayed(this, 10000);
@@ -162,7 +168,6 @@ public class UdeskXmppManager implements ConnectionListener, StanzaListener {
             }
         } catch (Exception e) {
             e.printStackTrace();
-            reConnected();
         }
     }
 
@@ -211,18 +216,19 @@ public class UdeskXmppManager implements ConnectionListener, StanzaListener {
 
 
     private synchronized void reConnected() {
-        if (time > 5) {
-            return;
-        }
-        if (isConnection()) {
-            return;
-        }
-        LoaderTask.getThreadPoolExecutor().execute(new Runnable() {
+        UdeskSDKManager.getInstance().getXmppExecutor().submit(new Runnable() {
 
             @Override
             public void run() {
+                if (time > 5) {
+                    return;
+                }
+                if (isConnection()) {
+                    return;
+                }
                 try {
                     time++;
+                    cancel();
                     startLoginXmpp(loginName,
                             loginPassword, loginServer, loginPort);
                 } catch (Exception e) {
@@ -261,8 +267,7 @@ public class UdeskXmppManager implements ConnectionListener, StanzaListener {
 
     @Override
     public void connected(XMPPConnection arg0) {
-
-
+        time = 0;
     }
 
     @Override
