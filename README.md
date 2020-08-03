@@ -242,9 +242,12 @@ Add this in your root build.gradle file (not your module build.gradle file):
     }
 
 ### 9.离线推送
-	
 
-	//保存注册推送的的唯一ID
+	当前推送方案为Udesk务端发送消息至开发者的服务端，开发者再推送消息到 App。
+	
+	1、设置接收推送的服务器地址
+
+	2、保存注册推送的的唯一ID
 	UdeskSDKManager.getInstance().setRegisterId(context, registerId);
 
     public void setRegisterId(Context context, String registerId) {
@@ -253,10 +256,10 @@ Add this in your root build.gradle file (not your module build.gradle file):
                 UdeskLibConst.SharePreParams.Udesk_Push_RegisterId, registerId);
     }
 	
-	//开启关闭推送开关  开启传false  关闭传true.
+	3、开启关闭推送开关  开启传false  关闭传true.
 	UdeskSDKManager.getInstance().setCustomerOffline(false);
 	
-	现在默认是进入会话界面关闭推送，退到后台开启推送
+	demo 现在默认是进入会话界面关闭推送，退到后台开启推送
 	建议 在application中registerActivityLifecycleCallbacks（ActivityLifecycleCallbacks activityLifecycleCallbacks）来控所有前后台逻辑
 
 ### 10.退出断开xmpp链接
@@ -313,7 +316,81 @@ application 中加入
 	"zh-CN" => “中文”
 
 
-### 13.混淆配置
+### 13.自定义按钮
+
+	demo中示例
+
+	 UdeskSDKManager.getInstance().setExtraFunctions(getExtraFunctions(), new IFunctionItemClickCallBack() {
+                @Override
+                public void callBack(Context context, ChatActivityPresenter mPresenter, FunctionMode functionMode) {
+                    switch (functionMode.getId()){
+                        case 21:
+                            mPresenter.sendTxtMessage("发送文本消息");
+                            break;
+                        case 22:
+                            mPresenter.sendProductMessage(createProduct());
+                            break;
+                        case 23:
+                            UdeskSDKManager.getInstance().cancleXmpp();
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            });
+
+	1、创建自定义按钮
+
+	说明：一个功能按钮设置成一个FunctionMode， 包含属性
+        //显示内容
+         private String name;
+        //用来映射选择后对应的操作 id值 前20 是udesk 预留的,  客户自定义添加的，用于返回后根据id值建立映射关系
+        private int id;
+        //如 R.drawable.udesk_001
+        //显示的图标
+        private int mIconSrc ;
+	
+	    private List<FunctionMode> getExtraFunctions() {
+        List<FunctionMode> modes = new ArrayList<>();
+        FunctionMode functionMode1 = new FunctionMode("发送文本消息", 21, R.mipmap.udesk_form_table);
+        FunctionMode functionMode2 = new FunctionMode("发送商品消息", 22, R.mipmap.udesk_form_table);
+        FunctionMode functionMode3 = new FunctionMode("断开xmpp连接", 23, R.mipmap.udesk_form_table);
+        modes.add(functionMode1);
+        modes.add(functionMode2);
+        modes.add(functionMode3);
+        return modes;
+    }
+
+	2、设置自定义按钮及回调
+	
+	 /**
+     * @param extraFunctions            设置额外的功能按钮
+     * @param functionItemClickCallBack 支持自定义功能按钮后 点击事件回调 直接发送文本,图片,视频,商品信息等
+     */
+    public void setExtraFunctions(List<FunctionMode> extraFunctions, IFunctionItemClickCallBack functionItemClickCallBack) {
+        this.extraFunctions = extraFunctions;
+        this.functionItemClickCallBack = functionItemClickCallBack;
+    }
+
+	3、根据接口回调返回的 参数进行调用方法操作 ChatActivityPresenter mPresenter
+	
+		1 发送文本 
+		  public void sendTxtMessage(String msgString)
+		  mPresenter.sendTxtMessage(msgString);
+		2 发送商品消息
+		  public void sendProductMessage(ProductMessage mProduct)
+		  mPresenter.sendProductMessage(mProduct)
+		3 发送图片
+		  public void sendBitmapMessage(String photoPath)
+		  mPresenter.sendBitmapMessage(photoPath)
+		4 发送小视频
+		  public void sendVideoMessage(String videoPath)
+		  mPresenter.sendVideoMessage(videoPath)
+		5 发送录音消息
+		  public void sendRecordAudioMsg(String audiopath, long duration)
+		  mPresenter.sendRecordAudioMsg(audioFilePath, duration)
+
+### 14.混淆配置
 
 	//udesk
 	-keep class udesk.** {*;} 
