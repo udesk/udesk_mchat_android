@@ -25,10 +25,10 @@ public class InitActivity extends Activity implements View.OnClickListener {
 
 //    String uuid = "561c8173-e3c8-4c19-94bf-6e45aeca2e39";
 //    String key = "111b0a6c368d49b8b1bb8887b5112c34";
-     String uuid = "b1ce357b-8ce8-4ea1-9a87-7d15519dd7e6";
-    String key = "27aa6696cba45cc091ee66fbc25aedab";
-//     String uuid = "fdb9d75a-ccae-4cd8-b761-3ac436454810";
-//    String key = "f6103178f7ca8e5b2c988e688850d106";
+//     String uuid = "b1ce357b-8ce8-4ea1-9a87-7d15519dd7e6";
+//    String key = "27aa6696cba45cc091ee66fbc25aedab";
+     String uuid = "e5f583d6-cc5f-441a-97ef-38c33f88c144";
+    String key = "0d116ad304224802be1c86a003c41275";
 
     private EditText uuidEdit, udesk_sign;
     private Button udesk_next;

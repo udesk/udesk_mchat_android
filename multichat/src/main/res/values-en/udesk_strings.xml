@@ -115,6 +115,7 @@
     <string name="photo">Album</string>
     <string name="survy">Satisfaction Rating</string>
     <string name="video">Video call</string>
+    <string name="file">File</string>
 
     <string name="udesk_too_short">Message too short</string>
     <string name="camera_view_tips">hold to record small video</string>
@@ -134,5 +135,8 @@
     <string name="udesk_selector_action_done_photo_pre">Preview(%1$d)</string>
     <string name="udesk_selector_photos">Select</string>
     <string name="udesk_selector_photo_index_num">(%1$d/%2$d)</string>
+    <string name="udesk_file_not_exist">File does not exist</string>
+    <string name="udesk_upload_video_error">Failed to upload video, please try again</string>
+    <string name="udesk_upload_file_error">Failed to upload file, please try again</string>
 
 </resources>

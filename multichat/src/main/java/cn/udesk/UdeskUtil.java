@@ -22,6 +22,7 @@ import android.os.Environment;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
 import android.provider.OpenableColumns;
+import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.Base64;
 import android.util.DisplayMetrics;
@@ -57,10 +58,15 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import cn.udesk.activity.UdeskZoomImageActivty;
+import cn.udesk.model.CustomerInfo;
+import cn.udesk.model.InitMode;
+import cn.udesk.muchat.UdeskLibConst;
+import cn.udesk.muchat.bean.UpdateCustomerField;
 import cn.udesk.provider.UdeskExternalCacheProvider;
 import cn.udesk.provider.UdeskExternalFileProvider;
 import cn.udesk.provider.UdeskExternalProvider;
@@ -160,6 +166,7 @@ public class UdeskUtil {
         }
         return "";
     }
+
     public static String getPathByUrl(Context context, String fileType, String url) {
         String fileName = getFileName(context, url, fileType);
         try {
@@ -169,33 +176,19 @@ public class UdeskUtil {
         }
         return fileName;
     }
+
     public static File getFileByUrl(Context context, String fileType, String url) {
-        String fileName = getFileName(url, fileType);
+        String fileName = getFileName(context, url, fileType);
         try {
             String filepath = getDirectoryPath(context.getApplicationContext(), fileType) + File.separator + fileName;
             File file = new File(filepath);
-            if (file.exists()) {
-                return file;
-            }
+            return file;
         } catch (Exception e) {
             e.printStackTrace();
         }
         return null;
     }
-    public static String getFileName(String url, String type) {
-        if (TextUtils.isEmpty(url)) {
-            return "";
-        }
-        String filename = url.substring(url.lastIndexOf("/") + 1);
-        if (type.equals(UdeskConst.FileAudio) && !filename.contains(UdeskConst.AUDIO_SUF_WAV)) {
-            filename = filename + UdeskConst.AUDIO_SUF_WAV;
-        } else if (type.equals(UdeskConst.FileImg) && !filename.contains(UdeskConst.IMG_SUF)) {
-            filename = filename + UdeskConst.IMG_SUF;
-        } else if (type.equals(UdeskConst.FileVideo) && !filename.contains(UdeskConst.VIDEO_SUF)) {
-            filename = filename + UdeskConst.VIDEO_SUF;
-        }
-        return filename;
-    }
+
     public static File cameaFile(Context context) {
         try {
             String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
@@ -572,19 +565,26 @@ public static Uri getOutputMediaFileUri(Context context, File file) {
         return false;
     }
 
-    public static String getFileSizeByLoaclPath(String filePath) {
+
+    public static String getFileSizeByLoaclPath(Context context, String filePath) {
         try {
-            File file = new File(filePath);
-            if (file != null && file.exists()) {
-                long blockSize = getFileSize(file);
-                return formetFileSize(blockSize);
+            long blockSize = 0L;
+            if (UdeskUtil.isAndroidQ()) {
+                AssetFileDescriptor assetFileDescriptor = context.getContentResolver().openAssetFileDescriptor(Uri.parse(getFilePathQ(context, filePath)), "r");
+                if (assetFileDescriptor != null) {
+                    blockSize = assetFileDescriptor.getLength();
+                }
+            } else {
+                File file = new File(filePath);
+                if (file.exists()) {
+                    blockSize = getFileSize(file);
+                }
             }
+            return formetFileSize(blockSize);
         } catch (Exception e) {
             return "0B";
         }
-        return "0B";
     }
-
 
     public static String getFileSizeByMsgIdAndUrl(String msgId, String url) {
         File file = getLoaclpathByMsgIdAndUrl(msgId, url);
@@ -598,6 +598,9 @@ public static Uri getOutputMediaFileUri(Context context, File file) {
 
     public static long getFileSize(File file) {
         long size = 0;
+        if (file == null) {
+            return size;
+        }
         if (file.exists()) {
             FileInputStream fis = null;
             try {
@@ -838,18 +841,6 @@ public static Uri getOutputMediaFileUri(Context context, File file) {
 
     }
 
-    public static String getAppName(Context context) {
-        String appName = "";
-        try {
-            PackageManager manager = context.getPackageManager();
-            PackageInfo info = null;
-            info = manager.getPackageInfo(context.getPackageName(), 0);
-            appName = info.applicationInfo.loadLabel(manager).toString();
-        } catch (PackageManager.NameNotFoundException e) {
-            e.printStackTrace();
-        }
-        return appName;
-    }
 
     public static int toInt(String str, int defValue) {
         try {
@@ -1433,6 +1424,18 @@ public static Uri getOutputMediaFileUri(Context context, File file) {
         return type;
     }
 
+    public static String getMIMEType(Context context, Uri uri) {
+        String mimeType = "*/*";
+        try {
+            mimeType = context.getContentResolver().getType(uri);
+            if (mimeType != null) {
+                return mimeType;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return mimeType;
+    }
 
     public static final String[][] MIME_MapTable = {
             {".3gp", "video/3gpp"},
@@ -1710,5 +1713,135 @@ public static Uri getOutputMediaFileUri(Context context, File file) {
         return MD5(s.getBytes());
     }
 
+    public static String getVersionName(Context context) {
+        try {
+            PackageManager manager = context.getPackageManager();
+            PackageInfo info = manager.getPackageInfo(context.getPackageName(), 0);
+            return info.versionName;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "";
+        }
+    }
 
+    public static String getAppName(Context context) {
+        String appName = "";
+        try {
+            PackageManager manager = context.getPackageManager();
+            PackageInfo info = null;
+            info = manager.getPackageInfo(context.getPackageName(), 0);
+            appName = info.applicationInfo.loadLabel(manager).toString();
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
+        return appName;
+    }
+
+    public static String getPhoneModal() {
+        try {
+            return Build.MODEL;
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return "";
+    }
+    public static String getPhoneVersion() {
+        try {
+            return Build.VERSION.RELEASE + ",  sdk version：" + UdeskLibConst.sdkversion;
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return "";
+    }
+
+    public static String getScaleScreen(Context context) {
+        try {
+            DisplayMetrics dm = new DisplayMetrics();
+            android.view.Display display = ((WindowManager) context
+                    .getSystemService(Context.WINDOW_SERVICE))
+                    .getDefaultDisplay();
+            display.getMetrics(dm);
+            return dm.heightPixels + "*" + dm.widthPixels;
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return "";
+    }
+
+    public static String getNetworkState(Context context) {
+        try {
+            TelephonyManager tm = (TelephonyManager) context
+                    .getSystemService(Context.TELEPHONY_SERVICE);
+
+            ConnectivityManager connectMgr = (ConnectivityManager) context
+                    .getSystemService(Context.CONNECTIVITY_SERVICE);
+
+            NetworkInfo networkInfoinfo = connectMgr.getActiveNetworkInfo();
+            if (networkInfoinfo == null) {
+                return "offline";
+            } else {
+                if (networkInfoinfo.getType() == ConnectivityManager.TYPE_WIFI) {
+                    return "wifi";
+                } else if (networkInfoinfo.getType() == ConnectivityManager.TYPE_MOBILE) {
+                    int netWorkType = tm.getNetworkType();
+                    if (netWorkType == TelephonyManager.NETWORK_TYPE_EVDO_A
+                            || netWorkType == TelephonyManager.NETWORK_TYPE_HSDPA
+                            || netWorkType == TelephonyManager.NETWORK_TYPE_UMTS
+                            || netWorkType == TelephonyManager.NETWORK_TYPE_EVDO_0) {
+                        return "3G";
+                    } else if (netWorkType == TelephonyManager.NETWORK_TYPE_GPRS
+                            || netWorkType == TelephonyManager.NETWORK_TYPE_EDGE
+                            || netWorkType == TelephonyManager.NETWORK_TYPE_CDMA) {
+                        return "2G";
+                    } else if (netWorkType == TelephonyManager.NETWORK_TYPE_LTE) {
+                        return "4G";
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return "";
+    }
+
+    public static String getCarrier(Context context) {
+        try {
+            TelephonyManager tm = (TelephonyManager) context
+                    .getSystemService(Context.TELEPHONY_SERVICE);
+            return tm.getNetworkOperatorName();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return "";
+    }
+
+    public static UpdateCustomerField buildUpdateCustomerField(Context context, InitMode initMode, CustomerInfo customerInfo) {
+        UpdateCustomerField updateCustomerField = new UpdateCustomerField();
+        try {
+            if (initMode != null && customerInfo != null) {
+                updateCustomerField.setImUsername(objectToString(initMode.getIm_username()));
+                updateCustomerField.setImUserpassword(objectToString(initMode.getIm_password()));
+                updateCustomerField.setTenantId(objectToString(initMode.getTenantId()));
+                updateCustomerField.setCustomerEuid(objectToString(initMode.getEuid()));
+                updateCustomerField.setCustomerName(objectToString(initMode.getName()));
+                updateCustomerField.setCarrier(getCarrier(context));
+                updateCustomerField.setPhoneVersion(getPhoneVersion());
+                updateCustomerField.setScaleScreen(getScaleScreen(context));
+                updateCustomerField.setPhoneModal(getPhoneModal());
+                updateCustomerField.setVersion(UdeskLibConst.sdkversion);
+                updateCustomerField.setNetworkStatus(getNetworkState(context));
+                updateCustomerField.setAppVersion(getVersionName(context));
+                updateCustomerField.setSearchType(getAppName(context));
+                updateCustomerField.setEmail(customerInfo.getEmail());
+                updateCustomerField.setPhone(customerInfo.getCellphone());
+                updateCustomerField.setTags(customerInfo.getTags());
+                updateCustomerField.setDesc(customerInfo.getCustomerDescription());
+                updateCustomerField.setOrg(customerInfo.getOrg());
+                updateCustomerField.setFieldMap(customerInfo.getCustomField());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return updateCustomerField;
+    }
 }

@@ -20,6 +20,20 @@ public class InitMode {
     private Object access_id;
     private Object prefix;
     private Object is_open_survey;
+    //tenan
+    private Object tenantId;
+    private Object deleteFlag;
+    private Object createdAt;
+    private Object updatedAt;
+    private Object uuid;
+    private Object key;
+    private Object tenantName;
+    private Object merchantTotal;
+    private Object imAgentTotal;
+    private Object ticketAgentTotal;
+    private Object backendUrl;
+    private Object subdomainPrefix;
+    private Object language;
 
 
 
@@ -109,5 +123,109 @@ public class InitMode {
 
     public void setIs_open_survey(Object is_open_survey) {
         this.is_open_survey = is_open_survey;
+    }
+
+    public Object getTenantId() {
+        return tenantId;
+    }
+
+    public void setTenantId(Object tenantId) {
+        this.tenantId = tenantId;
+    }
+
+    public Object getDeleteFlag() {
+        return deleteFlag;
+    }
+
+    public void setDeleteFlag(Object deleteFlag) {
+        this.deleteFlag = deleteFlag;
+    }
+
+    public Object getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(Object createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public Object getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(Object updatedAt) {
+        this.updatedAt = updatedAt;
+    }
+
+    public Object getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(Object uuid) {
+        this.uuid = uuid;
+    }
+
+    public Object getKey() {
+        return key;
+    }
+
+    public void setKey(Object key) {
+        this.key = key;
+    }
+
+    public Object getTenantName() {
+        return tenantName;
+    }
+
+    public void setTenantName(Object tenantName) {
+        this.tenantName = tenantName;
+    }
+
+    public Object getMerchantTotal() {
+        return merchantTotal;
+    }
+
+    public void setMerchantTotal(Object merchantTotal) {
+        this.merchantTotal = merchantTotal;
+    }
+
+    public Object getImAgentTotal() {
+        return imAgentTotal;
+    }
+
+    public void setImAgentTotal(Object imAgentTotal) {
+        this.imAgentTotal = imAgentTotal;
+    }
+
+    public Object getTicketAgentTotal() {
+        return ticketAgentTotal;
+    }
+
+    public void setTicketAgentTotal(Object ticketAgentTotal) {
+        this.ticketAgentTotal = ticketAgentTotal;
+    }
+
+    public Object getBackendUrl() {
+        return backendUrl;
+    }
+
+    public void setBackendUrl(Object backendUrl) {
+        this.backendUrl = backendUrl;
+    }
+
+    public Object getSubdomainPrefix() {
+        return subdomainPrefix;
+    }
+
+    public void setSubdomainPrefix(Object subdomainPrefix) {
+        this.subdomainPrefix = subdomainPrefix;
+    }
+
+    public Object getLanguage() {
+        return language;
+    }
+
+    public void setLanguage(Object language) {
+        this.language = language;
     }
 }

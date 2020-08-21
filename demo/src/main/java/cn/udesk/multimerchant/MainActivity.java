@@ -10,20 +10,20 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import cn.udesk.UdeskSDKManager;
+import cn.udesk.model.CustomerInfo;
 import cn.udesk.model.ProductMessage;
 import cn.udesk.muchat.bean.Products;
 
 public class MainActivity extends Activity implements View.OnClickListener {
 
     private final static String TAG = MainActivity.class.getSimpleName();
+    private EditText customEuid,name,org,cellphone,email,description,tags,textfiledkey,textfiledvalue,listfiledkey,listfiledvalue;
 
-
-    String uuid = "a04d138d-98fb-4b9d-b2a7-478b7c0c1ce9";
-    private EditText customeuid;
-    private EditText customeName;
     private Button startBtn;
 
 
@@ -31,8 +31,17 @@ public class MainActivity extends Activity implements View.OnClickListener {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main_view);
-        customeuid = (EditText) findViewById(R.id.udesk_customer_uuid);
-        customeName = (EditText) findViewById(R.id.custom_name);
+        customEuid = findViewById(R.id.customer_euid);
+        name = findViewById(R.id.nick_name);
+        org = findViewById(R.id.org);
+        cellphone = findViewById(R.id.cellphone);
+        email = findViewById(R.id.email);
+        description = findViewById(R.id.description);
+        tags = findViewById(R.id.tags);
+        textfiledkey = findViewById(R.id.textfiledkey);
+        textfiledvalue = findViewById(R.id.textfiledvalue);
+        listfiledkey = findViewById(R.id.listfiledkey);
+        listfiledvalue= findViewById(R.id.listfiledvalue);
         startBtn = (Button) findViewById(R.id.udesk_start);
         startBtn.setOnClickListener(this);
         //设置咨询对象
@@ -44,9 +53,9 @@ public class MainActivity extends Activity implements View.OnClickListener {
     @Override
     public void onClick(View view) {
         if (view.getId() == R.id.udesk_start) {
-
-            if (!TextUtils.isEmpty(customeuid.getText().toString())) {
-                UdeskSDKManager.getInstance().setCustomerInfo(customeuid.getText().toString(), customeName.getText().toString());
+            CustomerInfo customerInfo = buildCustomerInfo();
+            if (!TextUtils.isEmpty(customerInfo.getEuid())) {
+                UdeskSDKManager.getInstance().setCustomerInfo(customerInfo);
                 Intent intent = new Intent();
                 intent.setClass(MainActivity.this, UdeskUseGuideActivity.class);
                 startActivity(intent);
@@ -57,6 +66,47 @@ public class MainActivity extends Activity implements View.OnClickListener {
         }
     }
 
+    private CustomerInfo buildCustomerInfo(){
+        CustomerInfo customerInfo = new CustomerInfo();
+        customerInfo.setCellphone(cellphone.getText().toString());
+        customerInfo.setCustomerDescription(description.getText().toString());
+        customerInfo.setEmail(email.getText().toString());
+        customerInfo.setEuid(customEuid.getText().toString());
+        customerInfo.setName(name.getText().toString());
+        customerInfo.setOrg(org.getText().toString());
+        customerInfo.setTags(tags.getText().toString());
+        Map<String, Object> definedUserTextField = getDefinedUserTextField();
+        definedUserTextField.putAll(getDefinedUserRoplist());
+        customerInfo.setCustomField(definedUserTextField);
+        return customerInfo;
+    }
+    private Map<String, Object> getDefinedUserTextField() {
+        Map<String, Object> definedInfos=new HashMap<>();
+        if (!TextUtils.isEmpty(textfiledkey.getText().toString())
+                && !TextUtils.isEmpty(textfiledvalue.getText().toString())) {
+            definedInfos.put(textfiledkey.getText().toString(), textfiledvalue.getText().toString());
+        }
+        return definedInfos;
+    }
+
+    private Map<String, Object> getDefinedUserRoplist() {
+        Map<String, Object> definedDropListInfo = new HashMap<>();
+        try {
+            // key 是后台自定义字段id  value 是列表角标值
+            if (!TextUtils.isEmpty(listfiledkey.getText().toString())
+                    && !TextUtils.isEmpty(listfiledvalue.getText().toString())) {
+                String[] split = listfiledvalue.getText().toString().split(",");
+                int[] ints = new int[split.length];
+                for (int i = 0; i < split.length; i++) {
+                    ints[i] = Integer.parseInt(split[i]);
+                }
+                definedDropListInfo.put(listfiledkey.getText().toString(), ints);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return definedDropListInfo;
+    }
 
     //设置咨询的商品
     private void createProducts() {

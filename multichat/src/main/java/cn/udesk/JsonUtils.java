@@ -79,6 +79,9 @@ public class JsonUtils {
                     JSONObject extrasObject = new JSONObject(extras);
                     ExtrasInfo info = new ExtrasInfo();
                     info.setDuration(extrasObject.opt("duration"));
+                    info.setFilename(extrasObject.opt("filename"));
+                    info.setFilesize(extrasObject.opt("filesize"));
+                    info.setFileext(extrasObject.opt("fileext"));
                     receiveMessage.setExtras(info);
                 }
             }
@@ -110,6 +113,22 @@ public class JsonUtils {
                 initMode.setBucket(ossJson.opt("bucket"));
                 initMode.setAccess_id(ossJson.opt("access_id"));
                 initMode.setPrefix(ossJson.opt("prefix"));
+            }
+            if (initObject.has("tenant")){
+                JSONObject tenantJson = new JSONObject(initObject.getString("tenant"));
+                initMode.setTenantId(tenantJson.opt("id"));
+                initMode.setDeleteFlag(tenantJson.opt("deleteFlag"));
+                initMode.setCreatedAt(tenantJson.opt("createdAt"));
+                initMode.setUpdatedAt(tenantJson.opt("updatedAt"));
+                initMode.setUuid(tenantJson.opt("uuid"));
+                initMode.setKey(tenantJson.opt("key"));
+                initMode.setTenantName(tenantJson.opt("name"));
+                initMode.setMerchantTotal(tenantJson.opt("merchantTotal"));
+                initMode.setImAgentTotal(tenantJson.opt("imAgentTotal"));
+                initMode.setTicketAgentTotal(tenantJson.opt("ticketAgentTotal"));
+                initMode.setBackendUrl(tenantJson.opt("backendUrl"));
+                initMode.setSubdomainPrefix(tenantJson.opt("subdomainPrefix"));
+                initMode.setLanguage(tenantJson.opt("language"));
             }
 //            if (initObject.has("is_open_survey")) {
 //                initMode.setIs_open_survey(initObject.opt("is_open_survey"));

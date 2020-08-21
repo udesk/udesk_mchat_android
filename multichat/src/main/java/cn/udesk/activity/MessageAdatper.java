@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.graphics.drawable.AnimationDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.text.Html;
 import android.text.Spannable;
@@ -24,9 +25,11 @@ import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.google.gson.Gson;
@@ -76,6 +79,8 @@ MessageAdatper extends BaseAdapter {
             R.layout.udesk_chat_msg_item_product_r, // 显示客户定义的商品消息
             R.layout.udesk_chat_msg_item_smallvideo_l,//短视频消息左
             R.layout.udesk_chat_msg_item_smallvideo_r,//短视频消息右
+            R.layout.udesk_chat_msg_item_file_l,//文件消息左
+            R.layout.udesk_chat_msg_item_file_r,//文件消息右
     };
 
     /**
@@ -123,6 +128,9 @@ MessageAdatper extends BaseAdapter {
     private static final int MSG_PRODUCT_R = 11;
     private static final int MSG_SMALL_VIDEO_L = 12;
     private static final int MSG_SMALL_VIDEO_R = 13;
+    private static final int MSG_FILE_L = 14;
+    private static final int MSG_FILE_R = 15;
+
     private Activity mContext;
     private List<ReceiveMessage> list = new ArrayList<ReceiveMessage>();
 
@@ -193,6 +201,12 @@ MessageAdatper extends BaseAdapter {
                         return MSG_SMALL_VIDEO_L;
                     } else {
                         return MSG_SMALL_VIDEO_R;
+                    }
+                case UdeskConst.ChatMsgTypeInt.TYPE_FILE:
+                    if (UdeskUtil.objectToString(message.getDirection()).equals(UdeskConst.ChatMsgDirection.Recv)) {
+                        return MSG_FILE_L;
+                    } else {
+                        return MSG_FILE_R;
                     }
 
                 default:
@@ -427,6 +441,19 @@ MessageAdatper extends BaseAdapter {
                         smallVideoViewHolder.circleProgressBar = (CircleProgressBar) convertView.findViewById(R.id.video_upload_bar);
                         convertView.setTag(smallVideoViewHolder);
                         break;
+                    case MSG_FILE_L:
+                    case MSG_FILE_R:
+                        FileViewHolder fileViewHolder = new FileViewHolder();
+                        initItemNormalView(convertView, fileViewHolder);
+                        fileViewHolder.itemFile = convertView.findViewById(R.id.udesk_file_view);
+                        fileViewHolder.fileTitle = (TextView) convertView.findViewById(R.id.udesk_file_name);
+                        fileViewHolder.fileSize = (TextView) convertView.findViewById(R.id.udesk_file_size);
+                        fileViewHolder.operater = (TextView) convertView.findViewById(R.id.udesk_file_operater);
+                        fileViewHolder.mProgress = (ProgressBar) convertView.findViewById(R.id.udesk_progress);
+                        convertView.setTag(fileViewHolder);
+                        break;
+                    default:
+                        break;
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -473,6 +500,7 @@ MessageAdatper extends BaseAdapter {
                     case LEAVEMSG_TXT_R:
                     case COMMODITY:
                     case MSG_SMALL_VIDEO_R:
+                    case MSG_FILE_R:
                         this.isLeft = false;
                         Glide.with(mContext).load(UdeskConfig.customerUrl).error(R.drawable.udesk_im_default_user_avatar).placeholder(R.drawable.udesk_im_default_user_avatar).into(ivHeader);
                         break;
@@ -481,6 +509,7 @@ MessageAdatper extends BaseAdapter {
                     case RICH_TEXT:
                     case MSG_IMG_L:
                     case MSG_SMALL_VIDEO_L:
+                    case MSG_FILE_L:
                         this.isLeft = true;
                         Merchant merchant = ((UdeskChatActivity) mContext).getMerchant();
                         if (merchant != null && !TextUtils.isEmpty(UdeskUtil.objectToString(merchant.getLogo_url()))) {
@@ -522,6 +551,7 @@ MessageAdatper extends BaseAdapter {
                         || itemType == MSG_AUDIO_L
                         || itemType == MSG_IMG_L
                         || itemType == MSG_SMALL_VIDEO_L
+                        || itemType == MSG_FILE_L
                 ) {
                     ivStatus.setVisibility(View.GONE);
                 } else {
@@ -1312,6 +1342,145 @@ MessageAdatper extends BaseAdapter {
             }
         }
     }
+    /**
+     * 展示文件消息
+     */
+    public class FileViewHolder extends BaseViewHolder {
+        public TextView fileTitle;
+        public TextView fileSize;
+        public TextView operater;
+        public ProgressBar mProgress;
+        public LinearLayout itemFile;
+
+        @Override
+        void bind(final Context context) {
+            try {
+                ExtrasInfo info = message.getExtras();
+                String title = "";
+                String size = "";
+                String filetype = "";
+                if (info != null) {
+                    title = UdeskUtil.objectToString(info.getFilename());
+                    size = UdeskUtil.objectToString(info.getFilesize());
+                    filetype = UdeskUtil.objectToString(info.getFileext());
+                }
+                if (message.getDirection() == UdeskConst.ChatMsgDirection.Send) {
+                    if (TextUtils.isEmpty(title)) {
+                        fileTitle.setText(UdeskUtil.getFileName(mContext, message.getLocalPath()));
+                    } else {
+                        fileTitle.setText(title);
+                    }
+
+                    if (TextUtils.isEmpty(size)) {
+                        fileSize.setText(UdeskUtil.getFileSizeByLoaclPath(mContext, message.getLocalPath()));
+                    } else {
+                        fileSize.setText(size);
+                    }
+                    if (message.getSendFlag() == UdeskConst.SendFlag.RESULT_SUCCESS) {
+                        mProgress.setProgress(100);
+                        operater.setText(mContext.getString(R.string.udesk_has_send));
+                    } else {
+                        mProgress.setProgress(message.getPrecent());
+                        operater.setText(String.format("%s%%", String.valueOf(message.getPrecent())));
+                    }
+                } else {
+                    fileTitle.setText(title);
+                    fileSize.setText(size);
+                    if (UdeskUtil.fileIsExitByUrl(mContext, UdeskConst.File_File, UdeskUtil.objectToString(message.getContent()))
+                            && UdeskUtil.getFileSize(UdeskUtil.getFileByUrl(mContext, UdeskConst.File_File, UdeskUtil.objectToString(message.getContent()))) > 0) {
+                        mProgress.setProgress(100);
+                        operater.setText(mContext.getString(R.string.udesk_has_downed));
+                    } else {
+                        mProgress.setProgress(0);
+                        operater.setText(mContext.getString(R.string.udesk_has_download));
+                    }
+                    operater.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            ((UdeskChatActivity) mContext).downLoadMsg(message);
+                        }
+                    });
+                }
+
+                itemFile.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        try {
+                            Intent intent = new Intent(Intent.ACTION_VIEW);
+                            File file = null;
+                            Uri contentUri;
+                            String type;
+                            if (message.getDirection() == UdeskConst.ChatMsgDirection.Send) {
+                                if (UdeskUtil.isAndroidQ()) {
+                                    contentUri = Uri.parse(UdeskUtil.getFilePathQ(mContext, message.getLocalPath()));
+                                    intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                                } else {
+                                    file = new File(message.getLocalPath());
+                                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                                        intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                                        contentUri = UdeskUtil.getOutputMediaFileUri(mContext, file);
+                                    } else {
+                                        contentUri = Uri.fromFile(file);
+                                    }
+                                }
+                            } else {
+                                file = UdeskUtil.getFileByUrl(mContext, UdeskConst.File_File, UdeskUtil.objectToString(message.getContent()));
+                                if (file == null || UdeskUtil.getFileSizeQ(mContext.getApplicationContext(), file.getAbsolutePath()) <= 0) {
+                                    Toast.makeText(mContext.getApplicationContext(), mContext.getString(R.string.udesk_has_uncomplete_tip), Toast.LENGTH_SHORT).show();
+                                    return;
+                                }
+                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                                    intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                                    contentUri = UdeskUtil.getOutputMediaFileUri(mContext, file);
+                                } else {
+                                    contentUri = Uri.fromFile(file);
+                                }
+                            }
+                            if (contentUri == null) {
+                                return;
+                            }
+                            if (message.getContent_type().equals(UdeskConst.ChatMsgTypeString.TYPE_VIDEO)) {
+                                intent.setDataAndType(contentUri, "video/mp4");
+                            } else {
+                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                                    type = UdeskUtil.getMIMEType(mContext, contentUri);
+                                }else {
+                                    type = UdeskUtil.getMIMEType(file);
+                                }
+                                intent.setDataAndType(contentUri, type);
+                            }
+                            mContext.startActivity(intent);
+                        } catch (Exception e) {
+                            if (!TextUtils.isEmpty(e.getMessage()) && e.getMessage().contains("No Activity found to handle Intent")) {
+                                Toast.makeText(mContext.getApplicationContext(), mContext.getString(R.string.udesk_no_app_handle), Toast.LENGTH_SHORT).show();
+                            }
+                        }
+                    }
+                });
+
+                //设置重发按钮的点击事件
+                ivStatus.setOnClickListener(new OnClickListener() {
+
+                    @Override
+                    public void onClick(View v) {
+                        if (!UdeskUtils.isNetworkConnected(mContext.getApplicationContext())) {
+                            UdeskUtils.showToast(mContext.getApplicationContext(), mContext.getResources().getString(R.string.udesk_has_wrong_net));
+                            changeUiState(UdeskConst.SendFlag.RESULT_FAIL);
+                            return;
+                        }
+                        message.setSendFlag(UdeskConst.SendFlag.RESULT_RETRY);
+                        changeUiState(UdeskConst.SendFlag.RESULT_RETRY);
+                        ((UdeskChatActivity) mContext).retrySendMsg(message);
+                    }
+                });
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            } catch (OutOfMemoryError error) {
+                error.printStackTrace();
+            }
+        }
+    }
 
     private void initItemNormalView(View convertView, BaseViewHolder holder) {
         try {
@@ -1423,18 +1592,32 @@ MessageAdatper extends BaseAdapter {
     /**
      * 根据消息ID  修改对应消息的进度
      */
-    boolean changeFileState(View convertView, String msgId, int precent) {
+    boolean changeFileState(View convertView, String msgId, int percent, long fileSize, boolean isSuccess) {
         try {
             Object tag = convertView.getTag();
-            if (tag != null && tag instanceof SmallVideoViewHolder) {
-                SmallVideoViewHolder smallVideo = (SmallVideoViewHolder) tag;
-                if (smallVideo.message != null && msgId.contains(UdeskUtil.objectToString(smallVideo.message.getId()))) {
-                    smallVideo.circleProgressBar.setPercent(precent);
-                    if (precent == 100) {
-//                        smallVideo.cancleImg.setVisibility(View.GONE);
-                        smallVideo.circleProgressBar.setVisibility(View.GONE);
-                        smallVideo.video_tip.setVisibility(View.VISIBLE);
-                        smallVideo.pbWait.setVisibility(View.GONE);
+            if (tag != null){
+                BaseViewHolder holder = (BaseViewHolder) tag;
+                if (holder.message != null && msgId.contains(UdeskUtil.objectToString(holder.message.getId()))) {
+                    switch (UdeskConst.parseTypeForMessage(UdeskUtil.objectToString(holder.message.getContent_type()))) {
+                        case UdeskConst.ChatMsgTypeInt.TYPE_FILE:
+                            FileViewHolder fileViewHolder = (FileViewHolder) tag;
+                            changeFileState(fileViewHolder,percent, fileSize, isSuccess);
+                            return true;
+
+                        case UdeskConst.ChatMsgTypeInt.TYPE_VIDEO:
+                            SmallVideoViewHolder smallVideo = (SmallVideoViewHolder) tag;
+                            smallVideo.circleProgressBar.setPercent(percent);
+                            if (percent == 100) {
+                                smallVideo.circleProgressBar.setVisibility(View.GONE);
+                                smallVideo.video_tip.setVisibility(View.VISIBLE);
+                                smallVideo.pbWait.setVisibility(View.GONE);
+                            }
+                            return true;
+
+                        case UdeskConst.ChatMsgTypeInt.TYPE_IMAGE:
+                            return true;
+                        default:
+                            break;
                     }
                 }
             }
@@ -1444,6 +1627,40 @@ MessageAdatper extends BaseAdapter {
 
         return false;
     }
+
+    /**
+     * 文件状态改变
+     *
+     * @param percent
+     * @param fileSize
+     * @param isSuccess
+     */
+    public void changeFileState(FileViewHolder fileViewHolder,int percent, long fileSize, boolean isSuccess) {
+        try {
+            fileViewHolder.mProgress.setProgress(percent);
+            if (percent == 100) {
+                if (fileViewHolder.message.getDirection() == UdeskConst.ChatMsgDirection.Send) {
+                    fileViewHolder.operater.setText(mContext.getString(R.string.udesk_has_send));
+                } else {
+                    fileViewHolder.operater.setText(mContext.getString(R.string.udesk_has_downed));
+                }
+            } else {
+                if (0 < percent && percent < 100) {
+                    fileViewHolder.operater.setText(String.format("%d%%", percent));
+                }
+            }
+            if (fileSize > 0) {
+                fileViewHolder.fileSize.setText(UdeskUtil.formetFileSize(fileSize));
+            }
+            if (!isSuccess) {
+                Toast.makeText(mContext.getApplicationContext(), mContext.getString(R.string.udesk_download_failure), Toast.LENGTH_SHORT).show();
+                fileViewHolder.operater.setText(mContext.getString(R.string.udesk_has_download));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     /**
      * 根据消息ID  修改对应文件上传的进度
      */

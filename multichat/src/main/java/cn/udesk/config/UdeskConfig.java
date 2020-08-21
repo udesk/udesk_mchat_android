@@ -85,4 +85,7 @@ public class UdeskConfig {
 
     //是否使用表情 true表示使用 false表示不使用
     public static boolean isUseEmotion = true;
+
+    //是否使用上传文件功能  true表示使用 false表示不使用
+    public static boolean isUsefile = true;
 }

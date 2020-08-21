@@ -5,4 +5,12 @@
     <string name="udesk_form_tips">留言表单</string>
     <string name="udesk_utils_tips">开发者功能</string>
     <string name="udesk_reset_init">重置域名和App Key</string>
+    <string name="udesk_set_baseinfo">创建用户的基本信息</string>
+    <string name="udesk_set_basetextinfo">创建用户的自定义文本信息</string>
+    <string name="udesk_set_baselistinfo">创建用户的自定义下拉列表</string>
+    <string name="udesk_set_info_key">自定义字段的key</string>
+    <string name="udesk_set_admin_info_key">管理员后台找key</string>
+    <string name="udesk_set_key_map_value">key对应的value</string>
+    <string name="udesk_set_list_value">填写value(角标逗号隔开)</string>
+    <string name="udesk_set_value">填写value</string>
 </resources>

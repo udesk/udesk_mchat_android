@@ -23,6 +23,7 @@ public class UdeskConst {
     public static final String FileVideo = "video";
     public static final String PICTURE = "picture";
     public static final String FileAudio = "aduio";
+    public static final String File_File = "file";
 
     public final static String AUDIO_SUF_WAV= ".wav";
     //    public final static String AUDIO_SUF = ".aac";
@@ -82,6 +83,7 @@ public class UdeskConst {
         public static final int TYPE_PRODUCT = 8;
         public static final int TYPE_VIDEO = 9;
         public static final int TYPE_STRUCT = 10;
+        public static final int TYPE_FILE = 11;
 
     }
 
@@ -102,6 +104,8 @@ public class UdeskConst {
             return ChatMsgTypeInt.TYPE_VIDEO;
         } else if ("struct".equalsIgnoreCase(type)) {
             return ChatMsgTypeInt.TYPE_STRUCT;
+        } else if ("file".equalsIgnoreCase(type)) {
+            return ChatMsgTypeInt.TYPE_FILE;
         }
         return ChatMsgTypeInt.TYPE_TEXT;
     }
@@ -115,6 +119,7 @@ public class UdeskConst {
         public static final String TYPE_PRODUCT = "product";
         public static final String TYPE_VIDEO = "video";
         public static final String TYPE_STRUCT = "struct";
+        public static final String TYPE_FILE = "file";
     }
 
     public static class UdeskFunctionFlag {
@@ -123,6 +128,7 @@ public class UdeskConst {
         public static final int Udesk_Survy = 3;
         public static final int Udesk_Message_Center = 4;
         public static final int Udesk_Video = 5;
+        public static final int Udesk_File = 6;
 
     }
 

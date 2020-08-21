@@ -27,6 +27,7 @@ import cn.udesk.callback.ItotalUnreadMsgCnt;
 import cn.udesk.config.UdeskConfig;
 import cn.udesk.db.UdeskDBManager;
 import cn.udesk.emotion.LQREmotionKit;
+import cn.udesk.model.CustomerInfo;
 import cn.udesk.model.FunctionMode;
 import cn.udesk.model.InitMode;
 import cn.udesk.model.NavigationMode;
@@ -35,6 +36,7 @@ import cn.udesk.muchat.HttpCallBack;
 import cn.udesk.muchat.HttpFacade;
 import cn.udesk.muchat.UdeskLibConst;
 import cn.udesk.muchat.bean.Products;
+import cn.udesk.muchat.bean.UpdateCustomerField;
 import cn.udesk.xmpp.Concurrents;
 import cn.udesk.xmpp.UdeskXmppManager;
 import udesk.core.utils.Cockroach;
@@ -80,6 +82,7 @@ public class UdeskSDKManager {
     private ExecutorService singleExecutor;
     private List<FunctionMode> extraFunctions;
     private IFunctionItemClickCallBack functionItemClickCallBack;
+    private CustomerInfo customerInfo;
 
     private void ensureMessageExecutor() {
         if (scaleExecutor == null) {
@@ -245,21 +248,26 @@ public class UdeskSDKManager {
 
     /**
      * 初始化用户信息
-     *
-     * @param customer_euid 必填   用户唯一标识
-     * @param customer_name 选填， 没有填写则设置euid的值
+     * @param customerInfo 客户信息
      */
-    public void setCustomerInfo(final String customer_euid, String customer_name) {
-
-        if (TextUtils.isEmpty(customer_euid)) {
-            Toast.makeText(context, "必须设置客户的唯一标识", Toast.LENGTH_LONG).show();
+    public void setCustomerInfo(CustomerInfo customerInfo) {
+        try {
+            if (customerInfo != null){
+                this.customerInfo = customerInfo;
+                if (TextUtils.isEmpty(customerInfo.getEuid())) {
+                    Toast.makeText(context, "必须设置客户的唯一标识", Toast.LENGTH_LONG).show();
+                    return;
+                }
+                if (TextUtils.isEmpty(customerInfo.getName())) {
+                    customerInfo.setName(customerInfo.getEuid());
+                }
+                customerEuid = customerInfo.getEuid();
+                customerName = customerInfo.getName();
+                initMode(customerEuid, customerName,null);
+            }
+        }catch (Exception e){
+            e.printStackTrace();
         }
-        if (TextUtils.isEmpty(customer_name)) {
-            customer_name = customer_euid;
-        }
-        customerEuid = customer_euid;
-        customerName = customer_name;
-        initMode(customer_euid, customer_name,null);
     }
 
     private void initMode(final String customer_euid, final String customer_name, final IInitCallBack iInitCallBack) {
@@ -396,14 +404,46 @@ public class UdeskSDKManager {
      */
     public void entryChat(final Context context, final String euid) {
         if (initMode != null) {
-            entryUdeskChat(context,euid);
+            updateCustomerField(context,euid);
         } else {
             initMode(customerEuid, customerName, new IInitCallBack() {
                 @Override
                 public void initSuccess(InitMode initMode) {
-                    entryUdeskChat(context,euid);
+                    updateCustomerField(context,euid);
                 }
             });
+        }
+    }
+    /**
+     * 更新im客户的访问信息以及自定义字段信息
+     *
+     * @param context
+     * @param euid    商户的euid
+     */
+    private void updateCustomerField(final Context context, final String euid){
+        try {
+            if (initMode == null || customerInfo == null){
+                return;
+            }
+            UpdateCustomerField updateCustomerField = UdeskUtil.buildUpdateCustomerField(context, initMode, customerInfo);
+            HttpFacade.getInstance().updateCustomerField(UdeskUtil.getAuthToken(UdeskUtil.objectToString(initMode.getIm_username()),
+                    UdeskUtil.objectToString(initMode.getIm_password())), euid, updateCustomerField, new HttpCallBack() {
+                @Override
+                public void onSuccess(String message) {
+                    entryUdeskChat(context,euid);
+                }
+
+                @Override
+                public void onFail(Throwable message) {
+                }
+
+                @Override
+                public void onSuccessFail(String message) {
+                    Toast.makeText(context, message, Toast.LENGTH_LONG).show();
+                }
+            });
+        }catch (Exception e){
+            e.printStackTrace();
         }
     }
 

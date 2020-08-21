@@ -81,7 +81,7 @@
             android:layout_marginLeft="6dp"
             android:layout_marginRight="@dimen/udesk_chat_head_margin"
             android:layout_marginTop="@dimen/udesk_chat_head_margin"
-            android:background="#f2f2f2"
+            android:background="@color/color_999999"
             android:orientation="vertical">
 
             <TextView
@@ -93,7 +93,7 @@
                 android:ellipsize="middle"
                 android:gravity="left|center"
                 android:singleLine="true"
-                android:textColor="@color/udesk_color_im_text_left1"
+                android:textColor="@color/white"
                 android:textSize="@dimen/udesk_sp16" />
 
             <ProgressBar
@@ -121,7 +121,7 @@
                     android:layout_alignParentLeft="true"
                     android:layout_marginLeft="@dimen/udesk_20"
                     android:gravity="left|center"
-                    android:textColor="@color/udesk_edit_input_hint_msg_cololr1"
+                    android:textColor="@color/white"
                     android:textSize="@dimen/udesk_sp16" />
 
                 <TextView
@@ -130,7 +130,7 @@
                     android:layout_height="fill_parent"
                     android:layout_alignParentRight="true"
                     android:gravity="center"
-                    android:textColor="@color/udesk_edit_input_hint_msg_cololr1"
+                    android:textColor="@color/white"
                     android:textSize="@dimen/udesk_sp16" />
 
             </RelativeLayout>

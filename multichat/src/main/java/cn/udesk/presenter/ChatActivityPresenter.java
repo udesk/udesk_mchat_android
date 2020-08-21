@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 
@@ -37,8 +38,10 @@ import cn.udesk.R;
 import cn.udesk.UdeskConst;
 import cn.udesk.UdeskSDKManager;
 import cn.udesk.UdeskUtil;
+import cn.udesk.activity.UdeskChatActivity;
 import cn.udesk.activity.UdeskChatActivity.MessageWhat;
 import cn.udesk.config.UdeskConfig;
+import cn.udesk.db.UdeskDBManager;
 import cn.udesk.model.InitMode;
 import cn.udesk.model.Merchant;
 import cn.udesk.model.ProductMessage;
@@ -246,7 +249,7 @@ public class ChatActivityPresenter {
     public void sendVideoMessage(String videoPath) {
         try {
             if (TextUtils.isEmpty(videoPath)) {
-                UdeskUtils.showToast(mChatView.getContext(), mChatView.getContext().getString(R.string.udesk_upload_img_error));
+                UdeskUtils.showToast(mChatView.getContext(), mChatView.getContext().getString(R.string.udesk_upload_video_error));
                 return;
             }
             if (UdeskUtil.isAndroidQ()) {
@@ -260,6 +263,32 @@ public class ChatActivityPresenter {
             upLoadFileQ(videoPath, receiveMessage);
         } catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+
+    public synchronized void sendFileMessage(String filepath) {
+        try {
+            if (TextUtils.isEmpty(filepath)) {
+                UdeskUtils.showToast(mChatView.getContext(), mChatView.getContext().getString(R.string.udesk_upload_file_error));
+                return;
+            }
+            String fileName = (UdeskUtil.getFileName(mChatView.getContext(), filepath, UdeskConst.ChatMsgTypeString.TYPE_FILE));
+            String fileSize = UdeskUtil.getFileSizeByLoaclPath(mChatView.getContext(), filepath);
+            ReceiveMessage receiveMessage = buildSendMessage(UdeskConst.ChatMsgTypeString.TYPE_FILE,"", filepath);
+            if (!UdeskUtils.isNetworkConnected(mChatView.getContext())){
+                receiveMessage.setSendFlag(UdeskConst.SendFlag.RESULT_RETRY);
+            }
+            ExtrasInfo info = new ExtrasInfo();
+            info.setFilename(fileName);
+            info.setFilesize(fileSize);
+            info.setFileext(UdeskConst.ChatMsgTypeString.TYPE_FILE);
+            receiveMessage.setExtras(info);
+            onNewMessage(receiveMessage);
+            upLoadFileQ(filepath, receiveMessage);
+        } catch (Exception e) {
+            e.printStackTrace();
+        } catch (OutOfMemoryError error) {
+            error.printStackTrace();
         }
     }
 
@@ -404,13 +433,7 @@ public class ChatActivityPresenter {
                         }
                         if (progress != lastProgress) {
                             lastProgress = progress;
-                            if (mChatView != null && mChatView.getHandler() != null) {
-                                Message message = mChatView.getHandler().obtainMessage(
-                                        MessageWhat.ChangeFielProgress);
-                                message.obj = receiveMessage.getId();
-                                message.arg1 = progress;
-                                mChatView.getHandler().sendMessage(message);
-                            }
+                            changeFileProgress(progress, receiveMessage,MessageWhat.ChangeFileProgress);
                         }
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -473,14 +496,14 @@ public class ChatActivityPresenter {
         return null;
     }
 
-    //下载视频
-    public void downVideo(final ReceiveMessage info) {
+
+    //下载文件
+    public void downFile(final ReceiveMessage info, Context context, final String type) {
         try {
-            final File file = new File(UdeskUtil.getDirectoryPath(mChatView.getContext(), UdeskConst.FileVideo),
-                    UdeskUtil.getFileName(UdeskUtil.objectToString(info.getContent()), UdeskConst.FileVideo));
-
+            final File file = new File(UdeskUtil.getDirectoryPath(context, type),
+                    UdeskUtil.getFileName(context,UdeskUtil.objectToString(info.getContent()), type));
             HttpFacade.getInstance().downloadFile(UdeskUtil.uRLEncoder(UdeskUtil.objectToString(info.getContent())),info, new HttpDownloadCallBack() {
-
+                int lastProgress = 0;
                 @Override
                 public void onStart(Response<ResponseBody> response) {
                     OutputStream os = null;
@@ -497,11 +520,20 @@ public class ChatActivityPresenter {
                             currentLength += len;
                             //计算当前下载进度
                             int progress = (int) (100 * currentLength / totalLength);
+                            if (TextUtils.equals(UdeskConst.File_File,type)){
+                                if (progress != lastProgress) {
+                                    lastProgress = progress;
+                                    changeFileProgress(progress, info,MessageWhat.ChangeFileProgress);
+                                }
+                            }
 
                         }
                     }catch (Exception e){
                         e.printStackTrace();
                         Log.d("udeskdownload","downloadFile    loadingFail   "+e.getMessage());
+                        if (TextUtils.equals(UdeskConst.File_File,type)){
+                            changeFileProgress(0, info,MessageWhat.DownFileError);
+                        }
                     }finally {
                         try {
                             is.close();
@@ -520,11 +552,24 @@ public class ChatActivityPresenter {
 
                 @Override
                 public void onFail(Throwable message) {
-
+                    if (TextUtils.equals(UdeskConst.File_File,type)){
+                        changeFileProgress(0, info,MessageWhat.DownFileError);
+                    }
                 }
             });
         } catch (Exception e) {
             e.printStackTrace();
+        }
+
+
+    }
+
+    private void changeFileProgress(int progress, ReceiveMessage info,int type) {
+        if (mChatView != null && mChatView.getHandler() != null) {
+            Message message = mChatView.getHandler().obtainMessage(type);
+            message.obj = info.getId();
+            message.arg1 = progress;
+            mChatView.getHandler().sendMessage(message);
         }
     }
 
@@ -540,6 +585,7 @@ public class ChatActivityPresenter {
             } else if (UdeskUtil.objectToString(message.getContent_type()).equals(UdeskConst.ChatMsgTypeString.TYPE_AUDIO)
                     || UdeskUtil.objectToString(message.getContent_type()).equals(UdeskConst.ChatMsgTypeString.TYPE_IMAGE)
                     || UdeskUtil.objectToString(message.getContent_type()).equals(UdeskConst.ChatMsgTypeString.TYPE_VIDEO)
+                    || UdeskUtil.objectToString(message.getContent_type()).equals(UdeskConst.ChatMsgTypeString.TYPE_FILE)
             ) {
 
                 if (!UdeskUtil.objectToString(message.getLocalPath()).isEmpty()) {

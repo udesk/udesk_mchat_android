@@ -113,6 +113,7 @@
     <string name="photo">相册</string>
     <string name="survy">评价</string>
     <string name="video">拍视频</string>
+    <string name="file">文件</string>
 
     <string name="udesk_too_short">录制时间过短,请重新录制</string>
     <string name="camera_view_tips">长按拍摄小视频</string>
@@ -132,5 +133,8 @@
     <string name="udesk_selector_action_done_photo_pre">预览(%1$d)</string>
     <string name="udesk_selector_photos">选择</string>
     <string name="udesk_selector_photo_index_num">(%1$d/%2$d)</string>
+    <string name="udesk_file_not_exist">文件不存在</string>
+    <string name="udesk_upload_video_error">上传视频失败，请重试</string>
+    <string name="udesk_upload_file_error">上传文件失败，请重试</string>
 
 </resources>

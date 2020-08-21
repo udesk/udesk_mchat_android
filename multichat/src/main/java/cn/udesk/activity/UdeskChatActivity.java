@@ -119,6 +119,7 @@ public class UdeskChatActivity extends UdeskBaseActivity implements IChatActivit
     private final int SELECT_IMAGE_ACTIVITY_REQUEST_CODE = 102;
     private final int CAPTURE_IMAGE_SMALLVIDEO_ACTIVITY_REQUEST_CODE = 103;
     private final int SELECT_UDESK_IMAGE_ACTIVITY_REQUEST_CODE = 104;
+    private final int SELECT_FILE_OPTION_REQUEST_CODE = 105;
 
     private MyHandler mHandler;
     private ChatActivityPresenter mPresenter;
@@ -175,7 +176,8 @@ public class UdeskChatActivity extends UdeskBaseActivity implements IChatActivit
         public static final int Survey_Success = 13;
         public static final int IM_BOLACKED = 14;
         public static final int ChangeVideoThumbnail = 15;
-        public static final int ChangeFielProgress = 16;
+        public static final int ChangeFileProgress = 16;
+        public static final int DownFileError = 17;
     }
 
     class ConnectivtyChangedReceiver extends BroadcastReceiver {
@@ -310,10 +312,16 @@ public class UdeskChatActivity extends UdeskBaseActivity implements IChatActivit
                         String videoMsgId = (String) msg.obj;
                         activity.changeVideoThumbnail(videoMsgId);
                         break;
-                    case MessageWhat.ChangeFielProgress:
+                    case MessageWhat.ChangeFileProgress:
                         String fileMsgId = UdeskUtil.objectToString(msg.obj);
                         int percent = msg.arg1;
-                        activity.changeFileProgress(fileMsgId, percent);
+                        activity.changeFileProgress(fileMsgId, percent,0,true);
+                        break;
+                    case MessageWhat.DownFileError:
+                        String fileId = UdeskUtil.objectToString(msg.obj);
+                        activity.changeFileProgress(fileId, 0,0,false);
+                        break;
+                    default:
                         break;
                 }
             } catch (Exception e) {
@@ -338,7 +346,7 @@ public class UdeskChatActivity extends UdeskBaseActivity implements IChatActivit
     /**
      * 根据消息的ID 修改发送状态
      */
-    private void changeFileProgress(String msgId, int precent) {
+    private void changeFileProgress(String msgId, int precent, long fileSize, boolean isSuccess) {
         try {
             if (!TextUtils.isEmpty(msgId) && mListView != null
                     && mChatAdapter != null) {
@@ -346,7 +354,7 @@ public class UdeskChatActivity extends UdeskBaseActivity implements IChatActivit
                 for (int i = mListView.getChildCount() - 1; i >= 0; i--) {
                     View child = mListView.getChildAt(i);
                     if (child != null) {
-                        if (mChatAdapter.changeFileState(child, msgId, precent)) {
+                        if (mChatAdapter.changeFileState(child, msgId, precent,fileSize,isSuccess)) {
                             return;
                         }
                     }
@@ -629,6 +637,10 @@ public class UdeskChatActivity extends UdeskBaseActivity implements IChatActivit
                             clickVideo();
                             mBottomFramlayout.setVisibility(View.GONE);
                             break;
+                        case UdeskConst.UdeskFunctionFlag.Udesk_File:
+                            clickFile();
+                            mBottomFramlayout.setVisibility(View.GONE);
+                            break;
                         default:
                             if (UdeskSDKManager.getInstance().getFunctionItemClickCallBack() != null) {
                                 UdeskSDKManager.getInstance().getFunctionItemClickCallBack()
@@ -811,6 +823,44 @@ public class UdeskChatActivity extends UdeskBaseActivity implements IChatActivit
             e.printStackTrace();
         }
     }
+    //点击文件入口
+    private void clickFile() {
+        try {
+            if (Build.VERSION.SDK_INT < 23) {
+                selectFile();
+            } else {
+                XPermissionUtils.requestPermissions(UdeskChatActivity.this, RequestCode.EXTERNAL,
+                        new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                        new XPermissionUtils.OnPermissionListener() {
+                            @Override
+                            public void onPermissionGranted() {
+                                selectFile();
+                            }
+
+                            @Override
+                            public void onPermissionDenied(String[] deniedPermissions, boolean alwaysDenied) {
+                                UdeskUtils.showToast(getApplicationContext(), getResources().getString(R.string.file_denied));
+                            }
+                        });
+            }
+        } catch (Resources.NotFoundException e) {
+            e.printStackTrace();
+        }
+    }
+    //启动手机默认的选择mp4文件
+    private void selectFile() {
+        try {
+            Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+            intent.addCategory(Intent.CATEGORY_OPENABLE);
+            intent.setType("*/*");
+            Intent wrapperIntent = Intent.createChooser(intent, null);
+            startActivityForResult(wrapperIntent, SELECT_FILE_OPTION_REQUEST_CODE);
+        } catch (Exception e) {
+            e.printStackTrace();
+        } catch (OutOfMemoryError error) {
+            error.printStackTrace();
+        }
+    }
 
     //拍视频
     private void clickVideo() {
@@ -927,6 +977,10 @@ public class UdeskChatActivity extends UdeskBaseActivity implements IChatActivit
             }
             if (UdeskConfig.isUseSmallVideo) {
                 FunctionMode videoItem = new FunctionMode(getString(R.string.video), UdeskConst.UdeskFunctionFlag.Udesk_Video, R.drawable.udesk_video);
+                functionItems.add(videoItem);
+            }
+            if (UdeskConfig.isUsefile) {
+                FunctionMode videoItem = new FunctionMode(getString(R.string.file), UdeskConst.UdeskFunctionFlag.Udesk_File, R.drawable.udesk_file);
                 functionItems.add(videoItem);
             }
             if (UdeskSDKManager.getInstance().getExtraFunctions() != null
@@ -1171,6 +1225,26 @@ public class UdeskChatActivity extends UdeskBaseActivity implements IChatActivit
                     }
                 }
 
+            } else if (SELECT_FILE_OPTION_REQUEST_CODE == requestCode) {
+                if (resultCode != Activity.RESULT_OK || data == null) {
+                    return;
+                }
+                Uri mImageCaptureUri = data.getData();
+                if (mImageCaptureUri != null) {
+                    try {
+                        String path = UdeskUtil.getFilePath(this, mImageCaptureUri);
+                        if (this.getWindow() != null && this.getWindow().getDecorView().getWindowToken() != null && UdeskUtil.isGpsNet(getApplicationContext())) {
+                            toGpsNetView(true, null, path);
+                            return;
+                        }
+                        sendFile(path);
+
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    } catch (OutOfMemoryError error) {
+                        error.printStackTrace();
+                    }
+                }
             } else if (CAPTURE_IMAGE_SMALLVIDEO_ACTIVITY_REQUEST_CODE == requestCode) {
                 if (resultCode != Activity.RESULT_OK || data == null) {
                     return;
@@ -1228,7 +1302,97 @@ public class UdeskChatActivity extends UdeskBaseActivity implements IChatActivit
 
 
     }
+    /**
+     * 非wifi网络提示框
+     *
+     * @param isupload
+     * @param info
+     * @param path
+     */
+    private void toGpsNetView(final boolean isupload, final ReceiveMessage info, final String path) {
+        try {
+            String positiveLabel = this.getString(R.string.udesk_sure);
+            String negativeLabel = this.getString(R.string.udesk_cancel);
+            String content;
+            if (isupload) {
+                content = getApplicationContext().getString(R.string.udesk_gps_tips);
+            } else {
+                content = getApplicationContext().getString(R.string.udesk_gps_downfile_tips);
+            }
 
+            if (UdeskChatActivity.this.isFinishing()) {
+                return;
+            }
+            if (!popWindow.isShowing()) {
+                popWindow.show(this, this.getWindow().getDecorView(),
+                        positiveLabel, negativeLabel, content,
+                        new UdeskConfirmPopWindow.OnPopConfirmClick() {
+                            @Override
+                            public void onPositiveClick() {
+                                try {
+                                    if (isupload && !TextUtils.isEmpty(path)) {
+                                        sendFile(path);
+                                    }
+                                    if (!isupload && info != null) {
+                                        mPresenter.downFile(info, getApplicationContext(),UdeskConst.File_File);
+                                    }
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                            }
+
+                            @Override
+                            public void onNegativeClick() {
+
+                            }
+
+                        });
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void sendFile(String path) {
+        try {
+            long size = UdeskUtil.getFileSizeQ(getApplicationContext(), path);
+            if (size >= 30 * 1000 * 1000) {
+                UdeskUtils.showToast(getApplicationContext(), getResources().getString(R.string.udesk_file_to_large));
+                return;
+            } else if (size == 0) {
+                UdeskUtils.showToast(getApplicationContext(), getResources().getString(R.string.udesk_file_not_exist));
+                return;
+            }
+            if (path.contains(".mp4")) {
+                mPresenter.sendVideoMessage(path);
+            } else {
+                mPresenter.sendFileMessage(path);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } catch (OutOfMemoryError error) {
+            error.printStackTrace();
+        }
+    }
+
+    //下载文件
+    public void downLoadMsg(ReceiveMessage message) {
+        try {
+            if (!UdeskUtils.isNetworkConnected(getApplicationContext())) {
+                UdeskUtils.showToast(getApplicationContext(), getResources().getString(R.string.udesk_has_wrong_net));
+                return;
+            }
+            if (message != null) {
+                if (UdeskUtil.isGpsNet(getApplicationContext())) {
+                    toGpsNetView(false, message, null);
+                    return;
+                }
+                mPresenter.downFile(message, getApplicationContext(),UdeskConst.File_File);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
     private void loadHistoryRecords() {
         try {
@@ -1660,7 +1824,7 @@ public class UdeskChatActivity extends UdeskBaseActivity implements IChatActivit
                 return;
             }
             if (mPresenter != null && message != null) {
-                mPresenter.downVideo(message);
+                mPresenter.downFile(message,getApplicationContext(),UdeskConst.FileVideo);
             }
         } catch (Exception e) {
             e.printStackTrace();

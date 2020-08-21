@@ -13,34 +13,49 @@ Add this in your root build.gradle file (not your module build.gradle file):
   
 ### 1 初始化
   
+	UdeskSDKManager.getInstance().init(context, uuid, sign, time);
+
+	UdeskSDKManager.getInstance().setCustomerInfo(CustomerInfo customerInfo);  
+
   出于安全的考虑，建议租户将 key 保存在自己的服务器端，App 端通过租户提供的接口获取经过 SHA1
   计算后的加密字符串(sign)和时间戳(timestamp),时间戳精确到秒，然后传给 SDK。密码的有效期为时间戳 +/- 5分钟
-  
-	SHA1("租户uuid+租户key+时间戳")加密字符粗的格式
-
-	// String uuid 租户ID，Udesk后台系统获取
- 
-	//String timestamp 时间戳，由你们后端返回
-
-	//String sign  签名，由你们后端返回
-  
-	//customer_euid  用户ID是用户的唯一标示，请不要重复，并且只允许使用数字、字母、数字+字母
-  
-	UdeskSDKManager.getInstance().init(content, uuid, sign, time);
-
-	UdeskSDKManager.getInstance().setCustomerInfo(customer_euid, customer_name);     
-  
-  **备注：签名生成规则：建议由客户的服务端提供接口计算签名并返回对应的参数**
 
 |  数据名称  |     说明                                 |
 |-----------|-----------------------------------------|
-| uuid      | Udesk后台提供                            |
+| uuid      | 租户ID，Udesk后台系统获取                            |
 | secret    | Udesk后台提供                            |
-| timestamp | 获取精确到秒的时间戳                       |
- 
- sign = SHA1("uuid+secret+timestamp")
+| timestamp | 获取精确到秒的时间戳,由你们后端返回                       |
+| sign      | SHA1("uuid+secret+timestamp")                       |
+   
+**备注：签名生成规则：建议由客户的服务端提供接口计算签名并返回对应的参数**
 
+** 客户自定义信息（CustomerInfo）参数**
+|  参数                            |     说明                                 |
+|---------------------------------|-----------------------------------------|
+| euid                      | 用户ID是用户的唯一标示，请不要重复，并且只允许使用数字、字母、数字+字母（必传）|
+| name                      | 用户昵称（*必传）|
+| org                      | 公司名称|
+| customerDescription                      | 用户描述|
+| tags                      | 用户标签，用逗号分隔 如："帅气,漂亮"|
+| cellphone                      | 手机号（唯一值，不同用户不允许重复，重复会导致创建用户失败！！！）|
+| email                      | 邮箱（唯一值，不同用户不允许重复，重复会导致创建用户失败！！！）|
+| customField                      | 用户自定义字段 |
 
+	private CustomerInfo buildCustomerInfo(){
+        CustomerInfo customerInfo = new CustomerInfo();
+        customerInfo.setCellphone(cellphone.getText().toString());
+        customerInfo.setCustomerDescription(description.getText().toString());
+        customerInfo.setEmail(email.getText().toString());
+        customerInfo.setEuid(customEuid.getText().toString());
+        customerInfo.setName(name.getText().toString());
+        customerInfo.setOrg(org.getText().toString());
+        customerInfo.setTags(tags.getText().toString());
+        Map<String, Object> definedUserTextField = getDefinedUserTextField();
+        definedUserTextField.putAll(getDefinedUserRoplist());
+        customerInfo.setCustomField(definedUserTextField);
+        return customerInfo;
+    }
+   
 **配置信息（UdeskConfig）明细**
 
 |  属性                            |     说明                                 |
@@ -70,6 +85,7 @@ Add this in your root build.gradle file (not your module build.gradle file):
 | isUseMore                       | 是否使用更多展示出的列表选项                       |
 | isUseSmallVideo                 | 设置是否需要小视频的功能                       |
 | isUseEmotion                    | 是否使用表情                      |
+| isUsefile                    | 是否使用上传文件功能                      |
 
 ###2 客户通过某个商品详情页点击咨询按钮直接和客服进行会话
   
@@ -100,7 +116,7 @@ Add this in your root build.gradle file (not your module build.gradle file):
 	
 	//通过商户ID，咨询商户
      // merchantId  商户ID
-    UdeskSDKManager.getInstance().entryChat(content, merchantId);
+    UdeskSDKManager.getInstance().entryChat(context, merchantId);
 
 
 
