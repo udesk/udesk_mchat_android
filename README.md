@@ -29,7 +29,8 @@ Add this in your root build.gradle file (not your module build.gradle file):
    
 **备注：签名生成规则：建议由客户的服务端提供接口计算签名并返回对应的参数**
 
-** 客户自定义信息（CustomerInfo）参数**
+**客户自定义信息（CustomerInfo）参数**
+
 |  参数                            |     说明                                 |
 |---------------------------------|-----------------------------------------|
 | euid                      | 用户ID是用户的唯一标示，请不要重复，并且只允许使用数字、字母、数字+字母（必传）|
@@ -87,7 +88,8 @@ Add this in your root build.gradle file (not your module build.gradle file):
 | isUseEmotion                    | 是否使用表情                      |
 | isUsefile                    | 是否使用上传文件功能                      |
 
-###2 客户通过某个商品详情页点击咨询按钮直接和客服进行会话
+
+### 2.客户通过某个商品详情页点击咨询按钮直接和客服进行会话
   
       //进入会话可以设置咨询对象 (可选)
 	  //设置咨询的商品 如下：
