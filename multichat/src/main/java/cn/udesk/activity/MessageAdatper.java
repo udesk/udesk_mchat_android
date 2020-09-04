@@ -23,9 +23,11 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -40,6 +42,8 @@ import org.sufficientlysecure.htmltextview.HtmlTextView;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
@@ -47,12 +51,15 @@ import cn.udesk.R;
 import cn.udesk.UdeskConst;
 import cn.udesk.UdeskSDKManager;
 import cn.udesk.UdeskUtil;
+import cn.udesk.adapter.AbsCommonAdapter;
+import cn.udesk.adapter.AbsViewHolder;
 import cn.udesk.config.UdekConfigUtil;
 import cn.udesk.config.UdeskConfig;
 import cn.udesk.emotion.MoonUtils;
 import cn.udesk.model.Merchant;
 import cn.udesk.model.SendMsgResult;
 import cn.udesk.muchat.bean.ExtrasInfo;
+import cn.udesk.muchat.bean.NavigatesResult;
 import cn.udesk.muchat.bean.Products;
 import cn.udesk.muchat.bean.ReceiveMessage;
 import cn.udesk.widget.CircleProgressBar;
@@ -62,8 +69,7 @@ import udesk.core.utils.UdeskUtils;
 import static android.util.Patterns.PHONE;
 import static android.util.Patterns.WEB_URL;
 
-public class
-MessageAdatper extends BaseAdapter {
+public class MessageAdatper extends BaseAdapter {
     private static final int[] layoutRes = {
             R.layout.udesk_chat_msg_item_txt_l,//文本消息左边的UI布局文件
             R.layout.udesk_chat_msg_item_txt_r,//文本消息右边的UI布局文件
@@ -81,6 +87,7 @@ MessageAdatper extends BaseAdapter {
             R.layout.udesk_chat_msg_item_smallvideo_r,//短视频消息右
             R.layout.udesk_chat_msg_item_file_l,//文件消息左
             R.layout.udesk_chat_msg_item_file_r,//文件消息右
+            R.layout.udesk_chat_msg_navigates_menu,//导航菜单消息
     };
 
     /**
@@ -130,6 +137,7 @@ MessageAdatper extends BaseAdapter {
     private static final int MSG_SMALL_VIDEO_R = 13;
     private static final int MSG_FILE_L = 14;
     private static final int MSG_FILE_R = 15;
+    private static final int NAVIGATES = 16;
 
     private Activity mContext;
     private List<ReceiveMessage> list = new ArrayList<ReceiveMessage>();
@@ -163,6 +171,9 @@ MessageAdatper extends BaseAdapter {
             if (message instanceof Products) {
                 return COMMODITY;
             }
+            if (message instanceof NavigatesResult){
+                return NAVIGATES;
+            }
             if (UdeskUtil.objectToString(message.getCategory()).equals(UdeskConst.ChatMsgTypeString.TYPE_EVENT)) {
                 return Udesk_Event;
             }
@@ -174,6 +185,7 @@ MessageAdatper extends BaseAdapter {
                         return MSG_IMG_R;
                     }
                 case UdeskConst.ChatMsgTypeInt.TYPE_TEXT:
+                case UdeskConst.ChatMsgTypeInt.TYPE_NAVIGATES:
                     if (UdeskUtil.objectToString(message.getDirection()).equals(UdeskConst.ChatMsgDirection.Recv)) {
                         return MSG_TXT_L;
                     } else {
@@ -274,26 +286,57 @@ MessageAdatper extends BaseAdapter {
             }
             Iterator<ReceiveMessage> iterator = messages.iterator();
             while (iterator.hasNext()){
-                if (TextUtils.isEmpty(UdeskUtil.objectToString(iterator.next().getContent()))
-                        && TextUtils.equals(UdeskUtil.objectToString(iterator.next().getContent_type()), UdeskConst.ChatMsgTypeString.TYPE_TEXT)){
+                ReceiveMessage next = iterator.next();
+                if (TextUtils.isEmpty(UdeskUtil.objectToString(next.getContent()))
+                        && TextUtils.equals(UdeskUtil.objectToString(next.getContent_type()), UdeskConst.ChatMsgTypeString.TYPE_TEXT)){
                     iterator.remove();
                 }
             }
             if (isMore) {
                 list.addAll(0, messages);
             } else {
-                if (list.size() > 0) {
-                    ReceiveMessage temp = list.get(list.size() - 1);
-                    String createtime = UdeskUtil.objectToString(temp.getCreated_at());
-                    ReceiveMessage temp2 = messages.get(messages.size() - 1);
-                    String createtime2 = UdeskUtil.objectToString(temp2.getCreated_at());
-                    if (createtime.equals(createtime2)) {
-                        return;
+//                list.clear();
+//                list.addAll(messages);
+                listAddEventItems(messages);
+            }
+            notifyDataSetChanged();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void listAddEventItems(List<ReceiveMessage> messages) {
+        try {
+            if (messages == null) {
+                return;
+            }
+            if (list.size()>0){
+                List<ReceiveMessage> newMessages=new ArrayList<>();
+                for (ReceiveMessage info:list){
+                    for (ReceiveMessage newInfo:messages){
+                        if (TextUtils.equals(UdeskUtil.objectToString(info.getUuid()),UdeskUtil.objectToString(newInfo.getUuid()))){
+                            newMessages.add(info);
+                        }
                     }
                 }
-                list.clear();
-                list.addAll(messages);
+                list.removeAll(newMessages);
             }
+            list.addAll(messages);
+            Collections.sort(list, new Comparator<ReceiveMessage>() {
+                @Override
+                public int compare(ReceiveMessage o1, ReceiveMessage o2) {
+                    long createtime1 = UdeskUtil.stringToLong(UdeskUtil.objectToString(o1.getCreated_at()));
+                    long createtime2 = UdeskUtil.stringToLong(UdeskUtil.objectToString(o2.getCreated_at()));
+
+                    if (createtime1 > createtime2) {
+                        return 1;
+                    }
+                    if (createtime1 == createtime2) {
+                        return 0;
+                    }
+                    return -1;
+                }
+            });
             notifyDataSetChanged();
         } catch (Exception e) {
             e.printStackTrace();
@@ -452,6 +495,14 @@ MessageAdatper extends BaseAdapter {
                         fileViewHolder.mProgress = (ProgressBar) convertView.findViewById(R.id.udesk_progress);
                         convertView.setTag(fileViewHolder);
                         break;
+                    case NAVIGATES:
+                        NavigatesViewHolder navigatesViewHolder = new NavigatesViewHolder();
+                        initItemNormalView(convertView, navigatesViewHolder);
+                        navigatesViewHolder.desc = convertView.findViewById(R.id.navigates_desc);
+                        navigatesViewHolder.previous = convertView.findViewById(R.id.navigates_previous);
+                        navigatesViewHolder.navigatesList = convertView.findViewById(R.id.navigates_list);
+                        convertView.setTag(navigatesViewHolder);
+                        break;
                     default:
                         break;
                 }
@@ -510,6 +561,7 @@ MessageAdatper extends BaseAdapter {
                     case MSG_IMG_L:
                     case MSG_SMALL_VIDEO_L:
                     case MSG_FILE_L:
+                    case NAVIGATES:
                         this.isLeft = true;
                         Merchant merchant = ((UdeskChatActivity) mContext).getMerchant();
                         if (merchant != null && !TextUtils.isEmpty(UdeskUtil.objectToString(merchant.getLogo_url()))) {
@@ -552,6 +604,7 @@ MessageAdatper extends BaseAdapter {
                         || itemType == MSG_IMG_L
                         || itemType == MSG_SMALL_VIDEO_L
                         || itemType == MSG_FILE_L
+                        || itemType == NAVIGATES
                 ) {
                     ivStatus.setVisibility(View.GONE);
                 } else {
@@ -1478,6 +1531,82 @@ MessageAdatper extends BaseAdapter {
                 e.printStackTrace();
             } catch (OutOfMemoryError error) {
                 error.printStackTrace();
+            }
+        }
+    }
+    /**
+     * 展示导航消息
+     */
+    class NavigatesViewHolder extends BaseViewHolder {
+        public TextView desc;
+        public TextView previous;
+        public ListView navigatesList;
+
+        @Override
+        void bind(Context context) {
+            try {
+                final NavigatesResult result = (NavigatesResult) message;
+                if (result !=null && result.getData()!= null){
+                    desc.setText(result.getData().getDesc());
+                    final AbsCommonAdapter<NavigatesResult.DataBean.GroupMenusBean> adapter = new AbsCommonAdapter<NavigatesResult.DataBean.GroupMenusBean>(mContext,R.layout.udesk_navigates_menu_item){
+
+                        @Override
+                        public void convert(AbsViewHolder helper, NavigatesResult.DataBean.GroupMenusBean item, int pos) {
+                            TextView name = helper.getView(R.id.navigates_name);
+                            name.setText(item.getItem_name());
+                            if (message.isNavigatesClickable()){
+                                name.setBackgroundResource(R.drawable.udesk_navigate_menu_bg);
+                                name.setTextColor(mContext.getResources().getColor(R.color.udesk_custom_dialog_sure_btn_color));
+                            }else {
+                                name.setBackgroundResource(R.color.white);
+                                name.setTextColor(mContext.getResources().getColor(R.color.udesk_color_text_gray));
+                            }
+                        }
+                    };
+                    navigatesList.setAdapter(adapter);
+                    adapter.clearData(true);
+                    adapter.addData(result.getData().getGroup_menus(), false);
+                    navigatesList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                        @Override
+                        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                            if (message.isNavigatesClickable()){
+                                ((UdeskChatActivity) mContext).sendNavigatesMenu(adapter.getItem(position));
+                            }
+                        }
+                    });
+                    if (message.isNavigatesClickable()){
+                        previous.setTextColor(mContext.getResources().getColor(R.color.udesk_color_7878787));
+                    }else {
+                        previous.setTextColor(mContext.getResources().getColor(R.color.udesk_color_text_gray));
+                    }
+                    if (result.isShowPrevious()){
+                        previous.setVisibility(View.VISIBLE);
+                    }else {
+                        previous.setVisibility(View.GONE);
+                    }
+                    previous.setOnClickListener(new OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            if (message.isNavigatesClickable()){
+                                ((UdeskChatActivity) mContext).sendPrevious(result);
+                            }
+                        }
+                    });
+                }
+
+                /**
+                 * 设置重发按钮的点击事件
+                 */
+                ivStatus.setOnClickListener(new OnClickListener() {
+
+                    @Override
+                    public void onClick(View v) {
+                        changeUiState(UdeskConst.SendFlag.RESULT_RETRY);
+                        ((UdeskChatActivity) mContext).retrySendMsg(message);
+                    }
+                });
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         }
     }

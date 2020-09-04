@@ -44,6 +44,7 @@ public class UdeskConst {
 
     public final static String EXTERNAL_FOLDER = "udeskmchat";
     public static final String FileEmotion = "emotion";
+    public static final String NAVIGATES_ITEM = "item_0";
     public static int count = 9;
     public static class UdeskSurvyShowType {
         public static final int TEXT = 1;
@@ -84,6 +85,7 @@ public class UdeskConst {
         public static final int TYPE_VIDEO = 9;
         public static final int TYPE_STRUCT = 10;
         public static final int TYPE_FILE = 11;
+        public static final int TYPE_NAVIGATES = 12;
 
     }
 
@@ -106,6 +108,8 @@ public class UdeskConst {
             return ChatMsgTypeInt.TYPE_STRUCT;
         } else if ("file".equalsIgnoreCase(type)) {
             return ChatMsgTypeInt.TYPE_FILE;
+        }else if ("navigates".equalsIgnoreCase(type)) {
+            return ChatMsgTypeInt.TYPE_NAVIGATES;
         }
         return ChatMsgTypeInt.TYPE_TEXT;
     }
@@ -120,6 +124,7 @@ public class UdeskConst {
         public static final String TYPE_VIDEO = "video";
         public static final String TYPE_STRUCT = "struct";
         public static final String TYPE_FILE = "file";
+        public static final String TYPE_NAVIGATES = "navigates";
     }
 
     public static class UdeskFunctionFlag {

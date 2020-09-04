@@ -23,12 +23,12 @@ public class InitActivity extends Activity implements View.OnClickListener {
     private final static String TAG = InitActivity.class.getSimpleName();
 
 
-//    String uuid = "561c8173-e3c8-4c19-94bf-6e45aeca2e39";
-//    String key = "111b0a6c368d49b8b1bb8887b5112c34";
+    String uuid = "8eacd3d9-d866-41f7-9ad8-dbb458c7b023";
+    String key = "ccc39ba49dc64d15b26830bb9fd8bd98";
 //     String uuid = "b1ce357b-8ce8-4ea1-9a87-7d15519dd7e6";
 //    String key = "27aa6696cba45cc091ee66fbc25aedab";
-     String uuid = "e5f583d6-cc5f-441a-97ef-38c33f88c144";
-    String key = "0d116ad304224802be1c86a003c41275";
+//     String uuid = "e5f583d6-cc5f-441a-97ef-38c33f88c144";
+//    String key = "0d116ad304224802be1c86a003c41275";
 
     private EditText uuidEdit, udesk_sign;
     private Button udesk_next;

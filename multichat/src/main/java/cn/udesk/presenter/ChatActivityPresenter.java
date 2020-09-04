@@ -10,6 +10,8 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.google.gson.Gson;
+
 import org.apache.http.conn.ConnectTimeoutException;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -27,6 +29,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -34,6 +37,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 
 import cn.udesk.JsonUtils;
+import cn.udesk.PreferenceHelper;
 import cn.udesk.R;
 import cn.udesk.UdeskConst;
 import cn.udesk.UdeskSDKManager;
@@ -50,9 +54,12 @@ import cn.udesk.model.SurveyOptionsModel;
 import cn.udesk.muchat.HttpCallBack;
 import cn.udesk.muchat.HttpDownloadCallBack;
 import cn.udesk.muchat.HttpFacade;
+import cn.udesk.muchat.UdeskHttpCallBack;
 import cn.udesk.muchat.UdeskLibConst;
 import cn.udesk.muchat.bean.AliBean;
+import cn.udesk.muchat.bean.CustomerStatusResult;
 import cn.udesk.muchat.bean.ExtrasInfo;
+import cn.udesk.muchat.bean.NavigatesResult;
 import cn.udesk.muchat.bean.Products;
 import cn.udesk.muchat.bean.ReceiveMessage;
 import cn.udesk.muchat.bean.SendMessage;
@@ -81,7 +88,6 @@ public class ChatActivityPresenter {
     int failureCount;
     private OkHttpClient okHttpClient;
     private Map<Object, Call> concurrentHashMap = new ConcurrentHashMap();
-
     public ChatActivityPresenter(IChatActivityView chatview) {
         this.mChatView = chatview;
 
@@ -114,6 +120,10 @@ public class ChatActivityPresenter {
     public void sendCommodity(final Products products) {
         InitMode initMode = UdeskSDKManager.getInstance().getInitMode();
         if (initMode != null) {
+            String menuId = PreferenceHelper.readString(mChatView.getContext(), UdeskLibConst.SharePreParams.Udesk_Sharepre_Name, UdeskSDKManager.getInstance().getCustomerEuid() + UdeskLibConst.SharePreParams.MENU_ID);
+            if (!menuId.isEmpty()){
+                products.setMenuId(menuId);
+            }
             HttpFacade.getInstance().sendProducts(UdeskUtil.getAuthToken(UdeskUtil.objectToString(initMode.getIm_username()),
                     UdeskUtil.objectToString(initMode.getIm_password())), mChatView.getEuid(), products, new HttpCallBack() {
                 @Override
@@ -167,6 +177,17 @@ public class ChatActivityPresenter {
             mChatView.clearInputContent();
             onNewMessage(receiveMessage);
             createMessage(UdeskUtil.objectToString(receiveMessage.getId()), msgString, UdeskConst.ChatMsgTypeString.TYPE_TEXT, receiveMessage.getExtras());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    public void sendNavigatesMenuMessage(NavigatesResult.DataBean.GroupMenusBean menusBean) {
+        try {
+            if (menusBean != null){
+                ReceiveMessage receiveMessage = buildSendMessage(UdeskConst.ChatMsgTypeString.TYPE_NAVIGATES, menusBean.getItem_name());
+                onNewMessage(receiveMessage);
+                createMessage(UdeskUtil.objectToString(receiveMessage.getId()), menusBean, UdeskConst.ChatMsgTypeString.TYPE_NAVIGATES, receiveMessage.getExtras());
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -308,12 +329,82 @@ public class ChatActivityPresenter {
             msg.setReadFlag(UdeskConst.ChatMsgReadFlag.read);
             msg.setContent(content);
             msg.setLocalPath(locationPath);
+            msg.setCreated_at(UdeskUtil.setCreateTime());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return msg;
+    }
+    public ReceiveMessage buildNavigatesPreviousMessage(String msgtype, String content) {
+        ReceiveMessage msg = new ReceiveMessage();
+        try {
+            msg.setContent_type(msgtype);
+            msg.setId(UdeskIdBuild.buildMsgId());
+            msg.setMerchant_euid(mChatView.getEuid());
+            msg.setDirection(UdeskConst.ChatMsgDirection.Send);
+            msg.setSendFlag(UdeskConst.SendFlag.RESULT_SUCCESS);
+            msg.setReadFlag(UdeskConst.ChatMsgReadFlag.read);
+            msg.setContent(content);
+            msg.setCreated_at(UdeskUtil.setCreateTime());
+            msg.setUuid(UUID.randomUUID());
+            onNewMessage(msg);
+            addNavigateChatCache(msg);
         } catch (Exception e) {
             e.printStackTrace();
         }
         return msg;
     }
 
+    //构建导航消息
+    public ReceiveMessage buildNavigatesMessage(NavigatesResult navigatesResult, String id) {
+        NavigatesResult result = new NavigatesResult();
+        try {
+            if (navigatesResult != null && navigatesResult.getData() != null) {
+                NavigatesResult.DataBean dataBean = new NavigatesResult.DataBean();
+                dataBean.setDesc(navigatesResult.getData().getDesc());
+                List<NavigatesResult.DataBean.GroupMenusBean> groupMenus = navigatesResult.getData().getGroup_menus();
+                List<NavigatesResult.DataBean.GroupMenusBean> outerList = new ArrayList<>();
+                for (NavigatesResult.DataBean.GroupMenusBean menus : groupMenus) {
+                    if (TextUtils.equals(id, menus.getParentId())) {
+                        outerList.add(menus);
+                    }
+                    if (!TextUtils.equals(id,UdeskConst.NAVIGATES_ITEM)){
+                        if (TextUtils.equals(id,menus.getId())){
+                            result.setNavigatesParentId(menus.getParentId());
+                            result.setShowPrevious(true);
+                        }
+                    }else {
+                        result.setNavigatesParentId(UdeskConst.NAVIGATES_ITEM);
+                        result.setShowPrevious(false);
+                    }
+
+                }
+                dataBean.setGroup_menus(outerList);
+                result.setData(dataBean);
+                result.setMerchant_euid(mChatView.getEuid());
+                result.setCreated_at(UdeskUtil.setCreateTime());
+                result.setUuid(UUID.randomUUID());
+                result.setNavigatesClickable(true);
+                addNavigateChatCache(result);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+
+    private void addNavigateChatCache(ReceiveMessage message){
+        try {
+            List<ReceiveMessage> navigatesChatCache = mChatView.getNavigatesChatCache();
+            if (navigatesChatCache == null) {
+                navigatesChatCache = new ArrayList<>();
+            }
+            navigatesChatCache.add(message);
+            UdeskUtil.savePreferenceCache(mChatView.getContext(), UdeskSDKManager.getInstance().getCustomerEuid() + UdeskLibConst.SharePreParams.NavigatesChatCache, navigatesChatCache);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
     private void upLoadFileQ(final String filePath, final ReceiveMessage receiveMessage) {
         try {
 
@@ -650,13 +741,22 @@ public class ChatActivityPresenter {
 
 
     //创建消息
-    public void createMessage(final String id, final Object messa, String type, ExtrasInfo info) {
+    public void createMessage(final String id, final Object messa, final String type, ExtrasInfo info) {
         try {
             InitMode initMode = UdeskSDKManager.getInstance().getInitMode();
             if (initMode != null) {
                 final SendMessage sendMessage = new SendMessage();
                 SendMessage.MessageBean  messageBean= new SendMessage.MessageBean();
-                messageBean.setContent(messa);
+                String menuId = PreferenceHelper.readString(mChatView.getContext(), UdeskLibConst.SharePreParams.Udesk_Sharepre_Name, UdeskSDKManager.getInstance().getCustomerEuid() + UdeskLibConst.SharePreParams.MENU_ID);
+                if (!menuId.isEmpty()){
+                    messageBean.setMenu_id(menuId);
+                }
+                if (TextUtils.equals(type,UdeskConst.ChatMsgTypeString.TYPE_NAVIGATES)){
+                    messageBean.setContent(((NavigatesResult.DataBean.GroupMenusBean)messa).getItem_name());
+                    messageBean.setMenu_id(((NavigatesResult.DataBean.GroupMenusBean)messa).getId());
+                }else {
+                    messageBean.setContent(messa);
+                }
                 messageBean.setContent_type(type);
                 if (info != null) {
                     messageBean.setExtras(info);
@@ -668,6 +768,9 @@ public class ChatActivityPresenter {
                     public void onSuccess(String backstirng) {
                         mChatView.checkConnect();
                         sendMessageResult(id, UdeskConst.SendFlag.RESULT_SUCCESS, JsonUtils.getCreateTime(backstirng));
+                        if (TextUtils.equals(type,UdeskConst.ChatMsgTypeString.TYPE_NAVIGATES)){
+                            mChatView.showNavigatesItemMenu((NavigatesResult.DataBean.GroupMenusBean) messa);
+                        }
                     }
 
                     @Override
@@ -1141,6 +1244,74 @@ public class ChatActivityPresenter {
                             @Override
                             public void onSuccessFail(String message) {
                                 Log.i("udesk", "queue onSuccessFail =" + message);
+
+                            }
+                        }
+                );
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    public void getCustomerStatus() {
+        try {
+            InitMode initMode = UdeskSDKManager.getInstance().getInitMode();
+            if (initMode != null) {
+                HttpFacade.getInstance().getCustomerStatus(UdeskUtil.getAuthToken(UdeskUtil.objectToString(initMode.getIm_username()),
+                        UdeskUtil.objectToString(initMode.getIm_password())), mChatView.getEuid(), new UdeskHttpCallBack<CustomerStatusResult>() {
+                            @Override
+                            public void onSuccess(CustomerStatusResult customerStatusResult) {
+                                if (customerStatusResult != null && customerStatusResult.getData() != null){
+                                    if (!customerStatusResult.getData().isIn_queue() && !customerStatusResult.getData().isIn_session()){
+                                        getNavigates(true);
+                                    }else {
+                                        getNavigates(false);
+                                    }
+                                }
+                            }
+
+                            @Override
+                            public void onFail(Throwable message) {
+
+                            }
+
+                            @Override
+                            public void onSuccessFail(String message) {
+
+                            }
+                        }
+                );
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    public void getNavigates(final boolean isShow) {
+        try {
+            InitMode initMode = UdeskSDKManager.getInstance().getInitMode();
+            if (initMode != null) {
+                HttpFacade.getInstance().getNavigates(UdeskUtil.getAuthToken(UdeskUtil.objectToString(initMode.getIm_username()),
+                        UdeskUtil.objectToString(initMode.getIm_password())), mChatView.getEuid(), new UdeskHttpCallBack<NavigatesResult>() {
+                            @Override
+                            public void onSuccess(NavigatesResult navigatesResult) {
+                                if (navigatesResult != null){
+                                    mChatView.addNavigatesResult(navigatesResult);
+                                    if (isShow){
+                                        mChatView.showNavigatesMenu(navigatesResult,isShow);
+                                    }
+                                    Message messge = mChatView.getHandler().obtainMessage(
+                                            MessageWhat.SEND_AUTO_MESSAGE);
+                                    mChatView.getHandler().sendMessage(messge);
+                                }
+                            }
+
+                            @Override
+                            public void onFail(Throwable message) {
+
+                            }
+
+                            @Override
+                            public void onSuccessFail(String message) {
 
                             }
                         }

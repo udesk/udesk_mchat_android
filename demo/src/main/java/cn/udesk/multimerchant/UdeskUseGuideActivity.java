@@ -46,6 +46,7 @@ public class UdeskUseGuideActivity extends Activity implements View.OnClickListe
         findViewById(R.id.all_unread_msg).setOnClickListener(this);
         findViewById(R.id.add_navigation).setOnClickListener(this);
         findViewById(R.id.add_extraFunction).setOnClickListener(this);
+        findViewById(R.id.add_product_message).setOnClickListener(this);
         merchant_unread_count = (TextView) findViewById(R.id.merchant_unread_count);
         all_unread_count = (TextView) findViewById(R.id.all_unread_count);
         receive_msg = (TextView) findViewById(R.id.receive_msg);
@@ -206,6 +207,9 @@ public class UdeskUseGuideActivity extends Activity implements View.OnClickListe
                     }
                 }
             });
+            Toast.makeText(UdeskUseGuideActivity.this, "设置成功", Toast.LENGTH_SHORT).show();
+        } else if (v.getId() == R.id.add_product_message) {
+            UdeskSDKManager.getInstance().setProductMessage(createProduct());
             Toast.makeText(UdeskUseGuideActivity.this, "设置成功", Toast.LENGTH_SHORT).show();
         }
     }

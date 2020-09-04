@@ -7,6 +7,7 @@ import java.util.List;
 
 import cn.udesk.model.Merchant;
 import cn.udesk.model.SurveyOptionsModel;
+import cn.udesk.muchat.bean.NavigatesResult;
 import cn.udesk.muchat.bean.ReceiveMessage;
 
 public interface IChatActivityView {
@@ -34,4 +35,8 @@ public interface IChatActivityView {
 
 	SurveyOptionsModel getSurvyOption();
 
+	void addNavigatesResult(NavigatesResult navigatesResult);
+	void showNavigatesMenu(NavigatesResult navigatesResult,boolean isShow);
+	List<ReceiveMessage> getNavigatesChatCache();
+	void showNavigatesItemMenu(NavigatesResult.DataBean.GroupMenusBean item);
 }

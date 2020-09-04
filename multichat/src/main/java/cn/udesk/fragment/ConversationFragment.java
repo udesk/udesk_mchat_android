@@ -210,7 +210,7 @@ public class ConversationFragment extends BaseFragment implements PullToRefreshS
                 if (message != null) {
                     timeTv.setText(UdeskUtil.formatLongTypeTimeToString(ConversationFragment.this.getContext(), BaseUtils.objectToString(message.getCreated_at())));
                     String contentType = BaseUtils.objectToString(message.getContent_type());
-                    if (UdeskConst.ChatMsgTypeString.TYPE_TEXT.equals(contentType)) {
+                    if (UdeskConst.ChatMsgTypeString.TYPE_TEXT.equals(contentType) || UdeskConst.ChatMsgTypeString.TYPE_NAVIGATES.equals(contentType)) {
                         String content = BaseUtils.objectToString(message.getContent());
                         if (MoonUtils.isHasEmotions(content)){
                             contentTv.setText(MoonUtils.replaceEmoticons(mContext, content, (int) contentTv.getTextSize()));
@@ -221,6 +221,12 @@ public class ConversationFragment extends BaseFragment implements PullToRefreshS
                         contentTv.setText(getString(R.string.msg_type_audio));
                     } else if (UdeskConst.ChatMsgTypeString.TYPE_IMAGE.equals(contentType)) {
                         contentTv.setText(getString(R.string.msg_type_image));
+                    } else if (UdeskConst.ChatMsgTypeString.TYPE_VIDEO.equals(contentType)) {
+                        contentTv.setText(getString(R.string.msg_type_video));
+                    } else if (UdeskConst.ChatMsgTypeString.TYPE_FILE.equals(contentType)) {
+                        contentTv.setText(getString(R.string.msg_type_file));
+                    } else if (UdeskConst.ChatMsgTypeString.TYPE_PRODUCT.equals(contentType)) {
+                        contentTv.setText(getString(R.string.msg_type_product));
                     }
 
                 }

@@ -68,8 +68,8 @@ public class UdeskSDKManager {
      */
     private ProductMessage productMessage;
 
-    private static String customerEuid;
-    private static String customerName;
+    private String customerEuid;
+    private String customerName;
 
     private ExecutorService scaleExecutor;
 
@@ -270,13 +270,13 @@ public class UdeskSDKManager {
         }
     }
 
-    private void initMode(final String customer_euid, final String customer_name, final IInitCallBack iInitCallBack) {
+    private void initMode(final String customerEuid, final String customerName, final IInitCallBack iInitCallBack) {
         try {
-            if (TextUtils.isEmpty(customer_euid) || TextUtils.isEmpty(customer_name)) {
+            if (TextUtils.isEmpty(customerEuid) || TextUtils.isEmpty(customerName)) {
                 return;
             }
 
-            HttpFacade.getInstance().init(customer_euid, customer_name, new HttpCallBack() {
+            HttpFacade.getInstance().init(customerEuid, customerName, new HttpCallBack() {
                 @Override
                 public void onSuccess(String message) {
                     initMode = JsonUtils.parserInitMessage(message);
@@ -358,9 +358,7 @@ public class UdeskSDKManager {
                 @Override
                 public void run() {
                     if (mUdeskXmppManager != null) {
-                        if (mUdeskXmppManager != null) {
-                            mUdeskXmppManager.cancel();
-                        }
+                        mUdeskXmppManager.cancel();
                         mUdeskXmppManager.startLoginXmpp(loginName, loginPassword, loginServer, loginPort);
                     }
                 }
@@ -377,9 +375,7 @@ public class UdeskSDKManager {
                 @Override
                 public void run() {
                     if (mUdeskXmppManager != null) {
-                        if (mUdeskXmppManager != null) {
-                            mUdeskXmppManager.cancel();
-                        }
+                        mUdeskXmppManager.cancel();
                     }
                 }
             });
@@ -511,40 +507,38 @@ public class UdeskSDKManager {
 
 
     /**
-     * @param merchant_euid 指定商户euid
+     * @param merchantEuid 指定商户euid
      */
-    public void getMerchantUnReadMsg(String merchant_euid, final IMerchantUnreadMsgCnt merchantUnreadMsgCnt) {
+    public void getMerchantUnReadMsg(String merchantEuid, final IMerchantUnreadMsgCnt merchantUnreadMsgCnt) {
 
         if (initMode != null) {
-            if (initMode != null) {
-                HttpFacade.getInstance().unreadCount(UdeskUtil.getAuthToken(UdeskUtil.objectToString(initMode.getIm_username()),
-                        UdeskUtil.objectToString(initMode.getIm_password())), merchant_euid, new HttpCallBack() {
-                    @Override
-                    public void onSuccess(String message) {
-                        try {
-                            JSONObject jsonObject = new JSONObject(message);
-                            if (merchantUnreadMsgCnt != null) {
-                                merchantUnreadMsgCnt.totalCount(UdeskUtil.objectToInt(jsonObject.opt("count")));
-                            }
-                        } catch (JSONException e) {
-                            e.printStackTrace();
+            HttpFacade.getInstance().unreadCount(UdeskUtil.getAuthToken(UdeskUtil.objectToString(initMode.getIm_username()),
+                    UdeskUtil.objectToString(initMode.getIm_password())), merchantEuid, new HttpCallBack() {
+                @Override
+                public void onSuccess(String message) {
+                    try {
+                        JSONObject jsonObject = new JSONObject(message);
+                        if (merchantUnreadMsgCnt != null) {
+                            merchantUnreadMsgCnt.totalCount(UdeskUtil.objectToInt(jsonObject.opt("count")));
                         }
-
+                    } catch (JSONException e) {
+                        e.printStackTrace();
                     }
 
-                    @Override
-                    public void onFail(Throwable message) {
+                }
+
+                @Override
+                public void onFail(Throwable message) {
+                }
+
+                @Override
+                public void onSuccessFail(String message) {
+                    if (UdeskLibConst.isDebug) {
+                        Log.i("udesk", "getMerchantUnReadMsg result =" + message);
                     }
 
-                    @Override
-                    public void onSuccessFail(String message) {
-                        if (UdeskLibConst.isDebug) {
-                            Log.i("udesk", "getMerchantUnReadMsg result =" + message);
-                        }
-
-                    }
-                });
-            }
+                }
+            });
         }
 
     }
@@ -607,5 +601,9 @@ public class UdeskSDKManager {
 
     public Context getContext(){
         return context;
+    }
+
+    public String getCustomerEuid() {
+        return customerEuid;
     }
 }

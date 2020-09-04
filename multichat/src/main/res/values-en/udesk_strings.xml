@@ -98,6 +98,9 @@
 
     <string name="msg_type_image">[image]</string>
     <string name="msg_type_audio">[audio]</string>
+    <string name="msg_type_video">[video]</string>
+    <string name="msg_type_file">[file]</string>
+    <string name="msg_type_product">[product]</string>
     <string name="close_conversation">Delete conversation</string>
     <string name="time_out">time_out, please check net</string>
     <string name="no_conversation">No history dialogue</string>
@@ -138,5 +141,7 @@
     <string name="udesk_file_not_exist">File does not exist</string>
     <string name="udesk_upload_video_error">Failed to upload video, please try again</string>
     <string name="udesk_upload_file_error">Failed to upload file, please try again</string>
+    <string name="udesk_navigatesMenu_unchecked">Please select the navigation menu before sending the message</string>
+    <string name="udesk_navigatesMenu_previous">Back to previous</string>
 
 </resources>

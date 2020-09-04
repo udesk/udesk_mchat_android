@@ -40,6 +40,8 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.resource.drawable.GlideDrawable;
 import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.SimpleTarget;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -57,6 +59,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -66,6 +69,7 @@ import cn.udesk.activity.UdeskZoomImageActivty;
 import cn.udesk.model.CustomerInfo;
 import cn.udesk.model.InitMode;
 import cn.udesk.muchat.UdeskLibConst;
+import cn.udesk.muchat.bean.NavigatesResult;
 import cn.udesk.muchat.bean.UpdateCustomerField;
 import cn.udesk.provider.UdeskExternalCacheProvider;
 import cn.udesk.provider.UdeskExternalFileProvider;
@@ -1843,5 +1847,34 @@ public static Uri getOutputMediaFileUri(Context context, File file) {
             e.printStackTrace();
         }
         return updateCustomerField;
+    }
+    public static String setCreateTime(){
+        try {
+            String strDateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSZ";
+            SimpleDateFormat sdf = new SimpleDateFormat(strDateFormat);
+            return sdf.format(new Date());
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return "";
+    }
+
+    public static <T> void savePreferenceCache(Context context,String key, T navigatesChatCache){
+        try {
+            PreferenceHelper.write(context,UdeskLibConst.SharePreParams.Udesk_Sharepre_Name,key, PreferenceHelper.Object2String(navigatesChatCache));
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+    public static <T> T getPreferenceCache(Context context,String key){
+        try {
+            String cache = PreferenceHelper.readString(context, UdeskLibConst.SharePreParams.Udesk_Sharepre_Name,key);
+            if (!TextUtils.isEmpty(cache)){
+                return (T)PreferenceHelper.String2Object(cache);
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return null;
     }
 }

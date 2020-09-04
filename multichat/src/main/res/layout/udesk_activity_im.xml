@@ -36,7 +36,7 @@
             android:layout_width="wrap_content"
             android:layout_height="0dp"
             android:layout_weight="1"
-            android:background="@color/udesk_color_f0f2f2"
+            android:background="@color/white"
             android:cacheColorHint="@android:color/transparent"
             android:divider="@android:color/transparent"
             android:listSelector="@android:color/transparent" />

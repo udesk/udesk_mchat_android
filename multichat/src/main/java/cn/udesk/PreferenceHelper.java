@@ -3,6 +3,13 @@ package cn.udesk;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
+import android.util.Base64;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 
 
 public class PreferenceHelper {
@@ -25,4 +32,34 @@ public class PreferenceHelper {
         return preference.getString(k, "");
     }
 
+    public static String Object2String(Object object) {
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        ObjectOutputStream objectOutputStream = null;
+        try {
+            objectOutputStream = new ObjectOutputStream(byteArrayOutputStream);
+            objectOutputStream.writeObject(object);
+            String string = new String(Base64.encode(byteArrayOutputStream.toByteArray(), Base64.DEFAULT));
+            objectOutputStream.close();
+            return string;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public static Object String2Object(String objectString) {
+        byte[] mobileBytes = Base64.decode(objectString.getBytes(), Base64.DEFAULT);
+        ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(mobileBytes);
+        ObjectInputStream objectInputStream = null;
+        try {
+            objectInputStream = new ObjectInputStream(byteArrayInputStream);
+            Object object = objectInputStream.readObject();
+            objectInputStream.close();
+            return object;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+
+    }
 }
