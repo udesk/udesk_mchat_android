@@ -11,9 +11,12 @@ import android.content.res.AssetFileDescriptor;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.media.MediaMetadataRetriever;
 import android.net.ConnectivityManager;
+import android.net.NetworkCapabilities;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Build;
@@ -27,6 +30,7 @@ import android.text.TextUtils;
 import android.util.Base64;
 import android.util.DisplayMetrics;
 import android.view.Display;
+import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.ImageView;
@@ -35,11 +39,6 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.bumptech.glide.load.resource.drawable.GlideDrawable;
-import com.bumptech.glide.request.animation.GlideAnimation;
-import com.bumptech.glide.request.target.SimpleTarget;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -66,6 +65,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import cn.udesk.activity.UdeskZoomImageActivty;
+import cn.udesk.imageloader.UdeskImage;
+import cn.udesk.imageloader.UdeskImageLoader;
 import cn.udesk.model.CustomerInfo;
 import cn.udesk.model.InitMode;
 import cn.udesk.muchat.UdeskLibConst;
@@ -508,6 +509,18 @@ public static Uri getOutputMediaFileUri(Context context, File file) {
         }
         int index = filename.lastIndexOf('/');
         return filename.substring(index + 1);
+    }
+    public static String getPngName(String fileName) {
+        try {
+            int dotIndex = fileName.lastIndexOf(".");
+            if (dotIndex < 0) {
+                return fileName + ".png";
+            } else {
+                return fileName.substring(0, dotIndex) + ".png";
+            }
+        } catch (Exception e) {
+        }
+        return fileName;
     }
 
     public static File getOutputMediaFile(Context context, String mediaName) {
@@ -1016,9 +1029,9 @@ public static Uri getOutputMediaFileUri(Context context, File file) {
             // 如果图片高度比宽度大，以高度为基准
             ratio = (double) bitHeight / imageHeight;
         }
-        // 最小比率为1
-        if (ratio <= 1.0)
-            ratio = 1.0;
+//        // 最小比率为1
+//        if (ratio <= 1.0)
+//            ratio = 1.0;
         return ratio;
     }
 
@@ -1608,61 +1621,53 @@ public static Uri getOutputMediaFileUri(Context context, File file) {
 
     public static void loadInto(final Context context, final String imageUrl, int errorImageId, int placeHolder, final ImageView imageView) {
 
-        Glide.with(context.getApplicationContext())
-                .load(imageUrl)
-                .diskCacheStrategy(DiskCacheStrategy.RESULT)
-                .placeholder(placeHolder)
-                .error(errorImageId)
-                .into(imageView);
+        UdeskImage.loadImage(context, imageView, getUriFromPath(context, imageUrl), placeHolder, errorImageId, imageView.getWidth(), imageView.getHeight(), null);
     }
-    public static void loadIntoCustomerSize(final Context context, final String imageUrl, int errorImageId, int placeHolder, final ImageView imageView,int width,int height) {
 
-        Glide.with(context.getApplicationContext())
-                .load(imageUrl)
-                .diskCacheStrategy(DiskCacheStrategy.RESULT)
-                .placeholder(placeHolder)
-                .error(errorImageId)
-                .override(width,height)
-                .into(imageView);
+    public static void loadIntoCustomerSize(final Context context, final String imageUrl, int errorImageId, int placeHolder, final ImageView imageView, int width, int height) {
+
+        UdeskImage.loadImage(context, imageView, getUriFromPath(context, imageUrl), placeHolder, errorImageId, width, height, null);
+    }
+    private static void scaleImageView(Context context, ImageView imageView, boolean isfixScale, int reqWidth, int reqHeight) {
+        ViewGroup.LayoutParams layoutParams = imageView.getLayoutParams();
+        int imgWidth = dip2px(context, 140);
+        if (isfixScale) {
+            //固定宽度缩放
+            double bitScalew = (double) reqWidth / imgWidth;
+            layoutParams.height = (int) (reqHeight / bitScalew);
+            layoutParams.width = (int) (reqWidth / bitScalew);
+        } else {
+            int imgHight = dip2px(context, 220);
+            double bitScalew = getRatioSize(reqWidth, reqHeight, imgHight, imgWidth);
+            if (bitScalew >= 1) {
+                layoutParams.height = (int) (reqHeight / bitScalew);
+                layoutParams.width = (int) (reqWidth / bitScalew);
+            } else if (bitScalew >= 0.5) {
+                layoutParams.height = reqHeight;
+                layoutParams.width = reqWidth;
+            } else {
+                layoutParams.height = imgWidth / 2;
+                layoutParams.width = imgWidth / 2;
+            }
+        }
+        imageView.requestLayout();
     }
 
     /**
      * 自适应宽度加载图片。保持图片的长宽比例不变，通过修改imageView的高度来完全显示图片。
      */
-    public static void loadIntoFitSize(final Context context, String imageUrl, int errorImageId, int placeHolder, final ImageView imageView) {
-        final int screenWidth = getScreenWidth(context.getApplicationContext());
-        final int imgWidth = screenWidth / 3;
-        final int imgHight = getScreenHeight(context) / 3;
-        final Uri path = getUriFromPath(context, imageUrl);
-        SimpleTarget<GlideDrawable> target = new SimpleTarget<GlideDrawable>() {
-            @Override
-            public void onResourceReady(GlideDrawable resource, GlideAnimation<? super GlideDrawable> glideAnimation) {
-                if (resource == null || imageView.getTag() == path) {
-                    return;
+    public static void loadIntoFitSize(final Context context, String imageUrl, int errorImageId, int placeHolder, final ImageView imageView,final boolean isfixScale) {
+        try {
+            UdeskImageLoader.UdeskDisplayImageListener udeskDisplayImageListener = new UdeskImageLoader.UdeskDisplayImageListener() {
+                @Override
+                public void onSuccess(View view, Uri uri, int width, int height) {
+                    scaleImageView(context, imageView, isfixScale, width, height);
                 }
-                imageView.setTag(path);
-                int imageWidth = resource.getIntrinsicWidth();
-                int imageHeight = resource.getIntrinsicHeight();
-
-
-                double bitScalew = getRatioSize(imageWidth, imageHeight, imgHight, imgWidth);
-                ViewGroup.LayoutParams layoutParams = imageView.getLayoutParams();
-                layoutParams.height = (int) (imageHeight / bitScalew);
-                layoutParams.width = (int) (imageWidth / bitScalew);
-                imageView.setLayoutParams(layoutParams);
-                imageView.setImageDrawable(resource);
-//                imageView.invalidate();
-            }
-        };
-
-        Glide.with(context.getApplicationContext())
-                .load(path)
-                .diskCacheStrategy(DiskCacheStrategy.RESULT)
-                .placeholder(placeHolder)
-                .error(errorImageId)
-                .override(getScreenWidth(context), getScreenHeight(context))
-                .into(target);
-//                .into(imageView);
+            };
+            UdeskImage.loadImage(context, imageView, getUriFromPath(context, imageUrl), placeHolder, errorImageId, getScreenWidth(context), getScreenHeight(context), udeskDisplayImageListener);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public static int getScreenWidth(Context context) {
@@ -1679,6 +1684,41 @@ public static Uri getOutputMediaFileUri(Context context, File file) {
         return dm.heightPixels;
     }
 
+    public static Bitmap drawableToBitmap(Drawable drawable) {
+        if (drawable instanceof BitmapDrawable) {
+            return ((BitmapDrawable) drawable).getBitmap();
+        }
+        Bitmap bitmap;
+        try {
+            bitmap = Bitmap.createBitmap(drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
+            Canvas canvas = new Canvas(bitmap);
+            drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+            drawable.draw(canvas);
+        } catch (Exception e) {
+            bitmap = null;
+        }
+        return bitmap;
+    }
+    public static boolean isClassExists(String classFullName) {
+
+        try {
+            Class.forName(classFullName);
+            return true;
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+    /**
+     * 本地缓存文件
+     */
+    public static void getFileFromDiskCache(Context context, String path, UdeskImageLoader.UdeskDownloadImageListener udeskDownloadImageListener) {
+        try {
+            UdeskImage.loadImageFile(context, getUriFromPath(context, path), udeskDownloadImageListener);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
     /**
      * @return
@@ -1799,6 +1839,8 @@ public static Uri getOutputMediaFileUri(Context context, File file) {
                         return "2G";
                     } else if (netWorkType == TelephonyManager.NETWORK_TYPE_LTE) {
                         return "4G";
+                    }else if (netWorkType == TelephonyManager.NETWORK_TYPE_NR) {
+                        return "5G";
                     }
                 }
             }

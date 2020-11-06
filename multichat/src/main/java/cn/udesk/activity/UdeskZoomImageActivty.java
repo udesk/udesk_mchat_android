@@ -1,33 +1,26 @@
 package cn.udesk.activity;
 
-import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
-import android.graphics.drawable.Drawable;
+import android.content.Intent;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
-import android.text.TextUtils;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.Toast;
 
 import androidx.annotation.RequiresApi;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.bumptech.glide.load.resource.drawable.GlideDrawable;
-import com.bumptech.glide.request.animation.GlideAnimation;
-import com.bumptech.glide.request.target.SimpleTarget;
-import com.bumptech.glide.request.target.Target;
 import com.github.chrisbanes.photoview.OnPhotoTapListener;
 import com.github.chrisbanes.photoview.PhotoView;
 
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -37,8 +30,10 @@ import java.io.OutputStream;
 
 import cn.udesk.LoaderTask;
 import cn.udesk.R;
-import cn.udesk.UdeskSDKManager;
+import cn.udesk.UdeskConst;
 import cn.udesk.UdeskUtil;
+import cn.udesk.imageloader.UdeskImageLoader;
+import udesk.core.utils.UdeskUtils;
 
 
 public class UdeskZoomImageActivty extends UdeskBaseActivity implements
@@ -57,7 +52,7 @@ public class UdeskZoomImageActivty extends UdeskBaseActivity implements
             zoomImageView = (PhotoView) findViewById(R.id.udesk_zoom_imageview);
             Bundle bundle = getIntent().getExtras();
             uri = bundle.getParcelable("image_path");
-            loadInto(getApplicationContext(), uri.toString(), R.drawable.udesk_defualt_failure, R.drawable.udesk_defalut_image_loading, zoomImageView);
+            UdeskUtil.loadInto(getApplicationContext(), uri.toString(), R.drawable.udesk_defualt_failure, R.drawable.udesk_defalut_image_loading, zoomImageView);
             saveIdBtn = findViewById(R.id.udesk_zoom_save);
             saveIdBtn.setOnClickListener(this);
             zoomImageView.setOnPhotoTapListener(new OnPhotoTapListener() {
@@ -74,143 +69,136 @@ public class UdeskZoomImageActivty extends UdeskBaseActivity implements
 
     }
 
-    public static void loadInto(final Context context, final String imageUrl, int errorImageId, int placeHolder, final ImageView imageView) {
-        final int screenWidth = UdeskUtil.getScreenWidth(context.getApplicationContext());
-        final int imgWidth = screenWidth;
-        final int imgHight = UdeskUtil.getScreenHeight(context);
-        SimpleTarget<GlideDrawable> target = new SimpleTarget<GlideDrawable>() {
-            @Override
-            public void onResourceReady(GlideDrawable resource, GlideAnimation<? super GlideDrawable> glideAnimation) {
-                if (resource == null || TextUtils.equals(imageUrl, (String) imageView.getTag())) {
-                    return;
-                }
-                imageView.setTag(imageUrl);
-                int imageWidth = resource.getIntrinsicWidth();
-                int imageHeight = resource.getIntrinsicHeight();
-
-                double widthRatio = (double) imageWidth / imgWidth;
-                double heightRatio = (double) imageHeight / imgHight;
-
-                ViewGroup.LayoutParams layoutParams = imageView.getLayoutParams();
-
-                if (heightRatio >= 1) {
-                    layoutParams.height = (int) (imageHeight / heightRatio);
-                } else {
-                    layoutParams.height = imgHight / 2;
-                }
-
-                if (widthRatio > 1) {
-                    layoutParams.width = (int) (imageWidth / widthRatio);
-                } else {
-                    layoutParams.width = imgWidth;
-                }
-
-                imageView.setLayoutParams(layoutParams);
-                imageView.setImageDrawable(resource);
-            }
-
-            @Override
-            public void onLoadFailed(Exception e, Drawable errorDrawable) {
-                Exception exception = e;
-                super.onLoadFailed(e, errorDrawable);
-            }
-        };
-
-        Glide.with(context.getApplicationContext())
-                .load(imageUrl)
-                .diskCacheStrategy(DiskCacheStrategy.SOURCE)
-                .placeholder(placeHolder)
-                .error(errorImageId)
-                .override(UdeskUtil.getScreenWidth(context), UdeskUtil.getScreenHeight(context))
-                .into(target);
-//                .into(imageView);
-    }
-
 
     @Override
     public void onClick(View v) {
         try {
             if (v.getId() == R.id.udesk_zoom_save) {
-                LoaderTask.getThreadPoolExecutor().execute(new Runnable() {
-                    @Override
-                    public void run() {
-                        saveImageQ();
-
-                    }
-                });
+                saveImageQ();
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
 
     }
-
     public void saveImageQ() {
         if (uri == null) {
             showFail();
             return;
         }
         try {
-            File oldFile = Glide.with(this)
-                    .load(uri)
-                    .downloadOnly(Target.SIZE_ORIGINAL, Target.SIZE_ORIGINAL)
-                    .get();
-            if (UdeskUtil.isAndroidQ()) {
-                Uri cacheFileUri = null;
-                if (oldFile == null) {
-                    if ("content".equalsIgnoreCase(uri.getScheme())) {
-                        cacheFileUri = uri;
-                    } else {
-                        showFail();
-                        return;
-                    }
-                } else {
-                    cacheFileUri = UdeskUtil.getOutputMediaFileUri(this, oldFile);
+            UdeskUtil.getFileFromDiskCache(UdeskZoomImageActivty.this.getApplicationContext(), uri.toString(), new UdeskImageLoader.UdeskDownloadImageListener() {
+                @Override
+                public void onSuccess(final Uri uri, final Bitmap bitmap) {
+                    LoaderTask.getThreadPoolExecutor().execute(new Runnable() {
+                        @Override
+                        public void run() {
+                            File file = UdeskUtil.getFileByUrl(UdeskZoomImageActivty.this, UdeskConst.FileImg, uri.toString());
+                            if (saveBitmapFile(uri, bitmap, file)) {
+                                if (UdeskUtil.isAndroidQ()) {
+                                    Uri cacheFileUri;
+                                    if (file == null) {
+                                        if ("content".equalsIgnoreCase(uri.getScheme())) {
+                                            cacheFileUri = uri;
+                                        } else {
+                                            showFail();
+                                            return;
+                                        }
+                                    } else {
+                                        cacheFileUri = UdeskUtil.getOutputMediaFileUri(UdeskZoomImageActivty.this, file);
+                                    }
+                                    if (cacheFileUri == null) {
+                                        showFail();
+                                        return;
+                                    }
+                                    String newName = UdeskUtil.getFileName(UdeskZoomImageActivty.this, cacheFileUri);
+                                    newName = UdeskUtil.getPngName(newName);
+                                    if (copyFileQ(UdeskZoomImageActivty.this, newName, cacheFileUri)) {
+                                        showSuccess(null);
+                                    } else {
+                                        showFail();
+                                    }
+                                } else {
+                                    File cacheFile = file;
+                                    // 修改文件路径
+                                    if (cacheFile == null) {
+                                        if ("file".equalsIgnoreCase(uri.getScheme())) {
+                                            String oldPath = uri.getPath();
+                                            cacheFile = new File(oldPath);
+                                        } else {
+                                            showFail();
+                                            return;
+                                        }
+                                    }
+                                    String newName = cacheFile.getName();
+                                    final File folder = Environment
+                                            .getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM);
+                                    File newFile = new File(folder, newName);
+                                    // 拷贝，成功或者失败 都提示下
+                                    if (copyFile(cacheFile, newFile)) {
+                                        showSuccess(newFile);
+                                    } else {
+                                        showFail();
+                                    }
+                                }
+                            } else {
+                                showFail();
+                            }
+
+                        }
+                    });
+
                 }
-                if (cacheFileUri == null) {
+
+                @Override
+                public void onFailed(Uri uri) {
                     showFail();
-                    return;
                 }
-                String newName = cacheFileUri.getPath().substring(cacheFileUri.getPath().lastIndexOf("/") + 1);
-                if (!newName.contains(".png")) {
-                    newName = newName + ".png";
-                }
-                if (copyFileQ(this.getApplicationContext(), newName, cacheFileUri)) {
-                    showSuccess();
-                } else {
-                    showFail();
-                }
-            } else {
-                // 修改文件路径
-                if (oldFile == null) {
-                    if ("file".equalsIgnoreCase(uri.getScheme())) {
-                        String oldPath = uri.getPath();
-                        oldFile = new File(oldPath);
-                    } else {
-                        showFail();
-                        return;
-                    }
-                }
-                String newName = oldFile.getName();
-                if (!newName.contains(".png")) {
-                    newName = newName + ".png";
-                }
-                final File folder = Environment
-                        .getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM);
-                final File newFile = new File(folder, newName);
-                // 拷贝，成功或者失败 都提示下
-                if (copyFile(oldFile, newFile)) {
-                    showSuccess();
-                } else {
-                    showFail();
-                }
-            }
+            });
         } catch (Exception e) {
             e.printStackTrace();
-            showFail();
         }
 
     }
+    private boolean saveBitmapFile(Uri uri, Bitmap bitmap, File file) {
+        BufferedOutputStream bos = null;
+        try {
+            if (file == null) {
+                return false;
+            }
+            bos = new BufferedOutputStream(new FileOutputStream(file));
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, bos);
+            bos.flush();
+        } catch (Exception e) {
+            return false;
+        } finally {
+            if (bos != null) {
+                try {
+                    bos.close();
+                } catch (Exception e) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    private void showSuccess(final File newFile) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                if (newFile != null) {
+                    Intent intent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+                    Uri uri = Uri.fromFile(newFile);
+                    intent.setData(uri);
+                    UdeskZoomImageActivty.this.sendBroadcast(intent);
+                }
+                UdeskUtils.showToast(getApplicationContext(), getString(R.string.udesk_success_save_image));
+                UdeskZoomImageActivty.this.finish();
+            }
+        });
+    }
+
 
     private void showSuccess() {
         runOnUiThread(new Runnable() {

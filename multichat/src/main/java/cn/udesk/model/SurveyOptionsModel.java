@@ -11,7 +11,7 @@ public class SurveyOptionsModel implements Serializable {
     /**
      *
      */
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = -8126916239190995818L;
 
     private Object enabled;
     private Object remark_enabled;

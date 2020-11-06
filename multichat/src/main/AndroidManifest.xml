@@ -64,9 +64,6 @@
             android:screenOrientation="portrait"
             android:theme="@style/Udesk_Theme" />
 
-        <meta-data
-            android:name="cn.udesk.config.UdeskGlideModule"
-            android:value="GlideModule" />
         <provider
             android:name="cn.udesk.provider.UdeskExternalFileProvider"
             android:authorities="${applicationId}.udesk_external_file_provider"

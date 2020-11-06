@@ -33,7 +33,6 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.bumptech.glide.Glide;
 import com.google.gson.Gson;
 
 import org.json.JSONArray;
@@ -553,7 +552,11 @@ public class MessageAdatper extends BaseAdapter {
                     case MSG_SMALL_VIDEO_R:
                     case MSG_FILE_R:
                         this.isLeft = false;
-                        Glide.with(mContext).load(UdeskConfig.customerUrl).error(R.drawable.udesk_im_default_user_avatar).placeholder(R.drawable.udesk_im_default_user_avatar).into(ivHeader);
+                        if (TextUtils.isEmpty(UdeskConfig.customerUrl)){
+                            ivHeader.setImageResource(R.drawable.udesk_im_default_user_avatar);
+                        }else {
+                            UdeskUtil.loadInto(mContext,UdeskConfig.customerUrl,R.drawable.udesk_im_default_user_avatar,R.drawable.udesk_im_default_user_avatar,ivHeader);
+                        }
                         break;
                     case MSG_TXT_L:
                     case MSG_AUDIO_L:
@@ -565,9 +568,9 @@ public class MessageAdatper extends BaseAdapter {
                         this.isLeft = true;
                         Merchant merchant = ((UdeskChatActivity) mContext).getMerchant();
                         if (merchant != null && !TextUtils.isEmpty(UdeskUtil.objectToString(merchant.getLogo_url()))) {
-                            Glide.with(mContext).load(Uri.parse(UdeskUtil.objectToString(merchant.getLogo_url()))).error(R.drawable.udesk_im_default_user_avatar).placeholder(R.drawable.udesk_im_default_user_avatar).into(ivHeader);
+                            UdeskUtil.loadInto(mContext,UdeskUtil.objectToString(merchant.getLogo_url()),R.drawable.udesk_im_default_agent_avatar,R.drawable.udesk_im_default_agent_avatar,ivHeader);
                         } else {
-                            Glide.with(mContext).load(R.drawable.udesk_im_default_agent_avatar).into(ivHeader);
+                            ivHeader.setImageResource(R.drawable.udesk_im_default_agent_avatar);
                         }
                         if (merchant != null) {
                             agentnickName.setText(UdeskUtil.objectToString(merchant.getName()));
@@ -1036,9 +1039,9 @@ public class MessageAdatper extends BaseAdapter {
         void bind(Context context) {
             try {
                 if (!TextUtils.isEmpty(message.getLocalPath()) && UdeskUtil.isExitFileByPath(context, message.getLocalPath())) {
-                    UdeskUtil.loadIntoFitSize(context, message.getLocalPath(), R.drawable.udesk_defualt_failure, R.drawable.udesk_defalut_image_loading, imgView);
+                    UdeskUtil.loadIntoFitSize(context, message.getLocalPath(), R.drawable.udesk_defualt_failure, R.drawable.udesk_defalut_image_loading, imgView,true);
                 } else {
-                    UdeskUtil.loadIntoFitSize(context, UdeskUtil.uRLEncoder(UdeskUtil.objectToString(message.getContent())), R.drawable.udesk_defualt_failure, R.drawable.udesk_defalut_image_loading, imgView);
+                    UdeskUtil.loadIntoFitSize(context, UdeskUtil.uRLEncoder(UdeskUtil.objectToString(message.getContent())), R.drawable.udesk_defualt_failure, R.drawable.udesk_defalut_image_loading, imgView,true);
                 }
                 imgView.setOnClickListener(new OnClickListener() {
 
@@ -1314,10 +1317,10 @@ public class MessageAdatper extends BaseAdapter {
                 }
 
                 if (!TextUtils.isEmpty(message.getLocalPath()) && UdeskUtil.isExitFileByPath(mContext, message.getLocalPath())) {
-                    UdeskUtil.loadIntoFitSize(context, message.getLocalPath(), R.drawable.udesk_defualt_failure, R.drawable.udesk_defalut_image_loading, imgView);
+                    UdeskUtil.loadIntoFitSize(context, message.getLocalPath(), R.drawable.udesk_defualt_failure, R.drawable.udesk_defalut_image_loading, imgView,true);
                 } else if (UdeskUtil.fileIsExitByUrl(mContext, UdeskConst.FileImg, UdeskUtil.objectToString(message.getContent()))) {
                     String loaclpath = UdeskUtil.getPathByUrl(mContext, UdeskConst.FileImg, UdeskUtil.objectToString(message.getContent()));
-                    UdeskUtil.loadIntoFitSize(context, loaclpath, R.drawable.udesk_defualt_failure, R.drawable.udesk_defalut_image_loading, imgView);
+                    UdeskUtil.loadIntoFitSize(context, loaclpath, R.drawable.udesk_defualt_failure, R.drawable.udesk_defalut_image_loading, imgView,true);
                 } else {
                     if (!UdeskUtils.isNetworkConnected(mContext.getApplicationContext())) {
                         UdeskUtils.showToast(mContext.getApplicationContext(), mContext.getResources().getString(R.string.udesk_has_wrong_net));
@@ -1705,7 +1708,7 @@ public class MessageAdatper extends BaseAdapter {
                 if (cache.message != null && msgId.equals(cache.message.getUuid())) {
                     if (UdeskUtil.fileIsExitByUrl(mContext, UdeskConst.FileImg, UdeskUtil.objectToString(cache.message.getContent()))) {
                         String loaclpath = UdeskUtil.getPathByUrl(mContext, UdeskConst.FileImg, UdeskUtil.objectToString(cache.message.getContent()));
-                        UdeskUtil.loadIntoFitSize(mContext, loaclpath, R.drawable.udesk_defualt_failure, R.drawable.udesk_defalut_image_loading, cache.imgView);
+                        UdeskUtil.loadIntoFitSize(mContext, loaclpath, R.drawable.udesk_defualt_failure, R.drawable.udesk_defalut_image_loading, cache.imgView,true);
 
                     }
                     return true;

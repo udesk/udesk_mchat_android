@@ -14,10 +14,8 @@ import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import com.bumptech.glide.Glide;
 
 import cn.udesk.R;
-import cn.udesk.UdeskUtil;
 
 
 public class UDPullGetMoreListView extends ListView implements OnScrollListener {

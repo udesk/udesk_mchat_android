@@ -10,7 +10,7 @@ public class OptionsModel implements Serializable {
     /**
      *
      */
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = -4544661057662131461L;
     private Object id;
     private Object enabled;
     private Object text;

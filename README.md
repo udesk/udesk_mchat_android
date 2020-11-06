@@ -8,6 +8,9 @@ Add this in your root build.gradle file (not your module build.gradle file):
 		}
 	}
 
+**注意**
+
+**项目默认使用glide v4，如果要使用glide v3,将imageloader 文件夹下的UdeskGlideImageLoaderV3.jave 替换 multichat 库下面的cn.udesk.imageloader.UdeskGlideImageLoaderV4.java 即可**
 
 ## 2.快速使用 ##
   

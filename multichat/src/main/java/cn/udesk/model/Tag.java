@@ -10,6 +10,7 @@ import cn.udesk.UdeskUtil;
 
 public class Tag implements Serializable {
 
+    private static final long serialVersionUID = 9045651834480381823L;
     private Object text;
     private boolean isCheck;
 

@@ -6,6 +6,7 @@ import java.io.Serializable;
 import java.util.List;
 
 public class ProductMessage implements Serializable {
+    private static final long serialVersionUID = 4613779909290321135L;
 
 
     /**

@@ -11,6 +11,7 @@ import java.io.Serializable;
 
 public class SendMsgResult implements Serializable {
 
+    private static final long serialVersionUID = 2688617595928006586L;
     private  String id;
     private  String uuid;
     private  int flag;
