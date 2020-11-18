@@ -151,9 +151,6 @@ public class UdeskSDKManager {
     }
 
     public InitMode getInitMode() {
-        if (initMode == null) {
-            initMode(customerEuid, customerName,null);
-        }
         return initMode;
     }
 
@@ -247,15 +244,18 @@ public class UdeskSDKManager {
     }
 
     /**
-     * 初始化用户信息
-     * @param customerInfo 客户信息
+     * 初始化用户信息  回调里面进行后续处理
+     * @param customerInfo
+     * @param iInitCallBack
      */
-    public void setCustomerInfo(CustomerInfo customerInfo) {
+    public void setCustomerInfo(CustomerInfo customerInfo,final IInitCallBack iInitCallBack) {
         try {
             if (customerInfo != null){
+                initMode = null;
+                cancleXmpp();
                 this.customerInfo = customerInfo;
                 if (TextUtils.isEmpty(customerInfo.getEuid())) {
-                    Toast.makeText(context, "必须设置客户的唯一标识", Toast.LENGTH_LONG).show();
+                    Toast.makeText(context, context.getResources().getString(R.string.udesk_need_customer_unique_id), Toast.LENGTH_LONG).show();
                     return;
                 }
                 if (TextUtils.isEmpty(customerInfo.getName())) {
@@ -263,13 +263,19 @@ public class UdeskSDKManager {
                 }
                 customerEuid = customerInfo.getEuid();
                 customerName = customerInfo.getName();
-                initMode(customerEuid, customerName,null);
+                initMode(customerEuid, customerName,iInitCallBack);
             }
         }catch (Exception e){
             e.printStackTrace();
         }
     }
 
+    /**
+     * 初始化
+     * @param customerEuid
+     * @param customerName
+     * @param iInitCallBack
+     */
     private void initMode(final String customerEuid, final String customerName, final IInitCallBack iInitCallBack) {
         try {
             if (TextUtils.isEmpty(customerEuid) || TextUtils.isEmpty(customerName)) {
@@ -285,19 +291,24 @@ public class UdeskSDKManager {
                         UdeskDBManager.getInstance().addInitInfo(initMode);
                         getUnReadMessages();
                         if (iInitCallBack != null) {
-                            iInitCallBack.initSuccess(initMode);
+                            iInitCallBack.initSuccess(true);
                         }
                     }
                 }
 
                 @Override
                 public void onFail(Throwable message) {
+                    if (iInitCallBack != null) {
+                        iInitCallBack.initSuccess(false);
+                    }
 
                 }
 
                 @Override
                 public void onSuccessFail(String message) {
-
+                    if (iInitCallBack != null) {
+                        iInitCallBack.initSuccess(false);
+                    }
                 }
             });
         } catch (Exception e) {
@@ -401,13 +412,6 @@ public class UdeskSDKManager {
     public void entryChat(final Context context, final String euid) {
         if (initMode != null) {
             updateCustomerField(context,euid);
-        } else {
-            initMode(customerEuid, customerName, new IInitCallBack() {
-                @Override
-                public void initSuccess(InitMode initMode) {
-                    updateCustomerField(context,euid);
-                }
-            });
         }
     }
     /**

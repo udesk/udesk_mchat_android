@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 
 import cn.udesk.UdeskSDKManager;
+import cn.udesk.callback.IInitCallBack;
 import cn.udesk.model.CustomerInfo;
 import cn.udesk.model.ProductMessage;
 import cn.udesk.muchat.bean.Products;
@@ -55,10 +56,17 @@ public class MainActivity extends Activity implements View.OnClickListener {
         if (view.getId() == R.id.udesk_start) {
             CustomerInfo customerInfo = buildCustomerInfo();
             if (!TextUtils.isEmpty(customerInfo.getEuid())) {
-                UdeskSDKManager.getInstance().setCustomerInfo(customerInfo);
-                Intent intent = new Intent();
-                intent.setClass(MainActivity.this, UdeskUseGuideActivity.class);
-                startActivity(intent);
+                UdeskSDKManager.getInstance().setCustomerInfo(customerInfo, new IInitCallBack() {
+                    @Override
+                    public void initSuccess(boolean isSuccess) {
+                        //初始化成功 进行后续操作
+                        if (isSuccess){
+                            Intent intent = new Intent();
+                            intent.setClass(MainActivity.this, UdeskUseGuideActivity.class);
+                            startActivity(intent);
+                        }
+                    }
+                });
 
             } else {
                 Toast.makeText(this, "按要求输入值", Toast.LENGTH_LONG).show();

@@ -18,7 +18,17 @@ Add this in your root build.gradle file (not your module build.gradle file):
   
 	UdeskSDKManager.getInstance().init(context, uuid, sign, time);
 
-	UdeskSDKManager.getInstance().setCustomerInfo(CustomerInfo customerInfo);  
+	UdeskSDKManager.getInstance().setCustomerInfo(CustomerInfo customerInfo，IInitCallBack iInitCallBack);
+  **注意： 后续的操作放在初始化成功之后 示例**
+	
+	UdeskSDKManager.getInstance().setCustomerInfo(customerInfo, new IInitCallBack() {
+                    @Override
+                    public void initSuccess(boolean isSuccess) {
+                        if (isSuccess){
+                            //初始化成功 进行后续操作 
+                        }
+                    }
+                });
 
   出于安全的考虑，建议租户将 key 保存在自己的服务器端，App 端通过租户提供的接口获取经过 SHA1
   计算后的加密字符串(sign)和时间戳(timestamp),时间戳精确到秒，然后传给 SDK。密码的有效期为时间戳 +/- 5分钟

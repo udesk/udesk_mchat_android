@@ -141,5 +141,6 @@
     <string name="udesk_upload_file_error">上传文件失败，请重试</string>
     <string name="udesk_navigatesMenu_unchecked">请先选择导航菜单再发送消息</string>
     <string name="udesk_navigatesMenu_previous">返回上一级</string>
+    <string name="udesk_need_customer_unique_id">必须设置客户的唯一标识</string>
 
 </resources>

@@ -143,5 +143,6 @@
     <string name="udesk_upload_file_error">Failed to upload file, please try again</string>
     <string name="udesk_navigatesMenu_unchecked">Please select the navigation menu before sending the message</string>
     <string name="udesk_navigatesMenu_previous">Back to previous</string>
+    <string name="udesk_need_customer_unique_id">The customer’s unique ID must be set</string>
 
 </resources>
