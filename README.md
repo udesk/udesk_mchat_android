@@ -1,12 +1,37 @@
-## 1.导入multichat ##
+## 1.导入集成 ##
 
-Add this in your root build.gradle file (not your module build.gradle file):
+
+**1 远程依赖集成**
+
+ 1.Add it in your root build.gradle at the end of repositories:
+
+	allprojects {
+		repositories {
+			...
+			maven { url 'https://jitpack.io' }
+		}
+	}
+ 2.Add the dependency
+	
+	dependencies {
+	        implementation 'com.github.udesk:udesk_mchat_android:版本号（比如 1.0.16）'
+	}
+
+
+**2 本地集成**
+
+1.Add this in your root build.gradle file (not your module build.gradle file):
 
 	allprojects {
 		repositories {
 			maven { url "https://jitpack.io" }
 		}
 	}
+
+2.将multichat作为独立模块导入你的项目，并在你APP build.gradle文件中加入：
+	
+	implementation project(':multichat')
+
 
 **注意**
 
@@ -493,3 +518,43 @@ application 中加入
 	 //其它
 	-keep class org.sufficientlysecure.htmltextview.** {*; } 
 
+
+## 3.更新日志 ##
+
+### 1.0.16 更新内容（从本版本开始支持远程依赖） ###
+1. 修改多商户sdk初始化逻辑
+2. 修改xmpp问题
+
+
+### 1.0.15 更新内容 ###
+1. 适配Android11
+2. Glide升级适配
+
+### 1.0.14 更新内容 ###
+1. 多商户支持导航菜单
+
+
+### 1.0.13 更新内容 ###
+1. 多商户支持信息丰富
+2. 多商户支持文件
+3. 多商户支持客户传参
+
+### 1.0.12 更新内容 ###
+1. 支持离线推送
+2. 支持自定义按钮
+3. 添加排队放弃和离线客户检测机制
+4. 修复xmpp连接失败app无响应问题
+
+### 1.0.11 更新内容 ###
+1. 多商户支持部分表情
+
+### 1.0.10 更新内容 ###
+1. 多商户多语言适配 
+2. 多商户sdk功能 
+3. 多商户消息形式  
+
+### 1.0.9 更新内容 ###
+1. 适配androidQ
+
+### 1.0.9 更新内容 ###
+1. 添加黑名单功能
