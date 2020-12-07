@@ -113,6 +113,7 @@ public class JsonUtils {
                 initMode.setBucket(ossJson.opt("bucket"));
                 initMode.setAccess_id(ossJson.opt("access_id"));
                 initMode.setPrefix(ossJson.opt("prefix"));
+                initMode.setBase_url(ossJson.opt("base_url"));
             }
             if (initObject.has("tenant")){
                 JSONObject tenantJson = new JSONObject(initObject.getString("tenant"));
@@ -130,9 +131,13 @@ public class JsonUtils {
                 initMode.setSubdomainPrefix(tenantJson.opt("subdomainPrefix"));
                 initMode.setLanguage(tenantJson.opt("language"));
             }
-//            if (initObject.has("is_open_survey")) {
-//                initMode.setIs_open_survey(initObject.opt("is_open_survey"));
-//            }
+            if (initObject.has("signature")) {
+                JSONObject signature = new JSONObject(initObject.getString("signature"));
+                initMode.setSignature(signature.opt("signature"));
+                initMode.setSignature_access_id(signature.opt("access_id"));
+                initMode.setExpire_at(signature.opt("expire_at"));
+                initMode.setPolicy_Base64(signature.opt("policy_Base64"));
+            }
 
         } catch (JSONException e) {
             e.printStackTrace();

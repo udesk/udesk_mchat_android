@@ -14,7 +14,7 @@ public class UdeskConst {
     public final static int recordStateNum = 8;
 
     public static final String Euid = "euid";
-    public static final String WELCOME_URL = "welcome_url";
+    public static final String URL = "web_url";
 
 
     public static final String EXTERNAL_CACHE_FOLDER = "udeskcache";
@@ -135,6 +135,15 @@ public class UdeskConst {
         public static final int Udesk_Video = 5;
         public static final int Udesk_File = 6;
 
+    }
+    public static class UdeskXmppEventName {
+        public static final String INVITE_SURVEY = "invite_survey";
+        public static final String FEEDBACK_FORM = "feedback_form";
+    }
+    public static class UdeskLeaveMessageType {
+        public static final String Form = "form";
+        public static final String IM = "im";
+        public static final String MSG = "msg";
     }
 
 }

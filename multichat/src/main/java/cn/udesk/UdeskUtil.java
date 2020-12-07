@@ -909,7 +909,7 @@ public static Uri getOutputMediaFileUri(Context context, File file) {
             if (obj instanceof String) {
                 string = (String) obj;
             } else if (obj instanceof Double) {
-                string = String.valueOf(Double.valueOf((Double) obj).intValue());
+                string = String.valueOf(Double.valueOf((Double) obj).longValue());
             } else if (obj instanceof Float) {
                 string = String.valueOf(Float.valueOf((Float) obj).intValue());
             } else {

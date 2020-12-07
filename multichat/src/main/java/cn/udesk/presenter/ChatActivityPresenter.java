@@ -59,6 +59,7 @@ import cn.udesk.muchat.UdeskLibConst;
 import cn.udesk.muchat.bean.AliBean;
 import cn.udesk.muchat.bean.CustomerStatusResult;
 import cn.udesk.muchat.bean.ExtrasInfo;
+import cn.udesk.muchat.bean.FeedbacksResult;
 import cn.udesk.muchat.bean.NavigatesResult;
 import cn.udesk.muchat.bean.Products;
 import cn.udesk.muchat.bean.ReceiveMessage;
@@ -1321,5 +1322,43 @@ public class ChatActivityPresenter {
             e.printStackTrace();
         }
     }
+
+    public void getFeedbacks() {
+        try {
+            InitMode initMode = UdeskSDKManager.getInstance().getInitMode();
+            if (initMode != null) {
+                HttpFacade.getInstance().getFeedbacks(UdeskUtil.getAuthToken(UdeskUtil.objectToString(initMode.getIm_username()),
+                        UdeskUtil.objectToString(initMode.getIm_password())), mChatView.getEuid(), new UdeskHttpCallBack<FeedbacksResult>() {
+
+                            @Override
+                            public void onSuccess(FeedbacksResult feedbacksResult) {
+                                if (feedbacksResult != null && feedbacksResult.getData() != null) {
+                                    if (mChatView != null && mChatView.getHandler() != null) {
+                                        Message message = mChatView.getHandler().obtainMessage(
+                                                MessageWhat.DEAL_LEAVE_MSG);
+                                        message.obj = feedbacksResult;
+                                        mChatView.getHandler().sendMessage(message);
+                                    }
+
+                                }
+                            }
+
+                            @Override
+                            public void onFail(Throwable message) {
+
+                            }
+
+                            @Override
+                            public void onSuccessFail(String message) {
+
+                            }
+                        }
+                );
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
 
 }

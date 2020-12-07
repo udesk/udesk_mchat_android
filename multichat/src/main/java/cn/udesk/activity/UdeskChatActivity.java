@@ -73,6 +73,7 @@ import cn.udesk.model.Merchant;
 import cn.udesk.model.SendMsgResult;
 import cn.udesk.model.SurveyOptionsModel;
 import cn.udesk.muchat.UdeskLibConst;
+import cn.udesk.muchat.bean.FeedbacksResult;
 import cn.udesk.muchat.bean.NavigatesResult;
 import cn.udesk.muchat.bean.Products;
 import cn.udesk.muchat.bean.ReceiveMessage;
@@ -184,6 +185,8 @@ public class UdeskChatActivity extends UdeskBaseActivity implements IChatActivit
         public static final int ChangeFileProgress = 16;
         public static final int DownFileError = 17;
         public static final int SEND_AUTO_MESSAGE = 18;
+        public static final int GET_FEEDBACK = 19;
+        public static final int DEAL_LEAVE_MSG = 20;
     }
 
     class ConnectivtyChangedReceiver extends BroadcastReceiver {
@@ -319,6 +322,24 @@ public class UdeskChatActivity extends UdeskBaseActivity implements IChatActivit
                         }
                         activity.sendProductMessage();
 
+                        break;
+                    case MessageWhat.GET_FEEDBACK:
+                        if (activity.mPresenter != null) {
+                            activity.getPresenter().getFeedbacks();
+                        }
+
+                        break;
+                    case MessageWhat.DEAL_LEAVE_MSG:
+                        FeedbacksResult feedbacksResult = (FeedbacksResult) msg.obj;
+                        if (feedbacksResult != null && feedbacksResult.getData() != null) {
+                            String type = feedbacksResult.getData().getLeave_message_type();
+                            if (TextUtils.equals(UdeskConst.UdeskLeaveMessageType.Form,type)){
+                                Intent intent = new Intent(activity, UdeskWebViewUrlAcivity.class);
+                                intent.putExtra(UdeskConst.URL, feedbacksResult.getData().getFeedback_url());
+                                intent.putExtra(UdeskConst.Euid, UdeskUtil.objectToString(activity.getMerchant().getEuid()));
+                                activity.startActivity(intent);
+                            }
+                        }
                         break;
                     default:
                         break;
@@ -2120,9 +2141,13 @@ public class UdeskChatActivity extends UdeskBaseActivity implements IChatActivit
                 mChatAdapter.addItem(msgInfo);
                 smoothScrollToPosition(mListView, mChatAdapter.getCount());
             }
-            if (msgInfo.getEvent_name().equals("invite_survey")) {
+            if (msgInfo.getEvent_name().equals(UdeskConst.UdeskXmppEventName.INVITE_SURVEY)) {
                 Message messge = getHandler().obtainMessage(
                         MessageWhat.surveyNotify);
+                getHandler().sendMessage(messge);
+            }else if (msgInfo.getEvent_name().equals(UdeskConst.UdeskXmppEventName.FEEDBACK_FORM)){
+                Message messge = getHandler().obtainMessage(
+                        MessageWhat.GET_FEEDBACK);
                 getHandler().sendMessage(messge);
             }
         } catch (Exception e) {

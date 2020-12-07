@@ -750,7 +750,7 @@ public class MessageAdatper extends BaseAdapter {
             try {
                 if (WEB_URL.matcher(mUrl).find()) {
                     Intent intent = new Intent(mContext, UdeskWebViewUrlAcivity.class);
-                    intent.putExtra(UdeskConst.WELCOME_URL, mUrl);
+                    intent.putExtra(UdeskConst.URL, mUrl);
                     mContext.startActivity(intent);
                 } else if (PHONE.matcher(mUrl).find()) {
                     String phone = mUrl.toLowerCase();
@@ -781,7 +781,7 @@ public class MessageAdatper extends BaseAdapter {
         public void onClick(View widget) {
             try {
                 Intent intent = new Intent(mContext, UdeskWebViewUrlAcivity.class);
-                intent.putExtra(UdeskConst.WELCOME_URL, mUrl);
+                intent.putExtra(UdeskConst.URL, mUrl);
                 mContext.startActivity(intent);
             } catch (Exception e) {
                 e.printStackTrace();
@@ -1196,7 +1196,7 @@ public class MessageAdatper extends BaseAdapter {
                                 UdeskSDKManager.getInstance().getProductMessageWebonCliclk().txtMsgOnclick(productUrl);
                             } else {
                                 Intent intent = new Intent(mContext, UdeskWebViewUrlAcivity.class);
-                                intent.putExtra(UdeskConst.WELCOME_URL, productUrl);
+                                intent.putExtra(UdeskConst.URL, productUrl);
                                 mContext.startActivity(intent);
                             }
                         }

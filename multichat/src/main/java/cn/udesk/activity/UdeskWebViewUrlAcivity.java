@@ -2,12 +2,15 @@ package cn.udesk.activity;
 
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 
 import cn.udesk.R;
 import cn.udesk.UdeskConst;
+import cn.udesk.UdeskSDKManager;
 import cn.udesk.config.UdekConfigUtil;
 import cn.udesk.config.UdeskConfig;
+import cn.udesk.model.InitMode;
 
 
 /**
@@ -16,6 +19,7 @@ import cn.udesk.config.UdeskConfig;
 public class UdeskWebViewUrlAcivity extends UdeskBaseWebViewActivity {
 
     String url = "";
+    private String euid;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -24,10 +28,11 @@ public class UdeskWebViewUrlAcivity extends UdeskBaseWebViewActivity {
 
         try {
             if (getIntent() != null) {
-                url = getIntent().getStringExtra(UdeskConst.WELCOME_URL);
+                url = getIntent().getStringExtra(UdeskConst.URL);
+                euid = getIntent().getStringExtra(UdeskConst.Euid);
             }
             settingTitlebar();
-            mwebView.loadUrl(url);
+            loadView();
             setH5TitleListener(new UdeskWebChromeClient.GetH5Title() {
                 @Override
                 public void h5Title(String title) {
@@ -36,6 +41,27 @@ public class UdeskWebViewUrlAcivity extends UdeskBaseWebViewActivity {
             });
         } catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+
+    private void loadView() {
+        if (UdeskSDKManager.getInstance().getInitMode() != null){
+            InitMode initMode = UdeskSDKManager.getInstance().getInitMode();
+            StringBuilder builder = new StringBuilder();
+            builder.append(url)
+                    .append("?tenant_id=").append(initMode.getUuid())
+                    .append("&euid=").append(euid)
+                    .append("&im_username=").append(initMode.getIm_username())
+                    .append("&im_password=").append(initMode.getIm_password())
+                    .append("&base_url=").append(initMode.getBase_url())
+                    .append("&access_id=").append(initMode.getAccess_id())
+                    .append("&prefix=").append(initMode.getPrefix())
+                    .append("&policy=").append(initMode.getPolicy_Base64())
+                    .append("&signature=").append(initMode.getSignature())
+                    .append("&sdk_token=").append("true");
+            url=builder.toString();
+            mwebView.loadUrl(url);
+
         }
     }
 

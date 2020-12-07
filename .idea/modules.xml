@@ -3,10 +3,8 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/multichat/com.github.udesk.udesk_mchat_android.multichat.iml" filepath="$PROJECT_DIR$/.idea/modules/multichat/com.github.udesk.udesk_mchat_android.multichat.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/multichat/udesk.udesk_mchat_android.multichat.iml" filepath="$PROJECT_DIR$/.idea/modules/multichat/udesk.udesk_mchat_android.multichat.iml" />
       <module fileurl="file://$PROJECT_DIR$/udesk_mchat_android.iml" filepath="$PROJECT_DIR$/udesk_mchat_android.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/demo/udesk_mchat_android.demo.iml" filepath="$PROJECT_DIR$/.idea/modules/demo/udesk_mchat_android.demo.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/multichat/udesk_mchat_android.multichat.iml" filepath="$PROJECT_DIR$/.idea/modules/multichat/udesk_mchat_android.multichat.iml" />
     </modules>
   </component>
 </project>

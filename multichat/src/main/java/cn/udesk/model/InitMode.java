@@ -19,6 +19,7 @@ public class InitMode {
     private Object bucket;
     private Object access_id;
     private Object prefix;
+    private Object base_url;
     private Object is_open_survey;
     //tenan
     private Object tenantId;
@@ -34,6 +35,11 @@ public class InitMode {
     private Object backendUrl;
     private Object subdomainPrefix;
     private Object language;
+
+    private Object policy_Base64;
+    private Object signature;
+    private Object signature_access_id;
+    private Object expire_at;
 
 
 
@@ -227,5 +233,45 @@ public class InitMode {
 
     public void setLanguage(Object language) {
         this.language = language;
+    }
+
+    public Object getBase_url() {
+        return base_url;
+    }
+
+    public void setBase_url(Object base_url) {
+        this.base_url = base_url;
+    }
+
+    public Object getPolicy_Base64() {
+        return policy_Base64;
+    }
+
+    public void setPolicy_Base64(Object policy_Base64) {
+        this.policy_Base64 = policy_Base64;
+    }
+
+    public Object getSignature() {
+        return signature;
+    }
+
+    public void setSignature(Object signature) {
+        this.signature = signature;
+    }
+
+    public Object getSignature_access_id() {
+        return signature_access_id;
+    }
+
+    public void setSignature_access_id(Object signature_access_id) {
+        this.signature_access_id = signature_access_id;
+    }
+
+    public Object getExpire_at() {
+        return expire_at;
+    }
+
+    public void setExpire_at(Object expire_at) {
+        this.expire_at = expire_at;
     }
 }
