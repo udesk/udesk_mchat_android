@@ -32,6 +32,21 @@
 	
 	implementation project(':multichat')
 
+3.集成其他依赖
+
+	implementation 'androidx.recyclerview:recyclerview:1.1.0'
+    implementation 'com.github.bumptech.glide:glide:4.11.0'
+    implementation 'com.github.chrisbanes:PhotoView:2.0.0'
+    implementation 'org.sufficientlysecure:html-textview:3.6'
+    implementation 'com.squareup.retrofit2:converter-gson:2.3.0'
+    implementation 'org.greenrobot:eventbus:3.0.0'
+    implementation 'org.igniterealtime.smack:smack-android-extensions:4.2.0'
+    implementation 'org.igniterealtime.smack:smack-tcp:4.2.0'
+    implementation 'com.squareup.retrofit2:retrofit:2.3.0'
+    implementation'com.squareup.okhttp3:logging-interceptor:4.9.0'
+    implementation 'com.squareup.okhttp3:okhttp:4.9.0'
+    implementation 'com.squareup.okio:okio:2.8.0'
+
 
 **注意**
 
