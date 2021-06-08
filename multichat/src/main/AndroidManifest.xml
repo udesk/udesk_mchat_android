@@ -1,5 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="cn.udesk">
+    package="cn.udesk.multimerchant">
 
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.CALL_PHONE" />
@@ -15,99 +15,99 @@
     <application>
 
         <activity
-            android:name="cn.udesk.activity.UdeskChatActivity"
+            android:name=".activity.UdeskChatActivity"
             android:configChanges="screenSize|orientation|keyboardHidden"
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
-            android:theme="@style/Udesk_Theme"
+            android:theme="@style/Udesk_multimerchant_Theme"
             android:windowSoftInputMode="stateAlwaysHidden" />
         <activity
-            android:name="cn.udesk.activity.UdeskZoomImageActivty"
+            android:name=".activity.UdeskZoomImageActivty"
             android:configChanges="screenSize|orientation|keyboardHidden"
             android:screenOrientation="portrait"
-            android:theme="@style/Udesk_Theme" />
+            android:theme="@style/Udesk_multimerchant_Theme" />
         <activity
-            android:name="cn.udesk.activity.UdeskWebViewUrlAcivity"
+            android:name=".activity.UdeskWebViewUrlAcivity"
             android:configChanges="screenSize|orientation|keyboardHidden"
             android:screenOrientation="portrait"
-            android:theme="@style/Udesk_Theme" />
+            android:theme="@style/Udesk_multimerchant_Theme" />
 
         <activity
-            android:name="cn.udesk.camera.UdeskCameraActivity"
+            android:name=".camera.UdeskCameraActivity"
             android:configChanges="screenSize|orientation|keyboardHidden"
             android:screenOrientation="portrait"
-            android:theme="@style/Udesk_Theme" />
+            android:theme="@style/Udesk_multimerchant_Theme" />
         <activity
             android:name=".activity.PictureVideoPlayActivity"
             android:configChanges="screenSize|orientation|keyboardHidden"
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
-            android:theme="@style/Udesk_Theme" />
+            android:theme="@style/Udesk_multimerchant_Theme" />
         <activity
-            android:name="cn.udesk.photoselect.PhotoSelectorActivity"
+            android:name=".photoselect.PhotoSelectorActivity"
             android:configChanges="screenSize|orientation|keyboardHidden"
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
-            android:theme="@style/Udesk_Theme" />
+            android:theme="@style/Udesk_multimerchant_Theme" />
 
         <activity
-            android:name="cn.udesk.photoselect.PreviewActivity"
+            android:name=".photoselect.PreviewActivity"
             android:configChanges="screenSize|orientation|keyboardHidden"
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
-            android:theme="@style/Udesk_Theme" />
+            android:theme="@style/Udesk_multimerchant_Theme" />
 
         <activity
-            android:name="cn.udesk.photoselect.PictureVideoPlayActivity"
+            android:name=".photoselect.PictureVideoPlayActivity"
             android:configChanges="screenSize|orientation|keyboardHidden"
             android:launchMode="singleTop"
             android:screenOrientation="portrait"
-            android:theme="@style/Udesk_Theme" />
+            android:theme="@style/Udesk_multimerchant_Theme" />
 
         <provider
-            android:name="cn.udesk.provider.UdeskExternalFileProvider"
-            android:authorities="${applicationId}.udesk_external_file_provider"
+            android:name=".provider.UdeskExternalFileProvider"
+            android:authorities="${applicationId}.udesk_multimerchant_external_file_provider"
             android:exported="false"
             android:grantUriPermissions="true">
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/udesk_provider_paths_external_file" />
+                android:resource="@xml/udesk_multimerchant_provider_paths_external_file" />
         </provider>
         <provider
-            android:name="cn.udesk.provider.UdeskExternalCacheProvider"
-            android:authorities="${applicationId}.udesk_external_cache_provider"
+            android:name=".provider.UdeskExternalCacheProvider"
+            android:authorities="${applicationId}.udesk_multimerchant_external_cache_provider"
             android:exported="false"
             android:grantUriPermissions="true">
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/udesk_provider_paths_external_cache" />
+                android:resource="@xml/udesk_multimerchant_provider_paths_external_cache" />
         </provider>
         <provider
-            android:name="cn.udesk.provider.UdeskExternalProvider"
-            android:authorities="${applicationId}.udesk_external_provider"
+            android:name=".provider.UdeskExternalProvider"
+            android:authorities="${applicationId}.udesk_multimerchant_external_provider"
             android:exported="false"
             android:grantUriPermissions="true">
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/udesk_provider_paths_external" />
+                android:resource="@xml/udesk_multimerchant_provider_paths_external" />
         </provider>
         <provider
-            android:name="cn.udesk.provider.UdeskInternalFileProvider"
-            android:authorities="${applicationId}.udesk_internal_file_provider"
+            android:name=".provider.UdeskInternalFileProvider"
+            android:authorities="${applicationId}.udesk_multimerchant_internal_file_provider"
             android:exported="false"
             android:grantUriPermissions="true">
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/udesk_provider_paths_internal_file" />
+                android:resource="@xml/udesk_multimerchant_provider_paths_internal_file" />
         </provider>
         <provider
-            android:name="cn.udesk.provider.UdeskInternalCacheProvider"
-            android:authorities="${applicationId}.udesk_internal_cache_provider"
+            android:name=".provider.UdeskInternalCacheProvider"
+            android:authorities="${applicationId}.udesk_multimerchant_internal_cache_provider"
             android:exported="false"
             android:grantUriPermissions="true">
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/udesk_provider_paths_internal_cache" />
+                android:resource="@xml/udesk_multimerchant_provider_paths_internal_cache" />
         </provider>
     </application>
 

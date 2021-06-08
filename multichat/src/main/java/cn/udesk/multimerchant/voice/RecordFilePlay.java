@@ -1,0 +1,1 @@
+package cn.udesk.multimerchant.voice;import cn.udesk.multimerchant.core.bean.ReceiveMessage;public interface RecordFilePlay {	void click(ReceiveMessage message, RecordPlayCallback callback);	 void recycleRes();	 void recycleCallback();	void toggle();	 String getMediaPath();	ReceiveMessage getPlayAduioMessage();}

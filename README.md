@@ -1,3 +1,18 @@
+## 特别声明
+
+**为和其他sdk兼容，从1.1.0 版本开始，修改了包名和部分类名，从低版本升级会报错，建议重新import，类名修改信息如下：**
+
+|  原类名                        |     修改后类名                           |
+|-------------------------------|-----------------------------------------|
+| UdeskSDKManager               | UdeskMultimerchantSDKManager|
+| UdeskConfig                   | UdeskMultimerchantConfig|
+| LocalManageUtil               | UdeskMultimerchantLocalManageUtil|
+| IFunctionItemClickCallBack    | IUdeskMultimerchantFunctionItemClickCallBack|
+| INavigationItemClickCallBack  | IUdeskMultimerchantNavigationItemClickCallBack|
+| FunctionMode                  | UdeskMultimerchantFunctionMode|
+| NavigationMode                | UdeskMultimerchantNavigationMode|
+
+
 ## 1.导入集成 ##
 
 
@@ -56,12 +71,12 @@
   
 ### 1 初始化
   
-	UdeskSDKManager.getInstance().init(context, uuid, sign, time);
+	UdeskMultimerchantSDKManager.getInstance().init(context, uuid, sign, time);
 
-	UdeskSDKManager.getInstance().setCustomerInfo(CustomerInfo customerInfo，IInitCallBack iInitCallBack);
+	----------.getInstance().setCustomerInfo(CustomerInfo customerInfo，IInitCallBack iInitCallBack);
   **注意： 后续的操作放在初始化成功之后 示例**
 	
-	UdeskSDKManager.getInstance().setCustomerInfo(customerInfo, new IInitCallBack() {
+	UdeskMultimerchantSDKManager.getInstance().setCustomerInfo(customerInfo, new IInitCallBack() {
                     @Override
                     public void initSuccess(boolean isSuccess) {
                         if (isSuccess){
@@ -110,7 +125,7 @@
         return customerInfo;
     }
    
-**配置信息（UdeskConfig）明细**
+**配置信息（UdeskMultimerchantConfig）明细**
 
 |  属性                            |     说明                                 |
 |---------------------------------|-----------------------------------------|
@@ -162,16 +177,16 @@
         productBean.setExtras(extras);
         products.setProduct(productBean);
 
-        UdeskSDKManager.getInstance().setProducts(products);
+        UdeskMultimerchantSDKManager.getInstance().setProducts(products);
 
     }
 	
 	//如果不需要咨询对象显示
-	 UdeskSDKManager.getInstance().setProducts(null);
+	 UdeskMultimerchantSDKManager.getInstance().setProducts(null);
 	
 	//通过商户ID，咨询商户
      // merchantId  商户ID
-    UdeskSDKManager.getInstance().entryChat(context, merchantId);
+    UdeskMultimerchantSDKManager.getInstance().entryChat(context, merchantId);
 
 
 
@@ -182,25 +197,25 @@
 
 ### 4.获取指定的商户的未读消息
 
-	UdeskSDKManager.getInstance().getMerchantUnReadMsg(merchant_euid,merchantUnreadMsgCnt)
+	UdeskMultimerchantSDKManager.getInstance().getMerchantUnReadMsg(merchant_euid,merchantUnreadMsgCnt)
 
 
 ### 5.查询所有商户未读消息
 
-    UdeskSDKManager.getInstance().setItotalCount(new ItotalUnreadMsgCnt() {
+    UdeskMultimerchantSDKManager.getInstance().setItotalCount(new ItotalUnreadMsgCnt() {
                 @Override
                 public void totalcount(final int count) {
         
                 }
             });
-    UdeskSDKManager.getInstance().getUnReadMessages();
+    UdeskMultimerchantSDKManager.getInstance().getUnReadMessages();
 
 
 
 ### 6.设置在线状态下收到消息的监听事件
 
 
-	UdeskSDKManager.getInstance().setMessageArrived(new IMessageArrived() {
+	UdeskMultimerchantSDKManager.getInstance().setMessageArrived(new IMessageArrived() {
                 @Override
                 public void onNewMessage(final ReceiveMessage receiveMessage) {
 
@@ -210,7 +225,7 @@
 ### 7.设置咨询对象的回调
 
 
-	UdeskSDKManager.getInstance().setCommodityCallBack(new ICommodityCallBack() {
+	UdeskMultimerchantSDKManager.getInstance().setCommodityCallBack(new ICommodityCallBack() {
                 @Override
                 public void callBackProduct(Products products) {
 
@@ -290,26 +305,26 @@
 		使用方式 可以参考demo :
 		1 直接进入会话界面后 设置传入商品信息 :
 		 // 直接进入会话界面后 设置传入商品信息 
-         UdeskSDKManager.getInstance().setProducts(products);
+         UdeskMultimerchantSDKManager.getInstance().setProducts(products);
 		 
 		
 		2 通过导航栏的方式 发送商品消息:
-		  UdeskConfig.isUseNavigationView = true;
-            UdeskSDKManager.getInstance().setNavigationModes(getNavigations());
-            UdeskSDKManager.getInstance().setNavigationItemClickCallBack(new INavigationItemClickCallBack() {
+		  	UdeskMultimerchantConfig.isUseNavigationView = true;
+            UdeskMultimerchantSDKManager.getInstance().setNavigationModes(getNavigations());
+            UdeskMultimerchantSDKManager.getInstance().setNavigationItemClickCallBack(new IUdeskMultimerchantNavigationItemClickCallBack() {
                 @Override
-                public void callBack(Context context, ChatActivityPresenter mPresenter, NavigationMode navigationMode) {
+                public void callBack(Context context, ChatActivityPresenter mPresenter, UdeskMultimerchantNavigationMode navigationMode) {
                     if (navigationMode.getId() == 1) {
                         mPresenter.sendProductMessage(createProduct());
                     }
                 }
             });
 		
-		private List<NavigationMode> getNavigations() {
-			List<NavigationMode> modes = new ArrayList<>();
-			NavigationMode navigationMode1 = new NavigationMode("发送商品消息发送商", 1);
-			modes.add(navigationMode1);
-			return modes;
+		private List<UdeskMultimerchantNavigationMode> getNavigations() {
+	        List<UdeskMultimerchantNavigationMode> modes = new ArrayList<>();
+	        UdeskMultimerchantNavigationMode navigationMode1 = new UdeskMultimerchantNavigationMode("发送商品消息发送商", 1);
+	        modes.add(navigationMode1);
+	        return modes;
     }
 
 ### 9.离线推送
@@ -319,16 +334,16 @@
 	1、设置接收推送的服务器地址
 
 	2、保存注册推送的的唯一ID
-	UdeskSDKManager.getInstance().setRegisterId(context, registerId);
+	UdeskMultimerchantSDKManager.getInstance().setRegisterId(context, registerId);
 
     public void setRegisterId(Context context, String registerId) {
-        UdeskConfig.registerId = registerId;
+        UdeskMultimerchantConfig.registerId = registerId;
         PreferenceHelper.write(context, UdeskLibConst.SharePreParams.RegisterIdName,
                 UdeskLibConst.SharePreParams.Udesk_Push_RegisterId, registerId);
     }
 	
 	3、开启关闭推送开关  开启传false  关闭传true.
-	UdeskSDKManager.getInstance().setCustomerOffline(false);
+	UdeskMultimerchantSDKManager.getInstance().setCustomerOffline(false);
 	
 	demo 现在默认是进入会话界面关闭推送，退到后台开启推送
 	建议 在application中registerActivityLifecycleCallbacks（ActivityLifecycleCallbacks activityLifecycleCallbacks）来控所有前后台逻辑
@@ -338,11 +353,11 @@
 
 	//退出登录时 断开xmpp链接 
 	
-	UdeskSDKManager.getInstance().logout();
+	UdeskMultimerchantSDKManager.getInstance().logout();
 
 ### 11.图片上传压缩配置
 
-     在UdeskConfig类中
+     在UdeskMultimerchantConfig类中
     //上传图片是否使用原图 还是缩率图
     public static  boolean isScaleImg = true;
 
@@ -356,23 +371,23 @@ application 中加入
     @Override
     public void onCreate() {
         super.onCreate();
-        LocalManageUtil.setApplicationLanguage(this);
+        UdeskMultimerchantLocalManageUtil.setApplicationLanguage(this);
     }
     @Override
     protected void attachBaseContext(Context base) {
         super.attachBaseContext(base);
-        LocalManageUtil.saveSystemCurrentLanguage(base);
+        UdeskMultimerchantLocalManageUtil.saveSystemCurrentLanguage(base);
     }
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         //保存系统选择语言
-        LocalManageUtil.onConfigurationChanged(getApplicationContext());
+        UdeskMultimerchantLocalManageUtil.onConfigurationChanged(getApplicationContext());
     }
 
 在初始化的时候设置
 
-	LocalManageUtil.saveSelectLanguage(getApplicationContext(),new Locale("en-us");
+	UdeskMultimerchantLocalManageUtil.saveSelectLanguage(getApplicationContext(),new Locale("en-us");
 
 传入语言对应的编码，比如
 
@@ -391,9 +406,9 @@ application 中加入
 
 	demo中示例
 
-	 UdeskSDKManager.getInstance().setExtraFunctions(getExtraFunctions(), new IFunctionItemClickCallBack() {
+	 UdeskMultimerchantSDKManager.getInstance().setExtraFunctions(getExtraFunctions(), new IUdeskMultimerchantFunctionItemClickCallBack() {
                 @Override
-                public void callBack(Context context, ChatActivityPresenter mPresenter, FunctionMode functionMode) {
+                public void callBack(Context context, ChatActivityPresenter mPresenter, UdeskMultimerchantFunctionMode functionMode) {
                     switch (functionMode.getId()){
                         case 21:
                             mPresenter.sendTxtMessage("发送文本消息");
@@ -402,7 +417,7 @@ application 中加入
                             mPresenter.sendProductMessage(createProduct());
                             break;
                         case 23:
-                            UdeskSDKManager.getInstance().cancleXmpp();
+                            UdeskMultimerchantSDKManager.getInstance().cancleXmpp();
                             break;
                         default:
                             break;
@@ -412,7 +427,7 @@ application 中加入
 
 	1、创建自定义按钮
 
-	说明：一个功能按钮设置成一个FunctionMode， 包含属性
+	说明：一个功能按钮设置成一个UdeskMultimerchantFunctionMode， 包含属性
         //显示内容
          private String name;
         //用来映射选择后对应的操作 id值 前20 是udesk 预留的,  客户自定义添加的，用于返回后根据id值建立映射关系
@@ -421,11 +436,11 @@ application 中加入
         //显示的图标
         private int mIconSrc ;
 	
-	    private List<FunctionMode> getExtraFunctions() {
-        List<FunctionMode> modes = new ArrayList<>();
-        FunctionMode functionMode1 = new FunctionMode("发送文本消息", 21, R.mipmap.udesk_form_table);
-        FunctionMode functionMode2 = new FunctionMode("发送商品消息", 22, R.mipmap.udesk_form_table);
-        FunctionMode functionMode3 = new FunctionMode("断开xmpp连接", 23, R.mipmap.udesk_form_table);
+	    private List<UdeskMultimerchantFunctionMode> getExtraFunctions() {
+        List<UdeskMultimerchantFunctionMode> modes = new ArrayList<>();
+        UdeskMultimerchantFunctionMode functionMode1 = new UdeskMultimerchantFunctionMode("发送文本消息", 21, R.mipmap.udesk_form_table);
+        UdeskMultimerchantFunctionMode functionMode2 = new UdeskMultimerchantFunctionMode("发送商品消息", 22, R.mipmap.udesk_form_table);
+        UdeskMultimerchantFunctionMode functionMode3 = new UdeskMultimerchantFunctionMode("断开xmpp连接", 23, R.mipmap.udesk_form_table);
         modes.add(functionMode1);
         modes.add(functionMode2);
         modes.add(functionMode3);
@@ -438,7 +453,7 @@ application 中加入
      * @param extraFunctions            设置额外的功能按钮
      * @param functionItemClickCallBack 支持自定义功能按钮后 点击事件回调 直接发送文本,图片,视频,商品信息等
      */
-    public void setExtraFunctions(List<FunctionMode> extraFunctions, IFunctionItemClickCallBack functionItemClickCallBack) {
+    public void setExtraFunctions(List<UdeskMultimerchantFunctionMode> extraFunctions, IFunctionItemClickCallBack functionItemClickCallBack) {
         this.extraFunctions = extraFunctions;
         this.functionItemClickCallBack = functionItemClickCallBack;
     }
@@ -535,6 +550,10 @@ application 中加入
 
 
 ## 3.更新日志 ##
+
+### 1.1.0 更新内容 ###
+
+1. 更改sdk包名和类名
 
 ### 1.0.17 更新内容 ###
 1. 支持表单留言

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/udesk_panel_zoom_imageview"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/udesk_multimerchant_black">
+
+
+
+    <com.github.chrisbanes.photoview.PhotoView
+        android:id="@+id/udesk_zoom_imageview"
+        android:layout_centerInParent="true"
+        android:layout_gravity="center_horizontal|center_vertical"
+        android:scaleType="center"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+
+
+    <Button
+        android:id="@+id/udesk_zoom_save"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:background="@null"
+        android:padding="@dimen/udesk_multimerchant_20"
+        android:text="@string/udesk_multimerchant_save"
+        android:textColor="@android:color/white"
+        android:textSize="@dimen/udesk_multimerchant_sp16" />
+
+    <!--<me.relex.photodraweeview.PhotoDraweeView-->
+        <!--android:id="@+id/udesk_zoom_imageview"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="match_parent"-->
+        <!--android:layout_above="@id/udesk_zoom_save"-->
+        <!--android:layout_alignParentTop="true"-->
+        <!--fresco:actualImageScaleType="centerCrop" />-->
+
+</RelativeLayout>

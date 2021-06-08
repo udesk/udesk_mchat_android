@@ -1,148 +1,148 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="udesk_titlebar_back">Back</string>
-    <string name="udesk_navi_open_im">Contact us</string>
-    <string name="udesk_navi_helper_title_main">Help</string>
-    <string name="udesk_send_message">Send</string>
-    <string name="udesk_send_message_empty">No empty message</string>
-    <string name="udesk_get_more_history">Draging history records</string>
-    <string name="udesk_release_to_get_more">Releasing history records</string>
-    <string name="udesk_loading_more">Loading history records</string>
-    <string name="udesk_no_more_history">No more history records</string>
-    <string name="udesk_helper_loadding">Loading, please wait&#8230;</string>
-    <string name="udesk_navi_helper_input_hint">Describe your question</string>
-    <string name="udesk_save">Save</string>
-    <string name="udesk_copy">Copy</string>
-    <string name="udesk_fail_save_image">Failed saving</string>
-    <string name="udesk_success_save_image">Successful saving</string>
-    <string name="udesk_cancel">Cancel</string>
-    <string name="udesk_sure">Sure</string>
-    <string name="udesk_ok">Leave message</string>
+    <string name="udesk_multimerchant_titlebar_back">Back</string>
+    <string name="udesk_multimerchant_navi_open_im">Contact us</string>
+    <string name="udesk_multimerchant_navi_helper_title_main">Help</string>
+    <string name="udesk_multimerchant_send_message">Send</string>
+    <string name="udesk_multimerchant_send_message_empty">No empty message</string>
+    <string name="udesk_multimerchant_get_more_history">Draging history records</string>
+    <string name="udesk_multimerchant_release_to_get_more">Releasing history records</string>
+    <string name="udesk_multimerchant_loading_more">Loading history records</string>
+    <string name="udesk_multimerchant_no_more_history">No more history records</string>
+    <string name="udesk_multimerchant_helper_loadding">Loading, please wait&#8230;</string>
+    <string name="udesk_multimerchant_navi_helper_input_hint">Describe your question</string>
+    <string name="udesk_multimerchant_save">Save</string>
+    <string name="udesk_multimerchant_copy">Copy</string>
+    <string name="udesk_multimerchant_fail_save_image">Failed saving</string>
+    <string name="udesk_multimerchant_success_save_image">Successful saving</string>
+    <string name="udesk_multimerchant_cancel">Cancel</string>
+    <string name="udesk_multimerchant_sure">Sure</string>
+    <string name="udesk_multimerchant_ok">Leave message</string>
 
-    <string name="udesk_msg_offline_to_form">Agent is offline,submitting list to inform us</string>
-    <string name="udesk_msg_busyline_to_form">Customer service is busy now, please press button to leave message</string>
-    <string name="udesk_msg_busyline_to_wait">Customer service is busy now,please wait a moment</string>
-    <string name="udesk_msg_busy_default_to_form">No Agents available right now. Please contacting us at our working hours</string>
-    <string name="udesk_label_search_fail">Can not search your content</string>
-    <string name="udesk_label_no_sd">SD out of work, please check</string>
-
-
-    <string name="udesk_label_hint_too_short">Too short clicks</string>
-    <string name="udesk_im_record_error">Errors of recording, please check your authority of voice record on your application</string>
+    <string name="udesk_multimerchant_msg_offline_to_form">Agent is offline,submitting list to inform us</string>
+    <string name="udesk_multimerchant_msg_busyline_to_form">Customer service is busy now, please press button to leave message</string>
+    <string name="udesk_multimerchant_msg_busyline_to_wait">Customer service is busy now,please wait a moment</string>
+    <string name="udesk_multimerchant_msg_busy_default_to_form">No Agents available right now. Please contacting us at our working hours</string>
+    <string name="udesk_multimerchant_label_search_fail">Can not search your content</string>
+    <string name="udesk_multimerchant_label_no_sd">SD out of work, please check</string>
 
 
-    <string name="udesk_im_time_format_yday">"Yesterday"</string>
-    <string name="udesk_im_time_format_dby">"The day before yesterday"</string>
-    <string name="udesk_label_customer_offline">Agent is offline</string>
+    <string name="udesk_multimerchant_label_hint_too_short">Too short clicks</string>
+    <string name="udesk_multimerchant_im_record_error">Errors of recording, please check your authority of voice record on your application</string>
+
+
+    <string name="udesk_multimerchant_im_time_format_yday">"Yesterday"</string>
+    <string name="udesk_multimerchant_im_time_format_dby">"The day before yesterday"</string>
+    <string name="udesk_multimerchant_label_customer_offline">Agent is offline</string>
 
     <!-- 商品咨询界面，链接按钮的展示文字 -->
-    <string name="udesk_label_send_commondity_link">"Send links"</string>
-    <string name="udesk_transfer_persion">Operator</string>
-    <string name="udesk_robot_title">Intelligent robot</string>
+    <string name="udesk_multimerchant_label_send_commondity_link">"Send links"</string>
+    <string name="udesk_multimerchant_transfer_persion">Operator</string>
+    <string name="udesk_multimerchant_robot_title">Intelligent robot</string>
 
-    <string name="udesk_has_not_open_robot">You did not open intelligent robot service on your app</string>
-    <string name="udesk_has_wrong_net">Network error, please checking you network setting!</string>
+    <string name="udesk_multimerchant_has_not_open_robot">You did not open intelligent robot service on your app</string>
+    <string name="udesk_multimerchant_has_wrong_net">Network error, please checking you network setting!</string>
 
 
-    <string name="udesk_options_agentgroup">Please choose agent group</string>
-    <string name="file_denied">Refused storage authrity, can not tak a file </string>
-    <string name="call_denied">Refused call authrity, can not tak a call</string>
-    <string name="aduido_denied">Refused voice record authority, can not take a voice record</string>
-    <string name="camera_denied">Refused photo authrity, can not tak a photo </string>
-    <string name="photo_denied">Refused storage authrity, can not get your photos</string>
-    <string name="add_bolcked_tips">Sorry, you are in blacklist</string>
-    <string name="udesk_agent_connecting">Aagent connecting&#8230;</string>
-    <string name="udesk_agent_inti">Aagent connecting,please wait&#8230;</string>
-    <string name="udesk_agent_connecting_error_net_uavailabl">Failed connection, please try later!</string>
+    <string name="udesk_multimerchant_options_agentgroup">Please choose agent group</string>
+    <string name="udesk_multimerchant_file_denied">Refused storage authrity, can not tak a file </string>
+    <string name="udesk_multimerchant_call_denied">Refused call authrity, can not tak a call</string>
+    <string name="udesk_multimerchant_aduido_denied">Refused voice record authority, can not take a voice record</string>
+    <string name="udesk_multimerchant_camera_denied">Refused photo authrity, can not tak a photo </string>
+    <string name="udesk_multimerchant_photo_denied">Refused storage authrity, can not get your photos</string>
+    <string name="udesk_multimerchant_add_bolcked_tips">Sorry, you are in blacklist</string>
+    <string name="udesk_multimerchant_agent_connecting">Aagent connecting&#8230;</string>
+    <string name="udesk_multimerchant_agent_inti">Aagent connecting,please wait&#8230;</string>
+    <string name="udesk_multimerchant_agent_connecting_error_net_uavailabl">Failed connection, please try later!</string>
 
-    <string name="udesk_edit_hint_msg">Typing...</string>
+    <string name="udesk_multimerchant_edit_hint_msg">Typing...</string>
 <!--    <string name="udesk_edit_hint_msg">Glad to serve you, please describe your problem</string>-->
-    <string name="udesk_voice_init">Hold to talk</string>
-    <string name="udesk_voice_cancle">Release to cancel</string>
-    <string name="udesk_thanks_survy">Thanks for your comment！</string>
-    <string name="udesk_transfer_success">Successfully tansfer to agent</string>
-    <string name="udesk_service">Service</string>
-    <string name="udesk_nonexistent_agent">Agent is not correct, please check agent ID </string>
-    <string name="udesk_nonexistent_groupId"> Agent agroup is not correct, please check agent group ID</string>
+    <string name="udesk_multimerchant_voice_init">Hold to talk</string>
+    <string name="udesk_multimerchant_voice_cancle">Release to cancel</string>
+    <string name="udesk_multimerchant_thanks_survy">Thanks for your comment！</string>
+    <string name="udesk_multimerchant_transfer_success">Successfully tansfer to agent</string>
+    <string name="udesk_multimerchant_service">Service</string>
+    <string name="udesk_multimerchant_nonexistent_agent">Agent is not correct, please check agent ID </string>
+    <string name="udesk_multimerchant_nonexistent_groupId"> Agent agroup is not correct, please check agent group ID</string>
 
-    <string name="udesk_has_survey">Thank you, you have already done!</string>
+    <string name="udesk_multimerchant_has_survey">Thank you, you have already done!</string>
 
-    <string name="udesk_no_set_survey">Not set, temporarily unable to use!</string>
+    <string name="udesk_multimerchant_no_set_survey">Not set, temporarily unable to use!</string>
 
-    <string name="udesk_survey_error"> Sorry, temporarily unable to use!</string>
-    <string name="udesk_service_line"> Customer service line</string>
-    <string name="udesk_service_offline"> Customer service offline</string>
+    <string name="udesk_multimerchant_survey_error"> Sorry, temporarily unable to use!</string>
+    <string name="udesk_multimerchant_service_line"> Customer service line</string>
+    <string name="udesk_multimerchant_service_offline"> Customer service offline</string>
 
-    <string name="udesk_upload_img_error">Failed to upload pictures, please try again</string>
-    <string name="udesk_customer_leavemsg">Customer leaving a message</string>
-    <string name="udesk_offline_reply_msg">Offline message reply</string>
-    <string name="udesk_file_to_large">The video cannot be too large, please compress</string>
-    <string name="udesk_gps_tips">Currently in a non Wi-Fi environment, sending a file consumes a certain amount of traffic. Do you want to continue?</string>
-    <string name="udesk_gps_downfile_tips">Currently in a non Wi-Fi environment, download a file consumes a certain amount of traffic. Do you want to continue?</string>
-    <string name="udesk_has_send">has been sent</string>
-    <string name="udesk_has_downed">downloaded</string>
-    <string name="udesk_has_download">download</string>
-    <string name="udesk_has_uncomplete_tip">Download first, then click</string>
-    <string name="udesk_download_failure">Download failed. Please re Download</string>
-    <string name="udesk_no_app_handle">The application could not be found to execute the file</string>
-    <string name="udesk_no_sdktoken">Sdktoken is empty. Please import a valid value</string>
-    <string name="udesk_close_chart">Chat end</string>
+    <string name="udesk_multimerchant_upload_img_error">Failed to upload pictures, please try again</string>
+    <string name="udesk_multimerchant_customer_leavemsg">Customer leaving a message</string>
+    <string name="udesk_multimerchant_offline_reply_msg">Offline message reply</string>
+    <string name="udesk_multimerchant_file_to_large">The video cannot be too large, please compress</string>
+    <string name="udesk_multimerchant_gps_tips">Currently in a non Wi-Fi environment, sending a file consumes a certain amount of traffic. Do you want to continue?</string>
+    <string name="udesk_multimerchant_gps_downfile_tips">Currently in a non Wi-Fi environment, download a file consumes a certain amount of traffic. Do you want to continue?</string>
+    <string name="udesk_multimerchant_has_send">has been sent</string>
+    <string name="udesk_multimerchant_has_downed">downloaded</string>
+    <string name="udesk_multimerchant_has_download">download</string>
+    <string name="udesk_multimerchant_has_uncomplete_tip">Download first, then click</string>
+    <string name="udesk_multimerchant_download_failure">Download failed. Please re Download</string>
+    <string name="udesk_multimerchant_no_app_handle">The application could not be found to execute the file</string>
+    <string name="udesk_multimerchant_no_sdktoken">Sdktoken is empty. Please import a valid value</string>
+    <string name="udesk_multimerchant_close_chart">Chat end</string>
 
-    <string name="xlistview_header_hint_normal">Pull down to refresh</string>
-    <string name="xlistview_header_hint_ready">Release the refresh data</string>
-    <string name="xlistview_header_hint_loading">Refreshing&#8230;</string>
-    <string name="xlistview_footer_hint_ready">Release to load more</string>
-    <string name="xlistview_refresh_sucess">Refresh successful</string>
-    <string name="xlistview_refresh_failure">Refresh failed</string>
+    <string name="udesk_multimerchant_xlistview_header_hint_normal">Pull down to refresh</string>
+    <string name="udesk_multimerchant_xlistview_header_hint_ready">Release the refresh data</string>
+    <string name="udesk_multimerchant_xlistview_header_hint_loading">Refreshing&#8230;</string>
+    <string name="udesk_multimerchant_xlistview_footer_hint_ready">Release to load more</string>
+    <string name="udesk_multimerchant_xlistview_refresh_sucess">Refresh successful</string>
+    <string name="udesk_multimerchant_xlistview_refresh_failure">Refresh failed</string>
 
-    <string name="msg_type_image">[image]</string>
-    <string name="msg_type_audio">[audio]</string>
-    <string name="msg_type_video">[video]</string>
-    <string name="msg_type_file">[file]</string>
-    <string name="msg_type_product">[product]</string>
-    <string name="close_conversation">Delete conversation</string>
-    <string name="time_out">time_out, please check net</string>
-    <string name="no_conversation">No history dialogue</string>
-    <string name="udesk_statify">satisfaction</string>
-    <string name="udesk_unstatify">Dissatisfied</string>
-    <string name="udesk_common">general</string>
-    <string name="udesk_remark_must">* remark is required</string>
-    <string name="summit_remark">Submit remark</string>
-    <string name="summit_must_remark">remark must be filled</string>
+    <string name="udesk_multimerchant_msg_type_image">[image]</string>
+    <string name="udesk_multimerchant_msg_type_audio">[audio]</string>
+    <string name="udesk_multimerchant_msg_type_video">[video]</string>
+    <string name="udesk_multimerchant_msg_type_file">[file]</string>
+    <string name="udesk_multimerchant_msg_type_product">[product]</string>
+    <string name="udesk_multimerchant_close_conversation">Delete conversation</string>
+    <string name="udesk_multimerchant_time_out">time_out, please check net</string>
+    <string name="udesk_multimerchant_no_conversation">No history dialogue</string>
+    <string name="udesk_multimerchant_statify">satisfaction</string>
+    <string name="udesk_multimerchant_unstatify">Dissatisfied</string>
+    <string name="udesk_multimerchant_common">general</string>
+    <string name="udesk_multimerchant_remark_must">* remark is required</string>
+    <string name="udesk_multimerchant_summit_remark">Submit remark</string>
+    <string name="udesk_multimerchant_summit_must_remark">remark must be filled</string>
 
-    <string name="udesk_rollback_tips">recalled a message</string>
-    <string name="add_blocked_tips">Sorry, you are in blacklist</string>
+    <string name="udesk_multimerchant_rollback_tips">recalled a message</string>
+    <string name="udesk_multimerchant_add_blocked_tips">Sorry, you are in blacklist</string>
 
-    <string name="funtion_camera">Camera</string>
-    <string name="photo">Album</string>
-    <string name="survy">Satisfaction Rating</string>
-    <string name="video">Video call</string>
-    <string name="file">File</string>
+    <string name="udesk_multimerchant_funtion_camera">Camera</string>
+    <string name="udesk_multimerchant_photo">Album</string>
+    <string name="udesk_multimerchant_survy">Satisfaction Rating</string>
+    <string name="udesk_multimerchant_video">Video call</string>
+    <string name="udesk_multimerchant_file">File</string>
 
-    <string name="udesk_too_short">Message too short</string>
-    <string name="camera_view_tips">hold to record small video</string>
-    <string name="udesk_audio_permission_error">Allow app to access your microphone</string>
-    <string name="press_record">Hold to Talk</string>
-    <string name="release_end">Release to Send</string>
-    <string name="release_cancel">Release to cancel</string>
-    <string name="move_up_cancel">Slide up to cancel</string>
-    <string name="record_to_short">Message too short</string>
-    <string name="service_valuation">Satisfaction Rating</string>
-    <string name="udesk_img_video">Photos</string>
-    <string name="udesk_all_video">Videos</string>
-    <string name="udesk_original_photos">Full Image</string>
-    <string name="udesk_photo_pre">Preview</string>
-    <string name="udesk_max_tips">Select a maximum of 9 phots</string>
-    <string name="udesk_selector_action_done_photos">Send(%1$d/%2$d)</string>
-    <string name="udesk_selector_action_done_photo_pre">Preview(%1$d)</string>
-    <string name="udesk_selector_photos">Select</string>
-    <string name="udesk_selector_photo_index_num">(%1$d/%2$d)</string>
-    <string name="udesk_file_not_exist">File does not exist</string>
-    <string name="udesk_upload_video_error">Failed to upload video, please try again</string>
-    <string name="udesk_upload_file_error">Failed to upload file, please try again</string>
-    <string name="udesk_navigatesMenu_unchecked">Please select the navigation menu before sending the message</string>
-    <string name="udesk_navigatesMenu_previous">Back to previous</string>
-    <string name="udesk_need_customer_unique_id">The customer’s unique ID must be set</string>
+    <string name="udesk_multimerchant_too_short">Message too short</string>
+    <string name="udesk_multimerchant_camera_view_tips">hold to record small video</string>
+    <string name="udesk_multimerchant_audio_permission_error">Allow app to access your microphone</string>
+    <string name="udesk_multimerchant_press_record">Hold to Talk</string>
+    <string name="udesk_multimerchant_release_end">Release to Send</string>
+    <string name="udesk_multimerchant_release_cancel">Release to cancel</string>
+    <string name="udesk_multimerchant_move_up_cancel">Slide up to cancel</string>
+    <string name="udesk_multimerchant_record_to_short">Message too short</string>
+    <string name="udesk_multimerchant_service_valuation">Satisfaction Rating</string>
+    <string name="udesk_multimerchant_img_video">Photos</string>
+    <string name="udesk_multimerchant_all_video">Videos</string>
+    <string name="udesk_multimerchant_original_photos">Full Image</string>
+    <string name="udesk_multimerchant_photo_pre">Preview</string>
+    <string name="udesk_multimerchant_max_tips">Select a maximum of 9 phots</string>
+    <string name="udesk_multimerchant_selector_action_done_photos">Send(%1$d/%2$d)</string>
+    <string name="udesk_multimerchant_selector_action_done_photo_pre">Preview(%1$d)</string>
+    <string name="udesk_multimerchant_selector_photos">Select</string>
+    <string name="udesk_multimerchant_selector_photo_index_num">(%1$d/%2$d)</string>
+    <string name="udesk_multimerchant_file_not_exist">File does not exist</string>
+    <string name="udesk_multimerchant_upload_video_error">Failed to upload video, please try again</string>
+    <string name="udesk_multimerchant_upload_file_error">Failed to upload file, please try again</string>
+    <string name="udesk_multimerchant_navigatesMenu_unchecked">Please select the navigation menu before sending the message</string>
+    <string name="udesk_multimerchant_navigatesMenu_previous">Back to previous</string>
+    <string name="udesk_multimerchant_need_customer_unique_id">The customer’s unique ID must be set</string>
 
 </resources>

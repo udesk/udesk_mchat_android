@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="cn.udesk.multimerchant">
+    package="cn.udesk.multimerchant.demo">
 
     <!-- Required -->
     <permission
@@ -35,14 +35,14 @@
 
 
     <application
-        android:name="cn.udesk.multimerchant.jpush.ExampleApplication"
+        android:name=".jpush.ExampleApplication"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:usesCleartextTraffic="true"
         android:theme="@style/AppTheme">
 
         <activity
-            android:name="cn.udesk.multimerchant.InitActivity"
+            android:name=".InitActivity"
             android:theme="@style/Theme_AppStartLoadTranslucent">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -51,7 +51,7 @@
             </intent-filter>
         </activity>
 
-        <activity android:name="cn.udesk.multimerchant.MainActivity">
+        <activity android:name=".MainActivity">
 
         </activity>
 

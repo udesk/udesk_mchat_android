@@ -1,1 +1,0 @@
-package cn.udesk.voice;import cn.udesk.muchat.bean.ReceiveMessage;public interface RecordPlayCallback {    void onPlayComplete(ReceiveMessage message);     void onPlayStart(ReceiveMessage message);     void onPlayPause(ReceiveMessage message);     void onPlayEnd(ReceiveMessage message);         void endAnimation();}

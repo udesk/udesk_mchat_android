@@ -1,49 +1,49 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <style name="udesk_navi_button_text_style">
+    <style name="udesk_multimerchant_navi_button_text_style">
         <item name="android:gravity">center</item>
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
-        <item name="android:textColor">@color/udesk_color_navi_text1</item>
-        <item name="android:textSize">@dimen/udesk_navi_text_size</item>
+        <item name="android:textColor">@color/udesk_multimerchant_color_navi_text1</item>
+        <item name="android:textSize">@dimen/udesk_multimerchant_navi_text_size</item>
         <item name="android:ellipsize">middle</item>
         <item name="android:singleLine">true</item>
         <item name="android:drawablePadding">3dp</item>
     </style>
 
-    <style name="udesk_dialog" parent="@android:style/Theme.Dialog">
+    <style name="udesk_multimerchant_dialog" parent="@android:style/Theme.Dialog">
         <item name="android:windowFrame">@null</item>
         <item name="android:windowIsFloating">true</item>
         <item name="android:windowIsTranslucent">false</item>
         <item name="android:windowNoTitle">true</item>
-        <item name="android:windowBackground">@color/udesk_loginDialog_background</item>
+        <item name="android:windowBackground">@color/udesk_multimerchant_loginDialog_background</item>
         <item name="android:backgroundDimEnabled">false</item>
     </style>
 
-    <style name="dialogstyle" parent="@android:style/Theme.Dialog">
+    <style name="udesk_multimerchant_dialogstyle" parent="@android:style/Theme.Dialog">
         <item name="android:windowFrame">@null</item>
         <item name="android:windowIsFloating">true</item>
         <item name="android:windowIsTranslucent">false</item>
         <item name="android:windowNoTitle">true</item>
-        <item name="android:windowBackground">@drawable/udesk_dialog_request_bg</item>
+        <item name="android:windowBackground">@drawable/udesk_multimerchant_dialog_request_bg</item>
         <item name="android:backgroundDimEnabled">true</item>
     </style>
 
-    <style name="udesk_titlebar_button_text_style">
+    <style name="udesk_multimerchant_titlebar_button_text_style">
         <item name="android:gravity">left</item>
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
-        <item name="android:textColor">@color/udesk_color_navi_text1</item>
-        <item name="android:textSize">@dimen/udesk_navi_text_size</item>
+        <item name="android:textColor">@color/udesk_multimerchant_color_navi_text1</item>
+        <item name="android:textSize">@dimen/udesk_multimerchant_navi_text_size</item>
         <item name="android:ellipsize">end</item>
         <item name="android:singleLine">true</item>
     </style>
 
-    <style name="Udesk_Theme" parent="Theme.AppCompat.DayNight.NoActionBar"></style>
+    <style name="Udesk_multimerchant_Theme" parent="Theme.AppCompat.DayNight.NoActionBar"></style>
 
 
-    <style name="transcutestyle" parent="@android:style/Theme.Dialog">
+    <style name="udesk_multimerchant_transcutestyle" parent="@android:style/Theme.Dialog">
         <item name="android:windowFrame">@android:color/transparent</item><!-- 边框 -->
         <item name="android:windowIsFloating">true</item><!-- 是否浮现在activity之上 -->
         <item name="android:windowNoTitle">true</item><!-- 无标题 -->
@@ -53,11 +53,11 @@
 
     </style>
 
-    <style name="udesk_survy_anim" parent="android:Animation">
-        <item name="android:windowEnterAnimation">@anim/udesk_pop_enter_anim</item>
-        <item name="android:windowExitAnimation">@anim/udesk_pop_exit_anim</item>
+    <style name="udesk_multimerchant_survy_anim" parent="android:Animation">
+        <item name="android:windowEnterAnimation">@anim/udesk_multimerchant_pop_enter_anim</item>
+        <item name="android:windowExitAnimation">@anim/udesk_multimerchant_pop_exit_anim</item>
     </style>
-    <style name="Theme_Audio_Record_Button">
+    <style name="udesk_multimerchant_theme_Audio_Record_Button">
         <item name="android:windowBackground">@android:color/transparent</item>
         <item name="android:windowFrame">@null</item>
         <item name="android:windowIsFloating">true</item>

@@ -2,7 +2,7 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    android:background="@color/color_d8d8d8">
+    android:background="@color/udesk_multimerchant_color_d8d8d8">
 
 
     <LinearLayout
@@ -14,7 +14,7 @@
         <TextView
             android:id="@+id/conversation"
             android:layout_width="fill_parent"
-            android:layout_height="@dimen/udesk_40"
+            android:layout_height="@dimen/udesk_multimerchant_40"
             android:layout_margin="10dip"
             android:background="@drawable/udesk_btn_bg"
             android:gravity="center"
@@ -27,7 +27,7 @@
         <TextView
             android:id="@+id/history_conversation"
             android:layout_width="fill_parent"
-            android:layout_height="@dimen/udesk_40"
+            android:layout_height="@dimen/udesk_multimerchant_40"
             android:layout_margin="10dip"
             android:background="@drawable/udesk_btn_bg"
             android:gravity="center"
@@ -40,7 +40,7 @@
         <TextView
             android:id="@+id/merchant_unread_msg"
             android:layout_width="fill_parent"
-            android:layout_height="@dimen/udesk_40"
+            android:layout_height="@dimen/udesk_multimerchant_40"
             android:layout_margin="10dip"
             android:background="@drawable/udesk_btn_bg"
             android:gravity="center"
@@ -51,7 +51,7 @@
         <TextView
             android:id="@+id/all_unread_msg"
             android:layout_width="fill_parent"
-            android:layout_height="@dimen/udesk_40"
+            android:layout_height="@dimen/udesk_multimerchant_40"
             android:layout_margin="10dip"
             android:background="@drawable/udesk_btn_bg"
             android:gravity="center"
@@ -62,7 +62,7 @@
         <TextView
             android:id="@+id/msg_callback"
             android:layout_width="fill_parent"
-            android:layout_height="@dimen/udesk_40"
+            android:layout_height="@dimen/udesk_multimerchant_40"
             android:layout_margin="10dip"
             android:background="@drawable/udesk_btn_bg"
             android:gravity="center"
@@ -75,7 +75,7 @@
         <TextView
             android:id="@+id/commity_callback"
             android:layout_width="fill_parent"
-            android:layout_height="@dimen/udesk_40"
+            android:layout_height="@dimen/udesk_multimerchant_40"
             android:layout_margin="10dip"
             android:background="@drawable/udesk_btn_bg"
             android:gravity="center"
@@ -89,7 +89,7 @@
         <TextView
             android:id="@+id/merchant_unread_count"
             android:layout_width="fill_parent"
-            android:layout_height="@dimen/udesk_40"
+            android:layout_height="@dimen/udesk_multimerchant_40"
             android:layout_margin="10dip"
             android:background="@drawable/udesk_btn_bg"
             android:gravity="center"
@@ -100,7 +100,7 @@
         <TextView
             android:id="@+id/all_unread_count"
             android:layout_width="fill_parent"
-            android:layout_height="@dimen/udesk_40"
+            android:layout_height="@dimen/udesk_multimerchant_40"
             android:layout_margin="10dip"
             android:background="@drawable/udesk_btn_bg"
             android:gravity="center"
@@ -111,7 +111,7 @@
         <TextView
             android:id="@+id/receive_msg"
             android:layout_width="fill_parent"
-            android:layout_height="@dimen/udesk_40"
+            android:layout_height="@dimen/udesk_multimerchant_40"
             android:layout_margin="10dip"
             android:background="@drawable/udesk_btn_bg"
             android:gravity="center"
@@ -122,7 +122,7 @@
         <TextView
             android:id="@+id/add_product_message"
             android:layout_width="fill_parent"
-            android:layout_height="@dimen/udesk_40"
+            android:layout_height="@dimen/udesk_multimerchant_40"
             android:layout_margin="10dip"
             android:background="@drawable/udesk_btn_bg"
             android:gravity="center"
@@ -133,7 +133,7 @@
         <TextView
             android:id="@+id/add_navigation"
             android:layout_width="fill_parent"
-            android:layout_height="@dimen/udesk_40"
+            android:layout_height="@dimen/udesk_multimerchant_40"
             android:layout_margin="10dip"
             android:background="@drawable/udesk_btn_bg"
             android:gravity="center"
@@ -144,7 +144,7 @@
         <TextView
             android:id="@+id/add_extraFunction"
             android:layout_width="fill_parent"
-            android:layout_height="@dimen/udesk_40"
+            android:layout_height="@dimen/udesk_multimerchant_40"
             android:layout_margin="10dip"
             android:background="@drawable/udesk_btn_bg"
             android:gravity="center"

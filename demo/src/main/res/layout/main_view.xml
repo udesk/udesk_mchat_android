@@ -2,13 +2,13 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/color_d8d8d8"
+    android:background="@color/udesk_multimerchant_color_d8d8d8"
     android:orientation="vertical">
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingLeft="@dimen/udesk_25"
-        android:paddingRight="@dimen/udesk_25"
+        android:paddingLeft="@dimen/udesk_multimerchant_25"
+        android:paddingRight="@dimen/udesk_multimerchant_25"
         android:orientation="vertical">
         <TextView
             android:layout_width="fill_parent"
@@ -22,77 +22,77 @@
             android:id="@+id/customer_euid"
             android:layout_width="wrap_content"
             android:layout_height="fill_parent"
-            android:layout_marginTop="@dimen/udesk_5"
+            android:layout_marginTop="@dimen/udesk_multimerchant_5"
             android:gravity="start|center"
             android:hint="用户id"
             android:textColor="#333333"
-            android:textColorHint="@color/udesk_color_999999"
+            android:textColorHint="@color/udesk_multimerchant_color_999999"
             android:textSize="16sp" />
         <EditText
             android:id="@+id/nick_name"
             android:layout_width="wrap_content"
             android:layout_height="fill_parent"
-            android:layout_marginTop="@dimen/udesk_5"
+            android:layout_marginTop="@dimen/udesk_multimerchant_5"
             android:gravity="start|center"
             android:hint="用户昵称"
             android:textColor="#333333"
-            android:textColorHint="@color/udesk_color_999999"
+            android:textColorHint="@color/udesk_multimerchant_color_999999"
             android:textSize="16sp" />
         <EditText
             android:id="@+id/org"
             android:layout_width="wrap_content"
             android:layout_height="fill_parent"
-            android:layout_marginTop="@dimen/udesk_5"
+            android:layout_marginTop="@dimen/udesk_multimerchant_5"
             android:gravity="start|center"
             android:hint="公司名称"
             android:textColor="#333333"
-            android:textColorHint="@color/udesk_color_999999"
+            android:textColorHint="@color/udesk_multimerchant_color_999999"
             android:textSize="16sp" />
         <EditText
             android:id="@+id/cellphone"
             android:layout_width="wrap_content"
             android:layout_height="fill_parent"
-            android:layout_marginTop="@dimen/udesk_5"
+            android:layout_marginTop="@dimen/udesk_multimerchant_5"
             android:gravity="start|center"
             android:hint="用户手机"
             android:textColor="#333333"
-            android:textColorHint="@color/udesk_color_999999"
+            android:textColorHint="@color/udesk_multimerchant_color_999999"
             android:textSize="16sp" />
         <EditText
             android:id="@+id/email"
             android:layout_width="wrap_content"
             android:layout_height="fill_parent"
-            android:layout_marginTop="@dimen/udesk_5"
+            android:layout_marginTop="@dimen/udesk_multimerchant_5"
             android:gravity="start|center"
             android:hint="用户邮箱"
             android:textColor="#333333"
-            android:textColorHint="@color/udesk_color_999999"
+            android:textColorHint="@color/udesk_multimerchant_color_999999"
             android:textSize="16sp" />
         <EditText
             android:id="@+id/description"
             android:layout_width="wrap_content"
             android:layout_height="fill_parent"
-            android:layout_marginTop="@dimen/udesk_5"
+            android:layout_marginTop="@dimen/udesk_multimerchant_5"
             android:gravity="start|center"
             android:hint="用户描述"
             android:textColor="#333333"
-            android:textColorHint="@color/udesk_color_999999"
+            android:textColorHint="@color/udesk_multimerchant_color_999999"
             android:textSize="16sp" />
         <EditText
             android:id="@+id/tags"
             android:layout_width="wrap_content"
             android:layout_height="fill_parent"
-            android:layout_marginTop="@dimen/udesk_5"
+            android:layout_marginTop="@dimen/udesk_multimerchant_5"
             android:gravity="start|center"
             android:hint="用户标签"
             android:textColor="#333333"
-            android:textColorHint="@color/udesk_color_999999"
+            android:textColorHint="@color/udesk_multimerchant_color_999999"
             android:textSize="16sp" />
 
         <TextView
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/udesk_5"
+            android:layout_marginTop="@dimen/udesk_multimerchant_5"
             android:gravity="start|center"
             android:text="@string/udesk_set_basetextinfo"
             android:textColor="#333333"
@@ -100,7 +100,7 @@
         <LinearLayout
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/udesk_5"
+            android:layout_marginTop="@dimen/udesk_multimerchant_5"
             android:orientation="horizontal">
 
             <TextView
@@ -117,17 +117,17 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:gravity="start|center"
-                android:layout_marginLeft="@dimen/udesk_20"
+                android:layout_marginLeft="@dimen/udesk_multimerchant_20"
                 android:hint="@string/udesk_set_admin_info_key"
                 android:textColor="#333333"
-                android:textColorHint="@color/udesk_color_999999"
+                android:textColorHint="@color/udesk_multimerchant_color_999999"
                 android:textSize="16sp" />
         </LinearLayout>
 
         <LinearLayout
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/udesk_5"
+            android:layout_marginTop="@dimen/udesk_multimerchant_5"
             android:orientation="horizontal">
 
             <TextView
@@ -144,16 +144,16 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:gravity="start|center"
-                android:layout_marginLeft="@dimen/udesk_20"
+                android:layout_marginLeft="@dimen/udesk_multimerchant_20"
                 android:hint="@string/udesk_set_value"
                 android:textColor="#333333"
-                android:textColorHint="@color/udesk_color_999999"
+                android:textColorHint="@color/udesk_multimerchant_color_999999"
                 android:textSize="16sp" />
         </LinearLayout>
         <TextView
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/udesk_10"
+            android:layout_marginTop="@dimen/udesk_multimerchant_10"
             android:gravity="start|center"
             android:text="@string/udesk_set_baselistinfo"
             android:textColor="#333333"
@@ -161,7 +161,7 @@
         <LinearLayout
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/udesk_5"
+            android:layout_marginTop="@dimen/udesk_multimerchant_5"
             android:orientation="horizontal">
 
             <TextView
@@ -178,17 +178,17 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:gravity="start|center"
-                android:layout_marginLeft="@dimen/udesk_20"
+                android:layout_marginLeft="@dimen/udesk_multimerchant_20"
                 android:hint="@string/udesk_set_admin_info_key"
                 android:textColor="#333333"
-                android:textColorHint="@color/udesk_color_999999"
+                android:textColorHint="@color/udesk_multimerchant_color_999999"
                 android:textSize="16sp" />
         </LinearLayout>
 
         <LinearLayout
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/udesk_10"
+            android:layout_marginTop="@dimen/udesk_multimerchant_10"
             android:orientation="horizontal">
 
             <TextView
@@ -205,10 +205,10 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:gravity="start|center"
-                android:layout_marginLeft="@dimen/udesk_20"
+                android:layout_marginLeft="@dimen/udesk_multimerchant_20"
                 android:hint="@string/udesk_set_list_value"
                 android:textColor="#333333"
-                android:textColorHint="@color/udesk_color_999999"
+                android:textColorHint="@color/udesk_multimerchant_color_999999"
                 android:textSize="16sp" />
         </LinearLayout>
 
