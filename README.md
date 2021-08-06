@@ -1,5 +1,7 @@
 ## 特别声明
 
+**从1.1.1版本开始 权限声明有所调整，详情见[权限](#1)**
+
 **为和其他sdk兼容，从1.1.0 版本开始，修改了包名和部分类名，从低版本升级会报错，建议重新import，类名修改信息如下：**
 
 |  原类名                        |     修改后类名                           |
@@ -16,7 +18,7 @@
 ## 1.导入集成 ##
 
 
-**1 远程依赖集成**
+### 1 远程依赖集成 ###
 
  1.Add it in your root build.gradle at the end of repositories:
 
@@ -33,7 +35,7 @@
 	}
 
 
-**2 本地集成**
+### 2 本地集成 ###
 
 1.Add this in your root build.gradle file (not your module build.gradle file):
 
@@ -61,6 +63,88 @@
     implementation'com.squareup.okhttp3:logging-interceptor:4.9.0'
     implementation 'com.squareup.okhttp3:okhttp:4.9.0'
     implementation 'com.squareup.okio:okio:2.8.0'
+
+<h3 id="1">3 权限(本地远程都需要)</h3>
+	
+	//使用相册 拍照 文件，语音功能需要（不用功能，可以不声明）
+	<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+	//使用语音、拍摄功能需要（不用功能，可以不声明）
+	<uses-permission android:name="android.permission.RECORD_AUDIO" />
+	//拍摄功能使用（不用功能，可以不声明）
+    <uses-permission android:name="android.permission.CAMERA" />
+	
+
+### 4 混淆配置(本地远程都需要)
+
+	//udesk
+	-keep class udesk.** {*;} 
+	-keep class cn.udesk.**{*; } 
+	
+	//oss
+	-keep com.alibaba.sdk.**{*; } 
+	-keep com.google.gson.**{*; } 
+	-keep org.jxmpp.**{*; } 
+	-keep  de.measite.minidns.**{*; } 
+	
+	//eventbus
+	-keepattributes *Annotation*
+	-keepclassmembers class ** {
+	    @org.greenrobot.eventbus.Subscribe <methods>;
+	}
+	-keep enum org.greenrobot.eventbus.ThreadMode { *; }
+	 
+	# Only required if you use AsyncExecutor
+	-keepclassmembers class * extends org.greenrobot.eventbus.util.ThrowableFailureEvent {
+	    <init>(java.lang.Throwable);
+	}
+	
+	//smack
+	-keep class org.jxmpp.** {*;} 
+	-keep class de.measite.** {*;} 
+	-keep class org.jivesoftware.** {*;} 
+	-keep class org.xmlpull.** {*;} 
+	-dontwarn org.xbill.**
+	-keep class org.xbill.** {*;} 
+	
+	//JSONobject
+	-keep class org.json.** {*; }
+	
+	//okhttp
+	-keep class okhttp3.** {*;} 
+	-keep class okio.** {*;} 
+	
+	//retrofit2
+	# Platform calls Class.forName on types which do not exist on Android to determine platform.
+	-dontnote retrofit2.Platform
+	# Platform used when running on Java 8 VMs. Will not be used at runtime.
+	-dontwarn retrofit2.Platform$Java8
+	# Retain generic type information for use by reflection by converters and adapters.
+	-keepattributes Signature
+	# Retain declared checked exceptions for use by a Proxy instance.
+	-keepattributes Exceptions
+	
+	//glide
+	-keep public class * implements com.bumptech.glide.module.GlideModule
+	-keep public enum com.bumptech.glide.load.resource.bitmap.ImageHeaderParser$** {
+	  **[] $VALUES;
+	  public *;
+	}
+	
+	# for DexGuard only
+	-keepresourcexmlelements manifest/application/meta-data@value=GlideModule
+	
+	-keep class com.github.chrisbanes.** {*;} 
+	
+	-dontwarn okio.**
+	-dontwarn com.squareup.okhttp.**
+	-dontwarn okhttp3.**
+	-dontwarn javax.annotation.**
+	-dontwarn com.android.volley.toolbox.**
+	-dontwarn com.facebook.infer.**
+	-dontwarn com.bumptech.glide.**
+	
+	 //其它
+	-keep class org.sufficientlysecure.htmltextview.** {*; } 
 
 
 **注意**
@@ -375,8 +459,7 @@ application 中加入
     }
     @Override
     protected void attachBaseContext(Context base) {
-        super.attachBaseContext(base);
-        UdeskMultimerchantLocalManageUtil.saveSystemCurrentLanguage(base);
+      	super.attachBaseContext(UdeskMultimerchantLocalManageUtil.setLocal(getApplicationContext()));
     }
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
@@ -476,80 +559,15 @@ application 中加入
 		  public void sendRecordAudioMsg(String audiopath, long duration)
 		  mPresenter.sendRecordAudioMsg(audioFilePath, duration)
 
-### 14.混淆配置
-
-	//udesk
-	-keep class udesk.** {*;} 
-	-keep class cn.udesk.**{*; } 
-	
-	//oss
-	-keep com.alibaba.sdk.**{*; } 
-	-keep com.google.gson.**{*; } 
-	-keep org.jxmpp.**{*; } 
-	-keep  de.measite.minidns.**{*; } 
-	
-	//eventbus
-	-keepattributes *Annotation*
-	-keepclassmembers class ** {
-	    @org.greenrobot.eventbus.Subscribe <methods>;
-	}
-	-keep enum org.greenrobot.eventbus.ThreadMode { *; }
-	 
-	# Only required if you use AsyncExecutor
-	-keepclassmembers class * extends org.greenrobot.eventbus.util.ThrowableFailureEvent {
-	    <init>(java.lang.Throwable);
-	}
-	
-	//smack
-	-keep class org.jxmpp.** {*;} 
-	-keep class de.measite.** {*;} 
-	-keep class org.jivesoftware.** {*;} 
-	-keep class org.xmlpull.** {*;} 
-	-dontwarn org.xbill.**
-	-keep class org.xbill.** {*;} 
-	
-	//JSONobject
-	-keep class org.json.** {*; }
-	
-	//okhttp
-	-keep class okhttp3.** {*;} 
-	-keep class okio.** {*;} 
-	
-	//retrofit2
-	# Platform calls Class.forName on types which do not exist on Android to determine platform.
-	-dontnote retrofit2.Platform
-	# Platform used when running on Java 8 VMs. Will not be used at runtime.
-	-dontwarn retrofit2.Platform$Java8
-	# Retain generic type information for use by reflection by converters and adapters.
-	-keepattributes Signature
-	# Retain declared checked exceptions for use by a Proxy instance.
-	-keepattributes Exceptions
-	
-	//glide
-	-keep public class * implements com.bumptech.glide.module.GlideModule
-	-keep public enum com.bumptech.glide.load.resource.bitmap.ImageHeaderParser$** {
-	  **[] $VALUES;
-	  public *;
-	}
-	
-	# for DexGuard only
-	-keepresourcexmlelements manifest/application/meta-data@value=GlideModule
-	
-	-keep class com.github.chrisbanes.** {*;} 
-	
-	-dontwarn okio.**
-	-dontwarn com.squareup.okhttp.**
-	-dontwarn okhttp3.**
-	-dontwarn javax.annotation.**
-	-dontwarn com.android.volley.toolbox.**
-	-dontwarn com.facebook.infer.**
-	-dontwarn com.bumptech.glide.**
-	
-	 //其它
-	-keep class org.sufficientlysecure.htmltextview.** {*; } 
-
 
 ## 3.更新日志 ##
+
+### 1.1.1 更新内容 ###
+
+1. 敏感权限调整
+2. 修复导航问题
+3. 修复文件发送问题
+4. 修复已知问题
 
 ### 1.1.0 更新内容 ###
 
