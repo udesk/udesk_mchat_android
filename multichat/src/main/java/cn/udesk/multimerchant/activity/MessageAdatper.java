@@ -1420,7 +1420,7 @@ public class MessageAdatper extends BaseAdapter {
                     size = UdeskUtil.objectToString(info.getFilesize());
                     filetype = UdeskUtil.objectToString(info.getFileext());
                 }
-                if (message.getDirection() == UdeskConst.ChatMsgDirection.Send) {
+                if (TextUtils.equals(UdeskUtil.objectToString(message.getDirection()),UdeskConst.ChatMsgDirection.Send) && !TextUtils.isEmpty(message.getLocalPath())) {
                     if (TextUtils.isEmpty(title)) {
                         fileTitle.setText(UdeskUtil.getFileName(mContext, message.getLocalPath()));
                     } else {

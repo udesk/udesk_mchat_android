@@ -116,7 +116,7 @@ public class ChatActivityPresenter {
     public void sendCommodity(final Products products) {
         InitMode initMode = UdeskMultimerchantSDKManager.getInstance().getInitMode();
         if (initMode != null) {
-            String menuId = PreferenceHelper.readString(mChatView.getContext(), UdeskLibConst.SharePreParams.Udesk_Sharepre_Name, UdeskMultimerchantSDKManager.getInstance().getCustomerEuid() + UdeskLibConst.SharePreParams.MENU_ID);
+            String menuId = PreferenceHelper.readString(mChatView.getContext(), UdeskLibConst.SharePreParams.Udesk_Sharepre_Name, UdeskMultimerchantSDKManager.getInstance().getCustomerEuid() + "_" + mChatView.getEuid() + UdeskLibConst.SharePreParams.MENU_ID);
             if (!menuId.isEmpty()){
                 products.setMenuId(menuId);
             }
@@ -396,7 +396,7 @@ public class ChatActivityPresenter {
                 navigatesChatCache = new ArrayList<>();
             }
             navigatesChatCache.add(message);
-            UdeskUtil.savePreferenceCache(mChatView.getContext(), UdeskMultimerchantSDKManager.getInstance().getCustomerEuid() + UdeskLibConst.SharePreParams.NavigatesChatCache, navigatesChatCache);
+            UdeskUtil.savePreferenceCache(mChatView.getContext(), UdeskMultimerchantSDKManager.getInstance().getCustomerEuid() + "_" + mChatView.getEuid() + UdeskLibConst.SharePreParams.NavigatesChatCache, navigatesChatCache);
         }catch (Exception e){
             e.printStackTrace();
         }
@@ -743,7 +743,7 @@ public class ChatActivityPresenter {
             if (initMode != null) {
                 final SendMessage sendMessage = new SendMessage();
                 SendMessage.MessageBean  messageBean= new SendMessage.MessageBean();
-                String menuId = PreferenceHelper.readString(mChatView.getContext(), UdeskLibConst.SharePreParams.Udesk_Sharepre_Name, UdeskMultimerchantSDKManager.getInstance().getCustomerEuid() + UdeskLibConst.SharePreParams.MENU_ID);
+                String menuId = PreferenceHelper.readString(mChatView.getContext(), UdeskLibConst.SharePreParams.Udesk_Sharepre_Name, UdeskMultimerchantSDKManager.getInstance().getCustomerEuid() + "_" + mChatView.getEuid() + UdeskLibConst.SharePreParams.MENU_ID);
                 if (!menuId.isEmpty()){
                     messageBean.setMenu_id(menuId);
                 }

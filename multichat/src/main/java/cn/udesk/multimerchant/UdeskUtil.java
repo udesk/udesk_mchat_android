@@ -300,22 +300,22 @@ public static Uri getOutputMediaFileUri(Context context, File file) {
 
 
     public static String getExternalFileProviderName(Context context) {
-        return context.getPackageName() + ".udesk_external_file_provider";
+        return context.getPackageName() + ".udesk_multimerchant_external_file_provider";
     }
     public static String getExternalCacheProviderName(Context context) {
-        return context.getPackageName() + ".udesk_external_cache_provider";
+        return context.getPackageName() + ".udesk_multimerchant_external_cache_provider";
     }
 
     public static String getInternalFileProviderName(Context context) {
-        return context.getPackageName() + ".udesk_internal_file_provider";
+        return context.getPackageName() + ".udesk_multimerchant_internal_file_provider";
     }
 
     public static String getInternalCacheProviderName(Context context) {
-        return context.getPackageName() + ".udesk_internal_cache_provider";
+        return context.getPackageName() + ".udesk_multimerchant_internal_cache_provider";
     }
 
     public static String getExternalProviderName(Context context) {
-        return context.getPackageName() + ".udesk_external_provider";
+        return context.getPackageName() + ".udesk_multimerchant_external_provider";
     }
 
     /**

@@ -8,7 +8,6 @@ import android.content.ClipData;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.net.ConnectivityManager;
@@ -38,7 +37,6 @@ import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.FragmentTransaction;
 
 import com.bumptech.glide.Glide;
@@ -64,20 +62,22 @@ import cn.udesk.multimerchant.audio.AudioRecordButton;
 import cn.udesk.multimerchant.camera.UdeskCameraActivity;
 import cn.udesk.multimerchant.config.UdekConfigUtil;
 import cn.udesk.multimerchant.config.UdeskMultimerchantConfig;
-import cn.udesk.multimerchant.emotion.EmotionKeyboard;
-import cn.udesk.multimerchant.emotion.EmotionLayout;
-import cn.udesk.multimerchant.emotion.IEmotionSelectedListener;
-import cn.udesk.multimerchant.emotion.LQREmotionKit;
-import cn.udesk.multimerchant.model.UdeskMultimerchantFunctionMode;
-import cn.udesk.multimerchant.model.Merchant;
-import cn.udesk.multimerchant.model.SendMsgResult;
-import cn.udesk.multimerchant.model.SurveyOptionsModel;
 import cn.udesk.multimerchant.core.UdeskLibConst;
 import cn.udesk.multimerchant.core.bean.FeedbacksResult;
 import cn.udesk.multimerchant.core.bean.NavigatesResult;
 import cn.udesk.multimerchant.core.bean.Products;
 import cn.udesk.multimerchant.core.bean.ReceiveMessage;
 import cn.udesk.multimerchant.core.bean.SurvyOption;
+import cn.udesk.multimerchant.core.utils.BaseUtils;
+import cn.udesk.multimerchant.core.utils.UdeskUtils;
+import cn.udesk.multimerchant.emotion.EmotionKeyboard;
+import cn.udesk.multimerchant.emotion.EmotionLayout;
+import cn.udesk.multimerchant.emotion.IEmotionSelectedListener;
+import cn.udesk.multimerchant.emotion.LQREmotionKit;
+import cn.udesk.multimerchant.model.Merchant;
+import cn.udesk.multimerchant.model.SendMsgResult;
+import cn.udesk.multimerchant.model.SurveyOptionsModel;
+import cn.udesk.multimerchant.model.UdeskMultimerchantFunctionMode;
 import cn.udesk.multimerchant.permission.RequestCode;
 import cn.udesk.multimerchant.permission.XPermissionUtils;
 import cn.udesk.multimerchant.photoselect.PhotoSelectorActivity;
@@ -93,8 +93,6 @@ import cn.udesk.multimerchant.widget.UdeskMultiMenuHorizontalWindow;
 import cn.udesk.multimerchant.widget.UdeskMultiMenuHorizontalWindow.OnPopMultiMenuClick;
 import cn.udesk.multimerchant.widget.UdeskSurvyPopwindow;
 import cn.udesk.multimerchant.widget.UdeskTitleBar;
-import cn.udesk.multimerchant.core.utils.BaseUtils;
-import cn.udesk.multimerchant.core.utils.UdeskUtils;
 
 public class UdeskChatActivity extends UdeskBaseActivity implements IChatActivityView, IEmotionSelectedListener,
         OnClickListener {
@@ -487,7 +485,7 @@ public class UdeskChatActivity extends UdeskBaseActivity implements IChatActivit
                     msg.setNavigatesClickable(false);
                 }
             }
-            UdeskUtil.savePreferenceCache(getContext(), UdeskMultimerchantSDKManager.getInstance().getCustomerEuid() + UdeskLibConst.SharePreParams.NavigatesChatCache, navigatesChatCache);
+            UdeskUtil.savePreferenceCache(getContext(), UdeskMultimerchantSDKManager.getInstance().getCustomerEuid() + "_" + euid + UdeskLibConst.SharePreParams.NavigatesChatCache, navigatesChatCache);
         }catch (Exception e){
             e.printStackTrace();
         }
@@ -1240,30 +1238,8 @@ public class UdeskChatActivity extends UdeskBaseActivity implements IChatActivit
     @SuppressLint("MissingPermission")
     public void callphone(final String mobile) {
         try {
-            if (Build.VERSION.SDK_INT < 23) {
-                Intent intent = new Intent(Intent.ACTION_CALL, Uri.parse(mobile));
-                UdeskChatActivity.this.startActivity(intent);
-            } else {
-                XPermissionUtils.requestPermissions(UdeskChatActivity.this, RequestCode.CallPhone,
-                        new String[]{Manifest.permission.CALL_PHONE},
-                        new XPermissionUtils.OnPermissionListener() {
-                            @Override
-                            public void onPermissionGranted() {
-                                Intent intent = new Intent(Intent.ACTION_CALL, Uri.parse(mobile));
-                                if (ActivityCompat.checkSelfPermission(UdeskChatActivity.this, Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
-                                    return;
-                                }
-                                UdeskChatActivity.this.startActivity(intent);
-                            }
-
-                            @Override
-                            public void onPermissionDenied(String[] deniedPermissions, boolean alwaysDenied) {
-                                Toast.makeText(UdeskChatActivity.this,
-                                        getResources().getString(R.string.udesk_multimerchant_call_denied),
-                                        Toast.LENGTH_SHORT).show();
-                            }
-                        });
-            }
+            Intent intent = new Intent(Intent.ACTION_DIAL, Uri.parse(mobile));
+            startActivity(intent);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -1732,7 +1708,7 @@ public class UdeskChatActivity extends UdeskBaseActivity implements IChatActivit
                     }, 800);
                 }else {
                     isCheckedNavigatesMenu = true;
-                    PreferenceHelper.write(getContext(), UdeskLibConst.SharePreParams.Udesk_Sharepre_Name, UdeskMultimerchantSDKManager.getInstance().getCustomerEuid() + UdeskLibConst.SharePreParams.MENU_ID, item.getId());
+                    PreferenceHelper.write(getContext(), UdeskLibConst.SharePreParams.Udesk_Sharepre_Name, UdeskMultimerchantSDKManager.getInstance().getCustomerEuid() + "_" + euid + UdeskLibConst.SharePreParams.MENU_ID, item.getId());
                 }
                 sendCommodity();
                 sendProductMessage();
@@ -1748,7 +1724,7 @@ public class UdeskChatActivity extends UdeskBaseActivity implements IChatActivit
     @Override
     public List<ReceiveMessage> getNavigatesChatCache(){
         try {
-            return  UdeskUtil.getPreferenceCache(getContext(), UdeskMultimerchantSDKManager.getInstance().getCustomerEuid()+ UdeskLibConst.SharePreParams.NavigatesChatCache);
+            return  UdeskUtil.getPreferenceCache(getContext(), UdeskMultimerchantSDKManager.getInstance().getCustomerEuid() + "_" + euid + UdeskLibConst.SharePreParams.NavigatesChatCache);
         }catch (Exception e){
             e.printStackTrace();
         }
