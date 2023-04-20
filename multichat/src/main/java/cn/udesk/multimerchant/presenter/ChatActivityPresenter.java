@@ -114,6 +114,50 @@ public class ChatActivityPresenter {
 
     //发送商品链接广告
     public void sendCommodity(final Products products) {
+//        InitMode initMode = UdeskMultimerchantSDKManager.getInstance().getInitMode();
+//        if (initMode != null) {
+//            String menuId = PreferenceHelper.readString(mChatView.getContext(), UdeskLibConst.SharePreParams.Udesk_Sharepre_Name, UdeskMultimerchantSDKManager.getInstance().getCustomerEuid() + "_" + mChatView.getEuid() + UdeskLibConst.SharePreParams.MENU_ID);
+//            if (!menuId.isEmpty()){
+//                products.setMenuId(menuId);
+//            }
+//            HttpFacade.getInstance().sendProducts(UdeskUtil.getAuthToken(UdeskUtil.objectToString(initMode.getIm_username()),
+//                    UdeskUtil.objectToString(initMode.getIm_password())), mChatView.getEuid(), products, new HttpCallBack() {
+//                @Override
+//                public void onSuccess(String message) {
+//                    if (UdeskLibConst.isDebug) {
+//                        Log.i("udesk", "sendCommodity result =" + message);
+//                    }
+//                }
+//
+//                @Override
+//                public void onFail(Throwable message) {
+//                    failureCount++;
+//                    if (failureCount < 3) {
+//                        sendCommodity(products);
+//                    }
+//                    if (message instanceof ConnectTimeoutException) {
+//                        if (UdeskLibConst.isDebug) {
+//                            Log.i("udesk", "sendCommodity result =" + mChatView.getContext().getString(R.string.udesk_multimerchant_time_out));
+//                        }
+//                    }
+//                }
+//
+//                @Override
+//                public void onSuccessFail(String message) {
+//                    if (UdeskLibConst.isDebug) {
+//                        Log.i("udesk", "sendCommodity result =" + message);
+//                    }
+//                }
+//            });
+//        }
+
+        sendProducts(products);
+        ProductMessage commodityProduct = createCommodityProduct(products);
+        sendProductMessage(commodityProduct);
+    }
+
+    //发送商品链接广告
+    public void sendProducts(final Products products) {
         InitMode initMode = UdeskMultimerchantSDKManager.getInstance().getInitMode();
         if (initMode != null) {
             String menuId = PreferenceHelper.readString(mChatView.getContext(), UdeskLibConst.SharePreParams.Udesk_Sharepre_Name, UdeskMultimerchantSDKManager.getInstance().getCustomerEuid() + "_" + mChatView.getEuid() + UdeskLibConst.SharePreParams.MENU_ID);
@@ -152,6 +196,7 @@ public class ChatActivityPresenter {
         }
 
     }
+
 
 
     //发送文本消息
@@ -1355,5 +1400,39 @@ public class ChatActivityPresenter {
         }
     }
 
+    private ProductMessage createCommodityProduct(Products products) {
+        if (products == null){
+            return null;
+        }
+        ProductMessage product = new ProductMessage();
+        product.setImgUrl(products.getProduct().getImage());
+        product.setName(products.getProduct().getTitle());
+        product.setUrl(products.getProduct().getUrl());
 
+        List<ProductMessage.ParamsBean> paramsBeans = new ArrayList<>();
+        List<Products.ProductBean.ExtrasBean> extras = products.getProduct().getExtras();
+        if (extras != null && extras.size() > 0){
+
+            ProductMessage.ParamsBean paramsBean0 = new ProductMessage.ParamsBean();
+            paramsBean0.setText(extras.get(0).getTitle()+":");
+            paramsBean0.setColor("#FF3B30");
+            paramsBean0.setFold(false);
+            paramsBean0.setBreakX(false);
+            paramsBean0.setSize(16);
+
+            ProductMessage.ParamsBean paramsBean1 = new ProductMessage.ParamsBean();
+            paramsBean1.setText(extras.get(0).getContent());
+            paramsBean1.setColor("#FF3B30");
+            paramsBean1.setFold(true);
+            paramsBean1.setBreakX(true);
+            paramsBean1.setSize(16);
+
+            paramsBeans.add(paramsBean0);
+            paramsBeans.add(paramsBean1);
+        }
+
+        product.setParams(paramsBeans);
+
+        return product;
+    }
 }

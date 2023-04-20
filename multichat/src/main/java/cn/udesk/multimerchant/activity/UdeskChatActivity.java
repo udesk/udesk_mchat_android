@@ -1987,10 +1987,10 @@ public class UdeskChatActivity extends UdeskBaseActivity implements IChatActivit
             product.setProduct(products.getProduct());
             product.setUuid(UUID.randomUUID());
             product.setCreated_at(UdeskUtil.setCreateTime());
-            mChatAdapter.getList().add(product);
-            mPresenter.sendCommodity(product);
-            mChatAdapter.notifyDataSetChanged();
-            smoothScrollToPosition(mListView, mChatAdapter.getCount());
+//            mChatAdapter.getList().add(product);
+            mPresenter.sendCommodity(products);
+//            mChatAdapter.notifyDataSetChanged();
+//            smoothScrollToPosition(mListView, mChatAdapter.getCount());
         }
 
     }

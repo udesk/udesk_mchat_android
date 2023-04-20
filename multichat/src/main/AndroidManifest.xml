@@ -58,49 +58,13 @@
             android:theme="@style/Udesk_multimerchant_Theme" />
 
         <provider
-            android:name=".provider.UdeskExternalFileProvider"
-            android:authorities="${applicationId}.udesk_multimerchant_external_file_provider"
+            android:name=".provider.UdeskProvider"
+            android:authorities="${applicationId}.udesk_multimerchant_provider"
             android:exported="false"
             android:grantUriPermissions="true">
             <meta-data
                 android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/udesk_multimerchant_provider_paths_external_file" />
-        </provider>
-        <provider
-            android:name=".provider.UdeskExternalCacheProvider"
-            android:authorities="${applicationId}.udesk_multimerchant_external_cache_provider"
-            android:exported="false"
-            android:grantUriPermissions="true">
-            <meta-data
-                android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/udesk_multimerchant_provider_paths_external_cache" />
-        </provider>
-        <provider
-            android:name=".provider.UdeskExternalProvider"
-            android:authorities="${applicationId}.udesk_multimerchant_external_provider"
-            android:exported="false"
-            android:grantUriPermissions="true">
-            <meta-data
-                android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/udesk_multimerchant_provider_paths_external" />
-        </provider>
-        <provider
-            android:name=".provider.UdeskInternalFileProvider"
-            android:authorities="${applicationId}.udesk_multimerchant_internal_file_provider"
-            android:exported="false"
-            android:grantUriPermissions="true">
-            <meta-data
-                android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/udesk_multimerchant_provider_paths_internal_file" />
-        </provider>
-        <provider
-            android:name=".provider.UdeskInternalCacheProvider"
-            android:authorities="${applicationId}.udesk_multimerchant_internal_cache_provider"
-            android:exported="false"
-            android:grantUriPermissions="true">
-            <meta-data
-                android:name="android.support.FILE_PROVIDER_PATHS"
-                android:resource="@xml/udesk_multimerchant_provider_paths_internal_cache" />
+                android:resource="@xml/udesk_multimerchant_provider_paths" />
         </provider>
     </application>
 

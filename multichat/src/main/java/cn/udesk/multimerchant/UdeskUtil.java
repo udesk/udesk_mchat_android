@@ -59,18 +59,14 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import cn.udesk.multimerchant.activity.UdeskZoomImageActivty;
+import cn.udesk.multimerchant.core.UdeskLibConst;
+import cn.udesk.multimerchant.core.bean.UpdateCustomerField;
+import cn.udesk.multimerchant.core.utils.UdeskUtils;
 import cn.udesk.multimerchant.imageloader.UdeskImage;
 import cn.udesk.multimerchant.imageloader.UdeskImageLoader;
 import cn.udesk.multimerchant.model.CustomerInfo;
 import cn.udesk.multimerchant.model.InitMode;
-import cn.udesk.multimerchant.core.UdeskLibConst;
-import cn.udesk.multimerchant.core.bean.UpdateCustomerField;
-import cn.udesk.multimerchant.provider.UdeskExternalCacheProvider;
-import cn.udesk.multimerchant.provider.UdeskExternalFileProvider;
-import cn.udesk.multimerchant.provider.UdeskExternalProvider;
-import cn.udesk.multimerchant.provider.UdeskInternalCacheProvider;
-import cn.udesk.multimerchant.provider.UdeskInternalFileProvider;
-import cn.udesk.multimerchant.core.utils.UdeskUtils;
+import cn.udesk.multimerchant.provider.UdeskProvider;
 
 
 public class UdeskUtil {
@@ -271,51 +267,23 @@ public class UdeskUtil {
         return bitmap;
     }
 
-public static Uri getOutputMediaFileUri(Context context, File file) {
-    if (file == null) {
-        return null;
-    }
-    try {
-        if (Build.VERSION.SDK_INT >= 24) {
-            if (context.getExternalFilesDir("") != null
-                    && file.getAbsolutePath().contains(context.getExternalFilesDir("").getAbsolutePath())) {
-                return UdeskExternalFileProvider.getUriForFile(context, getExternalFileProviderName(context), file);
-            } else if (file.getAbsolutePath().contains(context.getExternalCacheDir().getAbsolutePath())) {
-                return UdeskExternalCacheProvider.getUriForFile(context, getExternalCacheProviderName(context), file);
-            } else if (file.getAbsolutePath().contains(context.getFilesDir().getAbsolutePath())) {
-                return UdeskInternalFileProvider.getUriForFile(context, getInternalFileProviderName(context), file);
-            } else if (file.getAbsolutePath().contains(context.getCacheDir().getAbsolutePath())) {
-                return UdeskInternalCacheProvider.getUriForFile(context, getInternalCacheProviderName(context), file);
-            } else if (file.getAbsolutePath().contains(Environment.getExternalStorageDirectory().getAbsolutePath())) {
-                return UdeskExternalProvider.getUriForFile(context, getExternalProviderName(context), file);
-            }
-        } else {
-            return Uri.fromFile(file);
+    public static Uri getOutputMediaFileUri(Context context, File file) {
+        if (file == null) {
+            return null;
         }
-    } catch (Exception e) {
-        return null;
-    }
-    return null;
-}
-
-
-    public static String getExternalFileProviderName(Context context) {
-        return context.getPackageName() + ".udesk_multimerchant_external_file_provider";
-    }
-    public static String getExternalCacheProviderName(Context context) {
-        return context.getPackageName() + ".udesk_multimerchant_external_cache_provider";
+        try {
+            if (Build.VERSION.SDK_INT >= 24) {
+                return UdeskProvider.getUriForFile(context, getProviderName(context), file);
+            } else {
+                return Uri.fromFile(file);
+            }
+        } catch (Exception e) {
+            return null;
+        }
     }
 
-    public static String getInternalFileProviderName(Context context) {
-        return context.getPackageName() + ".udesk_multimerchant_internal_file_provider";
-    }
-
-    public static String getInternalCacheProviderName(Context context) {
-        return context.getPackageName() + ".udesk_multimerchant_internal_cache_provider";
-    }
-
-    public static String getExternalProviderName(Context context) {
-        return context.getPackageName() + ".udesk_multimerchant_external_provider";
+    public static String getProviderName(Context context) {
+        return context.getPackageName() + ".udesk_multimerchant_provider";
     }
 
     /**
@@ -333,44 +301,16 @@ public static Uri getOutputMediaFileUri(Context context, File file) {
         }
         String path = "";
         try {
-            if (TextUtils.equals(uri.getAuthority(), getExternalFileProviderName(context))) {
-                if (cameraFile != null) {
-                    return cameraFile.getAbsolutePath();
-                } else {
-                    path = new File(context.getExternalFilesDir(""), uri.getPath().replace("udesk_multimerchant_external/", "")).getAbsolutePath();
-                }
-            } else if (TextUtils.equals(uri.getAuthority(), getExternalCacheProviderName(context))) {
-                if (cameraFile != null) {
-                    return cameraFile.getAbsolutePath();
-                } else {
-                    path = new File(context.getExternalCacheDir(), uri.getPath().replace("udesk_multimerchant_external/", "")).getAbsolutePath();
-                }
-            } else if (TextUtils.equals(uri.getAuthority(), getInternalFileProviderName(context))) {
-                if (cameraFile != null) {
-                    return cameraFile.getAbsolutePath();
-                } else {
-                    path = new File(context.getFilesDir(), uri.getPath().replace("udesk_multimerchant_external/", "")).getAbsolutePath();
-                }
-            } else if (TextUtils.equals(uri.getAuthority(), getInternalCacheProviderName(context))) {
-                if (cameraFile != null) {
-                    return cameraFile.getAbsolutePath();
-                } else {
-                    path = new File(context.getCacheDir(), uri.getPath().replace("udesk_multimerchant_external/", "")).getAbsolutePath();
-                }
-            } else if (TextUtils.equals(uri.getAuthority(), getExternalProviderName(context))) {
-                if (cameraFile != null) {
-                    return cameraFile.getAbsolutePath();
-                } else {
-                    path = new File(Environment.getExternalStorageDirectory(), uri.getPath().replace("udesk_multimerchant_external/", "")).getAbsolutePath();
-                }
-            } else {
-                path = uri.getEncodedPath();
+            if (cameraFile != null){
+                return cameraFile.getAbsolutePath();
             }
+            return getFilePath(context, uri);
         } catch (Exception e) {
             e.printStackTrace();
         }
         return path;
     }
+
 
     public static boolean isAndroidQ() {
         return Build.VERSION.SDK_INT >= 29;
@@ -416,18 +356,7 @@ public static Uri getOutputMediaFileUri(Context context, File file) {
                 } else {
                     file = new File(filePath);
                 }
-                if (context.getExternalFilesDir("") != null
-                        && filePath.contains(context.getExternalFilesDir("").getAbsolutePath())) {
-                    return UdeskExternalFileProvider.getUriForFile(context, getExternalFileProviderName(context), file).toString();
-                } else if (file.getAbsolutePath().contains(context.getExternalCacheDir().getAbsolutePath())) {
-                    return UdeskExternalCacheProvider.getUriForFile(context, getExternalCacheProviderName(context), file).toString();
-                } else if (filePath.contains(context.getFilesDir().getAbsolutePath())) {
-                    return UdeskInternalFileProvider.getUriForFile(context, getInternalFileProviderName(context), file).toString();
-                } else if (filePath.contains(context.getCacheDir().getAbsolutePath())) {
-                    return UdeskInternalCacheProvider.getUriForFile(context, getInternalCacheProviderName(context), file).toString();
-                } else if (file.getAbsolutePath().contains(Environment.getExternalStorageDirectory().getAbsolutePath())) {
-                    return UdeskExternalProvider.getUriForFile(context, getExternalProviderName(context), file).toString();
-                }
+                return UdeskProvider.getUriForFile(context, getProviderName(context), file).toString();
             }
         } catch (Exception e) {
             return "";
@@ -1040,7 +969,7 @@ public static Uri getOutputMediaFileUri(Context context, File file) {
         return display.getWidth();
     }
 
-    public static String getFilePath(Activity context, Uri uri) {
+    public static String getFilePath(Context context, Uri uri) {
         String path = "";
         if ("content".equalsIgnoreCase(uri.getScheme())) {
             Cursor cursor = null;
